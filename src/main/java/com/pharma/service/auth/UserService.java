@@ -42,7 +42,7 @@ public class UserService {
         Role userRole = roleRepository.findByName("ADMIN")
                 .orElseGet(() -> {
                     Role newRole = new Role();
-                    newRole.setName("ADMIN");
+                    newRole.setName("USER");
                     try {
                         return roleRepository.save(newRole);
                     } catch (Exception e) {
