@@ -20,7 +20,7 @@ public class StockEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer invId;
+    private Long invId;
 
     @Column(name = "supplier_id")
     private String supplierId;
