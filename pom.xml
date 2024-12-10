@@ -91,6 +91,7 @@
 	</dependencies>
 
 	<build>
+		<finalName>pharma</finalName>
 		<plugins>
 			<!-- Spring Boot Maven Plugin -->
 			<plugin>

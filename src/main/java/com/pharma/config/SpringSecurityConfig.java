@@ -47,7 +47,7 @@ public class SpringSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()  // Permit CORS preflight request
                         .requestMatchers("/error").permitAll()          // Allow error endpoint without authentication
-                        .requestMatchers("/login/**", "/register/**").permitAll()  // Public login & registration
+                        .requestMatchers("/login/**", "/register/**","/api/v1/health-check").permitAll()  // Public login & registration
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/doc/**",
