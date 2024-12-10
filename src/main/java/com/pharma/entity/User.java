@@ -93,4 +93,9 @@ public class User {
     public String getFullName() {
         return firstName + " " + lastName;
     }
+
+    //To connect between user and Stock purchase
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
+    @JoinTable(name = "pharma_users_stock", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "inv_id"))
+    private Set<Role> role_stocks = new HashSet<>();
 }
