@@ -17,12 +17,6 @@ spring:
   server:
     port: 8080  # Port on which the application runs
 
-
-  security:
-    user:
-      name: user  # Default user (for basic auth, if used)
-      password: password  # Default password
-
   servlet:
     multipart:
       max-file-size: 10MB  # Maximum size for a single file
@@ -44,8 +38,6 @@ logging:
     com:
       fasterxml:
         jackson: DEBUG  # Enable detailed logging for Jackson
-
-
 
 server:
   servlet:
