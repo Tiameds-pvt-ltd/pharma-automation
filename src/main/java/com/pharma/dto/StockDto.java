@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class StockDto {
 
-    private Integer invId;
+    private Long invId;
     private String supplierId;
     private String store;
     private String purchaseBillNo;
