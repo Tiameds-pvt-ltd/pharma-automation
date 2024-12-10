@@ -1,7 +1,8 @@
-package com.project.pharma.mapper;
+package com.pharma.mapper;
 
-import com.project.pharma.dto.SupplierDto;
-import com.project.pharma.entity.SupplierEntity;
+import com.pharma.dto.SupplierDto;
+import com.pharma.entity.SupplierEntity;
+
 
 public class SupplierMapper {
     public static SupplierDto mapToDto(SupplierEntity supplierEntity){

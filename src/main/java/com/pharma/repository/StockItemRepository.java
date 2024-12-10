@@ -1,7 +1,10 @@
-package com.project.pharma.repository;
+package com.pharma.repository;
 
-import com.project.pharma.entity.StockItemEntity;
+
+import com.pharma.entity.StockItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public interface StockItemRepository extends JpaRepository<StockItemEntity, Integer> {
 }

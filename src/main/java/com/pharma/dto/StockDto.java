@@ -1,11 +1,9 @@
-package com.project.pharma.dto;
+package com.pharma.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -30,8 +28,6 @@ public class StockDto {
     private String paymentStatus="Pending";
     private String goodStatus="Received";
 
-    private List<StockItemDto> stockItems = new ArrayList<>();;
-
-
+    private List<StockItemDto> stockItemDtos = new ArrayList<>();       // List of StockItemDto
 
 }

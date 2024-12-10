@@ -1,14 +1,15 @@
-package com.project.pharma.service.impl;
+package com.pharma.service.impl;
 
-import com.project.pharma.dto.StockDto;
+import com.pharma.dto.StockDto;
+import com.pharma.dto.StockItemDto;
+import com.pharma.entity.StockEntity;
+import com.pharma.entity.StockItemEntity;
+import com.pharma.exception.ResourceNotFoundException;
+import com.pharma.mapper.StockMapper;
 
-import com.project.pharma.dto.StockItemDto;
-import com.project.pharma.entity.StockEntity;
-import com.project.pharma.entity.StockItemEntity;
-import com.project.pharma.exception.ResourceNotFoundException;
-import com.project.pharma.mapper.StockMapper;
-import com.project.pharma.repository.StockRepository;
-import com.project.pharma.service.StockService;
+
+import com.pharma.repository.StockRepository;
+import com.pharma.service.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,7 @@ public class StockSerivceImpl implements StockService {
 
         // Update StockItemEntities
         List<StockItemEntity> existingItems = stockEntity.getStockItemEntities();
-        List<StockItemDto> updatedItems = updatedStock.getStockItems();
+        List<StockItemDto> updatedItems = updatedStock.getStockItemDtos();
 
         // Clear existing items and rebuild from updated DTO list
         existingItems.clear();

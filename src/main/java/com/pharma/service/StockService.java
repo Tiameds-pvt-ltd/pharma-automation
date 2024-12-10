@@ -1,7 +1,7 @@
-package com.project.pharma.service;
+package com.pharma.service;
 
-import com.project.pharma.dto.ItemDto;
-import com.project.pharma.dto.StockDto;
+
+import com.pharma.dto.StockDto;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public interface StockService {
 
     StockDto updateStock(Integer invId, StockDto updatedStock);
 
-    void  deleteStock(Integer invId);
+    void deleteStock(Integer invId);
 
 
 }

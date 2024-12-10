@@ -1,4 +1,4 @@
- package com.project.pharma.entity;
+ package com.pharma.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

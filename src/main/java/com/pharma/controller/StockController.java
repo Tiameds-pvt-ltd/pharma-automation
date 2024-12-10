@@ -1,7 +1,8 @@
-package com.project.pharma.controller;
+package com.pharma.controller;
 
-import com.project.pharma.dto.StockDto;
-import com.project.pharma.service.StockService;
+
+import com.pharma.dto.StockDto;
+import com.pharma.service.StockService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

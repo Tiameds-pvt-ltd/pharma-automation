@@ -1,4 +1,4 @@
-package com.project.pharma.dto;
+package com.pharma.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

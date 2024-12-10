@@ -1,7 +1,8 @@
-package com.project.pharma.controller;
+package com.pharma.controller;
 
-import com.project.pharma.dto.SupplierDto;
-import com.project.pharma.service.SupplierService;
+import com.pharma.dto.SupplierDto;
+
+import com.pharma.service.SupplierService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-//@CrossOrigin(value = "http://localhost:3000")
+
 @CrossOrigin
 @AllArgsConstructor
 @RestController
@@ -17,6 +18,7 @@ import java.util.List;
 public class SupplierController {
 
     private SupplierService supplierService;
+
 
     @PostMapping("/save")
     public ResponseEntity<SupplierDto> createSupplier(@RequestBody SupplierDto supplierDto){

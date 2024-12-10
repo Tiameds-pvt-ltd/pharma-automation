@@ -1,11 +1,13 @@
-package com.project.pharma.service.impl;
+package com.pharma.service.impl;
 
-import com.project.pharma.dto.ItemDto;
-import com.project.pharma.entity.ItemEntity;
-import com.project.pharma.exception.ResourceNotFoundException;
-import com.project.pharma.mapper.ItemMapper;
-import com.project.pharma.repository.ItemRepository;
-import com.project.pharma.service.ItemService;
+import com.pharma.dto.ItemDto;
+import com.pharma.entity.ItemEntity;
+import com.pharma.exception.ResourceNotFoundException;
+import com.pharma.mapper.ItemMapper;
+
+import com.pharma.repository.ItemRepository;
+import com.pharma.service.ItemService;
+
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,7 +1,9 @@
-package com.project.pharma.mapper;
+package com.pharma.mapper;
 
-import com.project.pharma.dto.ItemDto;
-import com.project.pharma.entity.ItemEntity;
+
+import com.pharma.dto.ItemDto;
+import com.pharma.entity.ItemEntity;
+
 
 public class ItemMapper {
 

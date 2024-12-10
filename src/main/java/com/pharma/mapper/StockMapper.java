@@ -1,16 +1,16 @@
-package com.project.pharma.mapper;
+package com.pharma.mapper;
 
-import com.project.pharma.dto.StockDto;
-import com.project.pharma.dto.StockItemDto;
-import com.project.pharma.entity.StockEntity;
-import com.project.pharma.entity.StockItemEntity;
+
+import com.pharma.dto.StockDto;
+import com.pharma.entity.StockEntity;
+import com.pharma.entity.StockItemEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
+import com.pharma.dto.StockItemDto;
 
 @Component
 public class StockMapper {
-
     public StockDto toDTO(StockEntity stockEntity) {
         StockDto stockDto = new StockDto();
         stockDto.setInvId(stockEntity.getInvId());
@@ -27,7 +27,7 @@ public class StockMapper {
         stockDto.setGrandTotal(stockEntity.getGrandTotal());
         stockDto.setPaymentStatus(stockEntity.getPaymentStatus());
         stockDto.setGoodStatus(stockDto.getGoodStatus());
-        stockDto.setStockItems(stockEntity.getStockItemEntities().stream()
+        stockDto.setStockItemDtos(stockEntity.getStockItemEntities().stream()
                 .map(this::toDTO).collect(Collectors.toList()));
         return stockDto;
     }
@@ -47,7 +47,7 @@ public class StockMapper {
         stockEntity.setGrandTotal(StockDto.getGrandTotal());
         stockEntity.setPaymentStatus(StockDto.getPaymentStatus());
         stockEntity.setGoodStatus(StockDto.getGoodStatus());
-        stockEntity.setStockItemEntities(StockDto.getStockItems().stream()
+        stockEntity.setStockItemEntities(StockDto.getStockItemDtos().stream()
                 .map(this::toEntity).collect(Collectors.toList()));
         return stockEntity;
     }

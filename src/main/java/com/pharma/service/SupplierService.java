@@ -1,6 +1,7 @@
-package com.project.pharma.service;
+package com.pharma.service;
 
-import com.project.pharma.dto.SupplierDto;
+
+import com.pharma.dto.SupplierDto;
 
 import java.util.List;
 

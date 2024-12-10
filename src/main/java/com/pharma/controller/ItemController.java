@@ -1,12 +1,13 @@
-package com.project.pharma.controller;
+package com.pharma.controller;
 
-import com.project.pharma.dto.ItemDto;
-import com.project.pharma.service.ItemService;
+
+import com.pharma.dto.ItemDto;
+
+import com.pharma.service.ItemService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @CrossOrigin
