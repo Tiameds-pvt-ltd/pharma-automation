@@ -52,4 +52,7 @@ public class StockItemEntity {
     private StockEntity stockEntity;
 
 
+    public Integer getId() {
+        return stockId;
+    }
 }

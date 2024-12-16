@@ -94,8 +94,27 @@ public class User {
         return firstName + " " + lastName;
     }
 
-    //To connect between user and Stock purchase
-    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
-    @JoinTable(name = "pharma_users_stock", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "inv_id"))
-    private Set<Role> role_stocks = new HashSet<>();
+    //   To connect between user and Stock purchase
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JoinTable(name = "pharma_users_stock",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "inv_id"))
+    @JsonManagedReference // Ensure StockEntity uses @JsonBackReference
+    private Set<StockEntity> stockEntities = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id != null && id.equals(user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
+
+
+
 }

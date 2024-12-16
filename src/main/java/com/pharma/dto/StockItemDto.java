@@ -12,7 +12,6 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockItemDto {
-
     private Integer stockId;
     private String itemId;
     private String batchNo;
