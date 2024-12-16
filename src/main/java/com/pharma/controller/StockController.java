@@ -26,7 +26,6 @@ public class StockController {
         return ResponseEntity.ok(savedStock);
     }
 
-
     @GetMapping("/getById/{id}")
     public ResponseEntity<StockDto> getStockById(@PathVariable("id") Integer invId) {
         return ResponseEntity.ok(stockService.getStockById(invId));
