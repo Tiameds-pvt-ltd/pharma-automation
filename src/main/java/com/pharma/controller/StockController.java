@@ -30,13 +30,13 @@ public class StockController {
         this.userAuthService = userAuthService;
     }
 
-    @PostMapping("/save")
-    public ResponseEntity<StockDto> saveStock(
-            @RequestHeader("Authorization") String token,
-            @RequestBody StockDto StockDto) {
-        StockDto savedStock = stockService.createStock(StockDto);
-        return ResponseEntity.ok(savedStock);
-    }
+//    @PostMapping("/save")
+//    public ResponseEntity<StockDto> saveStock(
+//            @RequestHeader("Authorization") String token,
+//            @RequestBody StockDto StockDto) {
+//        StockDto savedStock = stockService.createStock(StockDto);
+//        return ResponseEntity.ok(savedStock);
+//    }
 
     @GetMapping("/getById/{id}")
     public ResponseEntity<StockDto> getStockById(@PathVariable("id") Integer invId) {
@@ -61,7 +61,7 @@ public class StockController {
     }
 
     //create stock items for a user
-    @PostMapping("/saveItems")
+    @PostMapping("/save")
     public ResponseEntity<?> saveStockItems(
             @RequestHeader("Authorization") String token,
             @RequestBody StockDto StockDto
