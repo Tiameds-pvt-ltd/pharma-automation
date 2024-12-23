@@ -16,7 +16,7 @@ public class PatientDetailsDto {
     private Long patientId;
     private String patientName;
     private Long patientNumber;
-    private Integer patientMobile;
+    private Long patientMobile;
     private String patientAddress;
     private LocalDate patientEnteredDate;
     private Long patientEnteredBy;

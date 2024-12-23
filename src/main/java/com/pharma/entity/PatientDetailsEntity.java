@@ -27,7 +27,7 @@ public class PatientDetailsEntity {
     private Long patientNumber;
 
     @Column(name = "patient_mobile")
-    private Integer patientMobile;
+    private Long patientMobile;
 
     @Column(name = "patient_address")
     private String patientAddress;

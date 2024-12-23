@@ -1,7 +1,6 @@
 package com.pharma.controller;
 
 import com.pharma.dto.PatientDetailsDto;
-import com.pharma.dto.SupplierDto;
 import com.pharma.service.PatientDetailsService;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
