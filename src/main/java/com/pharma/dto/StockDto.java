@@ -2,6 +2,7 @@ package com.pharma.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -17,9 +18,9 @@ public class StockDto {
     private String supplierId;
     private String store;
     private String purchaseBillNo;
-    private Date purchaseDate;
+    private LocalDate purchaseDate;
     private Integer creditPeriod;
-    private Date paymentDueDate;
+    private LocalDate paymentDueDate;
     private Integer invoiceAmount;
     private Double totalAmount;
     private Double totalGst;
