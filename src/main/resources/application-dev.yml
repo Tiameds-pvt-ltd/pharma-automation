@@ -15,7 +15,7 @@ spring:
         default_batch_fetch_size: 10  # Batch size for collection loading
 
   server:
-    port: 8080  # Port on which the application runs
+    port: 8081  # Port on which the application runs
 
   servlet:
     multipart:
