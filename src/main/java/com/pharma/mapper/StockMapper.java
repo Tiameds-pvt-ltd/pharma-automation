@@ -32,8 +32,8 @@ public class StockMapper {
         stockDto.setTotalGst(stockEntity.getTotalGst() != null ? stockEntity.getTotalGst().doubleValue() : null);
         stockDto.setTotalDiscount(stockEntity.getTotalDiscount() != null ? stockEntity.getTotalDiscount().doubleValue() : null);
         stockDto.setGrandTotal(stockEntity.getGrandTotal() != null ? stockEntity.getGrandTotal().doubleValue() : null);
-        stockDto.setPaymentStatus(stockEntity.getPaymentStatus().name());
-        stockDto.setGoodStatus(stockEntity.getGoodStatus().name());
+        stockDto.setPaymentStatus(stockEntity.getPaymentStatus());
+        stockDto.setGoodStatus(stockEntity.getGoodStatus());
 
         // Map StockItemEntities to StockItemDtos
         List<StockItemDto> stockItemDtos = stockEntity.getStockItemEntities().stream()
@@ -62,8 +62,8 @@ public class StockMapper {
         stockEntity.setTotalGst(stockDto.getTotalGst() != null ? BigDecimal.valueOf(stockDto.getTotalGst()) : null);
         stockEntity.setTotalDiscount(stockDto.getTotalDiscount() != null ? BigDecimal.valueOf(stockDto.getTotalDiscount()) : null);
         stockEntity.setGrandTotal(stockDto.getGrandTotal() != null ? BigDecimal.valueOf(stockDto.getGrandTotal()) : null);
-        stockEntity.setPaymentStatus(StockEntity.PaymentStatus.valueOf(stockDto.getPaymentStatus()));
-        stockEntity.setGoodStatus(StockEntity.GoodStatus.valueOf(stockDto.getGoodStatus()));
+        stockEntity.setPaymentStatus(stockDto.getPaymentStatus());
+        stockEntity.setGoodStatus(stockDto.getGoodStatus());
 
         // Map StockItemDtos to StockItemEntities
         List<StockItemEntity> stockItemEntities = stockDto.getStockItemDtos().stream()
@@ -134,8 +134,8 @@ public class StockMapper {
         stockEntity.setTotalGst(stockDto.getTotalGst() != null ? BigDecimal.valueOf(stockDto.getTotalGst()) : null);
         stockEntity.setTotalDiscount(stockDto.getTotalDiscount() != null ? BigDecimal.valueOf(stockDto.getTotalDiscount()) : null);
         stockEntity.setGrandTotal(stockDto.getGrandTotal() != null ? BigDecimal.valueOf(stockDto.getGrandTotal()) : null);
-        stockEntity.setPaymentStatus(StockEntity.PaymentStatus.valueOf(stockDto.getPaymentStatus().toUpperCase()));
-        stockEntity.setGoodStatus(StockEntity.GoodStatus.valueOf(stockDto.getGoodStatus().toUpperCase()));
+        stockEntity.setPaymentStatus(stockDto.getPaymentStatus().toUpperCase());
+        stockEntity.setGoodStatus(stockDto.getGoodStatus().toUpperCase());
 
         // Update StockItemEntities if provided in StockDto
         if (stockDto.getStockItemDtos() != null && !stockDto.getStockItemDtos().isEmpty()) {

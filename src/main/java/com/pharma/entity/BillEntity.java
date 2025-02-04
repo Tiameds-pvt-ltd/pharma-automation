@@ -60,6 +60,9 @@ public class BillEntity {
     @Column(name = "entered_by")
     private Long enteredBy;
 
+    @Column(name = "bill_status")
+    private String billStatus;
+
     @PrePersist
     protected void onCreate() {
         this.billDate = LocalDate.now();

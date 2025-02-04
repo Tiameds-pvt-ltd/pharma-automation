@@ -30,6 +30,7 @@ public class BillDto {
     private String paymentType;
     private Long billNo;
     private Long enteredBy;
+    private String billStatus="Pending";
 
     private List<BillItemDto> billItemDtos = new ArrayList<>();
 }
