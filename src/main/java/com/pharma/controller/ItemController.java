@@ -38,22 +38,28 @@ public class ItemController {
         return ResponseEntity.ok(itemDto);
     }
 
+//    @GetMapping("/getAll")
+//    public ResponseEntity<Map<String, Object>> getAllItem(@RequestHeader("Authorization") String token){
+//
+//        // Validate token format
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//
+//        // If user is not found, return unauthorized response
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage("User not found", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        System.out.println("currentUserOptional--------"+currentUserOptional);
+//
+//
+//        List<ItemDto> itemDtos = itemService.getAllItem();
+//        return ApiResponseHelper.successResponseWithDataAndMessage("Data Found", HttpStatus.OK,itemDtos);
+//    }
+
     @GetMapping("/getAll")
-    public ResponseEntity<Map<String, Object>> getAllItem(@RequestHeader("Authorization") String token){
-
-        // Validate token format
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-
-        // If user is not found, return unauthorized response
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("User not found", HttpStatus.UNAUTHORIZED, null);
-        }
-
-        System.out.println("currentUserOptional--------"+currentUserOptional);
-
-
+    public ResponseEntity<List<ItemDto>> getAllItem(){
         List<ItemDto> itemDtos = itemService.getAllItem();
-        return ApiResponseHelper.successResponseWithDataAndMessage("Data Found", HttpStatus.OK,itemDtos);
+        return ResponseEntity.ok(itemDtos);
     }
 
     @PutMapping("/update/{id}")
