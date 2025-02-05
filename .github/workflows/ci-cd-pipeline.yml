@@ -53,7 +53,11 @@ jobs:
           echo "Building Docker image $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
+          
+      
+       # Step to list files in the deploy directory
+      - name: List files in deploy directory
+        run: ls deploy/
 
       # Step 7: Update ECS Task Definition
       - name: Update ECS Task Definition
