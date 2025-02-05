@@ -65,7 +65,7 @@ jobs:
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
           task-definition: deploy/tiameds-pharma-task-defination.json
-          container-name: tiamed-lab-test
+          container-name: tiamed-pharma-test
           image: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
 
 
