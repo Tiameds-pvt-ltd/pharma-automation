@@ -19,6 +19,28 @@
       "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
+      "secrets": [
+        {
+          "name": "DB_URL",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:DB_URL::"
+        },
+        {
+          "name": "DB_NAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:DB_NAME::"
+        },
+        {
+          "name": "DB_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:DB_USERNAME::"
+        },
+        {
+          "name": "DB_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:DB_PASSWORD::"
+        },
+        {
+          "name": "JWT_SECRET",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:JWT_SECRET::"
+        }
+      ],
       "ulimits": [],
       "logConfiguration": {
         "logDriver": "awslogs",
