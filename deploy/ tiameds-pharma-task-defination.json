@@ -3,7 +3,7 @@
   "containerDefinitions": [
     {
       "name": "tiamed-pharma-test",
-      "image": "977098986605.dkr.ecr.ap-south-1.amazonaws.com/tiamed-billing-test:latest",
+      "image": "977098986605.dkr.ecr.ap-south-1.amazonaws.com/tiamed-billing-test",
       "cpu": 0,
       "portMappings": [
         {
@@ -15,12 +15,12 @@
         }
       ],
       "essential": true,
-        "environment": [
-            {
-            "name": "SPRING_PROFILES_ACTIVE",
-            "value": "prod"
-            }
-        ],
+      "environment": [
+        {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "prod"
+        }
+      ],
       "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],
