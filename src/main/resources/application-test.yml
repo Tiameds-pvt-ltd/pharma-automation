@@ -1,29 +1,31 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/pharmacy  # Database URL
-    username: postgres
-    password: root
+    url: jdbc:postgresql://tiamed-test-db.cfsi2w0iou42.ap-south-1.rds.amazonaws.com:5432/tiamedtestdb
+    username: tiamedtestdb
+    password: tiamedtestdb
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update  # 'create' for development; 'update' or 'none' for production
+      ddl-auto: update   # 'create' for development; 'update' or 'none' for production
     show-sql: true  # Optional: Shows SQL queries in logs
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_batch_fetch_size: 10  # Batch size for collection loading
 
-  server:
-    port: 8080  # Port on which the application runs
 
   servlet:
     multipart:
       max-file-size: 10MB  # Maximum size for a single file
       max-request-size: 10MB  # Maximum total request size, should be >= max-file-size
+    context-path: /api/v1  # Combined the `context-path` here
 
   jwt:
     secret: "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V"
+
+  server:
+    port: 8080  # Port on which the application runs
 
 springdoc:
   api-docs:
@@ -42,4 +44,3 @@ logging:
 server:
   servlet:
     context-path: /api/v1
-
