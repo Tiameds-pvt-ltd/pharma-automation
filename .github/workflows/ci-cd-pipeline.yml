@@ -54,6 +54,7 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
+
       # Step 7: Update ECS Task Definition
       - name: Update ECS Task Definition
         id: update-task-def
@@ -62,6 +63,7 @@ jobs:
           task-definition: deploy/tiameds-pharma-task-defination.json
           container-name: tiamed-lab-test
           image: ${{ steps.ecr-login.outputs.registry }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
+
 
       # Step 8: Deploy to ECS
       - name: Deploy to ECS
