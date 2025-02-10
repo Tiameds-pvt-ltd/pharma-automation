@@ -14,11 +14,15 @@ public class CorsConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));  // Allow frontend origin
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));  // Allow these HTTP methods
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));  // Headers allowed in requests
-        configuration.setAllowCredentials(true);  // Allow credentials like cookies
-        configuration.setMaxAge(3600L);  // Cache preflight responses for 1 hour
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",
+                "https://*.vercel.app",
+                "https://pharma-test-env.tiameds.ai/"
+        ));  // Allow frontend origin
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
