@@ -1,7 +1,6 @@
 package com.pharma.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,9 +24,6 @@ public class StockEntity {
 
     @Column(name = "supplier_id")
     private String supplierId;
-
-    @Column(name = "store")
-    private String store;
 
     @Column(name = "purchase_bill_no")
     private String purchaseBillNo;
@@ -55,7 +51,6 @@ public class StockEntity {
 
     @Column(name = "grand_total")
     private BigDecimal grandTotal;
-
 
     @Column(name = "payment_status")
     private String paymentStatus;

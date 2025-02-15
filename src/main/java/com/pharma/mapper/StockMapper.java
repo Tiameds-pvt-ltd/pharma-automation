@@ -22,7 +22,6 @@ public class StockMapper {
         StockDto stockDto = new StockDto();
         stockDto.setInvId(stockEntity.getInvId());
         stockDto.setSupplierId(stockEntity.getSupplierId());
-        stockDto.setStore(stockEntity.getStore());
         stockDto.setPurchaseBillNo(stockEntity.getPurchaseBillNo());
         stockDto.setPurchaseDate(stockEntity.getPurchaseDate());
         stockDto.setCreditPeriod(stockEntity.getCreditPeriod());
@@ -52,7 +51,6 @@ public class StockMapper {
 
         StockEntity stockEntity = new StockEntity();
         stockEntity.setSupplierId(stockDto.getSupplierId());
-        stockEntity.setStore(stockDto.getStore());
         stockEntity.setPurchaseBillNo(stockDto.getPurchaseBillNo());
         stockEntity.setPurchaseDate(stockDto.getPurchaseDate());
         stockEntity.setCreditPeriod(stockDto.getCreditPeriod());
@@ -89,9 +87,12 @@ public class StockMapper {
         stockItemDto.setExpiryDate(stockItemEntity.getExpiryDate());
         stockItemDto.setFreeItem(stockItemEntity.getFreeItem());
         stockItemDto.setDiscount(stockItemEntity.getDiscount());
+        stockItemDto.setPurchasePrice(stockItemEntity.getPurchasePrice());
+        stockItemDto.setMrpSalePrice(stockItemEntity.getMrpSalePrice());
         stockItemDto.setGstPercentage(stockItemEntity.getGstPercentage());
         stockItemDto.setGstAmount(stockItemEntity.getGstAmount());
         stockItemDto.setAmount(stockItemEntity.getAmount());
+        stockItemDto.setStore(stockItemEntity.getStore());
 
         return stockItemDto;
     }
@@ -109,10 +110,12 @@ public class StockMapper {
         stockItemEntity.setExpiryDate(stockItemDto.getExpiryDate());
         stockItemEntity.setFreeItem(stockItemDto.getFreeItem());
         stockItemEntity.setDiscount(stockItemDto.getDiscount());
+        stockItemEntity.setPurchasePrice(stockItemDto.getPurchasePrice());
+        stockItemEntity.setMrpSalePrice(stockItemDto.getMrpSalePrice());
         stockItemEntity.setGstPercentage(stockItemDto.getGstPercentage());
         stockItemEntity.setGstAmount(stockItemDto.getGstAmount());
         stockItemEntity.setAmount(stockItemDto.getAmount());
-
+        stockItemEntity.setStore(stockItemDto.getStore());
         return stockItemEntity;
     }
 
@@ -124,7 +127,6 @@ public class StockMapper {
 
         // Update fields of StockEntity from StockDto
         stockEntity.setSupplierId(stockDto.getSupplierId());
-        stockEntity.setStore(stockDto.getStore());
         stockEntity.setPurchaseBillNo(stockDto.getPurchaseBillNo());
         stockEntity.setPurchaseDate(stockDto.getPurchaseDate());
         stockEntity.setCreditPeriod(stockDto.getCreditPeriod());

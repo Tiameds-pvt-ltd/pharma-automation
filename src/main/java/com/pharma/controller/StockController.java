@@ -2,6 +2,8 @@ package com.pharma.controller;
 
 
 import com.pharma.dto.StockDto;
+import com.pharma.dto.StockItemDto;
+import com.pharma.entity.StockItemEntity;
 import com.pharma.entity.User;
 import com.pharma.service.StockService;
 import com.pharma.utils.ApiResponseHelper;
@@ -112,5 +114,10 @@ public class StockController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", true));
         }
+    }
+
+    @GetMapping("/getByItemId/{itemId}")
+    public List<StockItemDto> getStockByItemId(@PathVariable String itemId) {
+        return stockService.getStockByItemId(itemId);
     }
 }

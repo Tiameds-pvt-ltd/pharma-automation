@@ -38,6 +38,12 @@ public class StockItemEntity {
     @Column(name = "discount")
     private Integer discount;
 
+    @Column(name = "purchase_price")
+    private Integer purchasePrice;
+
+    @Column(name = "mrp_sale_price")
+    private Integer mrpSalePrice;
+
     @Column(name = "gst_percentage")
     private Integer gstPercentage;
 
@@ -47,9 +53,13 @@ public class StockItemEntity {
     @Column(name = "amount")
     private Double amount;
 
+    @Column(name = "store")
+    private String store;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "invId")
     private StockEntity stockEntity;
+
 
 
     public Integer getId() {

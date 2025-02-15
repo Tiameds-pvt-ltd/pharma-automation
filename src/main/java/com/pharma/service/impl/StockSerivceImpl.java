@@ -11,17 +11,16 @@ import com.pharma.mapper.StockMapper;
 
 
 import com.pharma.repository.InventoryRepository;
+import com.pharma.repository.StockItemRepository;
 import com.pharma.repository.StockRepository;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.StockService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.nio.file.AccessDeniedException;
-import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -41,12 +40,19 @@ public class StockSerivceImpl implements StockService {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+    @Autowired
+    private StockItemRepository stockItemRepository;
+
     @Override
+    @Transactional
     public StockDto createStockAndAssociateWithUser(StockDto stockDto, User user) {
         StockEntity stockEntity = stockMapper.toEntity(stockDto);
         stockEntity.getUsers().add(user);
         user.getStockEntities().add(stockEntity);
         userRepository.save(user);
+
+        // Persist stockEntity to generate invId
+        stockEntity = stockRepository.save(stockEntity);
 
         // Loop through stock items to update or insert into ItemStockEntity
         for (StockItemEntity stockItem : stockEntity.getStockItemEntities()) {
@@ -72,6 +78,7 @@ public class StockSerivceImpl implements StockService {
 
 
     @Override
+    @Transactional
     public List<StockDto> getAllStocks(String userId) {
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
@@ -82,6 +89,7 @@ public class StockSerivceImpl implements StockService {
     }
 
     @Override
+    @Transactional
     public StockDto getStockById(String userId, Long invId) {
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
@@ -93,6 +101,7 @@ public class StockSerivceImpl implements StockService {
 
 
     @Override
+    @Transactional
     public void deleteStock(Long invId, String userId) {
         User user = userRepository.findById(Long.valueOf(userId))
                 .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
@@ -106,12 +115,12 @@ public class StockSerivceImpl implements StockService {
 
 
     @Override
+    @Transactional
     public StockDto updateStock(Long invId, StockDto updatedStock) {
         StockEntity stockEntity = stockRepository.findById(invId).
                 orElseThrow(() -> new ResourceNotFoundException("Stock does not exists with given ID :" + invId));
 
         stockEntity.setSupplierId(updatedStock.getSupplierId());
-        stockEntity.setStore(updatedStock.getStore());
         stockEntity.setPurchaseBillNo(updatedStock.getPurchaseBillNo());
         stockEntity.setPurchaseDate(updatedStock.getPurchaseDate());
         stockEntity.setCreditPeriod(updatedStock.getCreditPeriod());
@@ -145,6 +154,29 @@ public class StockSerivceImpl implements StockService {
     public boolean isBillNoExists(Long supplierId, int year, String purchaseBillNo) {
         List<String> billNos = stockRepository.findBillNoBySupplierIdAndYear(supplierId, year, purchaseBillNo);
         return !billNos.isEmpty();
+    }
+
+    @Override
+    @Transactional
+    public List<StockItemDto> getStockByItemId(String itemId) {
+        List<StockItemEntity> stockItems = stockItemRepository.findByItemId(itemId);
+
+        // Convert Entity to DTO to remove infinite recursion issue
+        return stockItems.stream().map(stockItem -> new StockItemDto(
+                stockItem.getStockId(),
+                stockItem.getItemId(),
+                stockItem.getBatchNo(),
+                stockItem.getPackageQuantity(),
+                stockItem.getExpiryDate(),
+                stockItem.getFreeItem(),
+                stockItem.getDiscount(),
+                stockItem.getPurchasePrice(),
+                stockItem.getMrpSalePrice(),
+                stockItem.getGstPercentage(),
+                stockItem.getGstAmount(),
+                stockItem.getAmount(),
+                stockItem.getStore()
+        )).collect(Collectors.toList());
     }
 
 }

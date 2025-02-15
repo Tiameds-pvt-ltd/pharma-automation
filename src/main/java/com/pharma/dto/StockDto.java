@@ -14,7 +14,6 @@ public class StockDto {
 
     private Long invId;
     private String supplierId;
-    private String store;
     private String purchaseBillNo;
     private LocalDate purchaseDate;
     private Integer creditPeriod;

@@ -1,5 +1,6 @@
 package com.pharma.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
@@ -19,7 +20,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "pharma_users")
-@ToString(exclude = {"password", "createdBy"})
+@ToString(exclude = {"password", "createdBy","stockEntities"})
 public class User {
 
     @Id
@@ -95,11 +96,12 @@ public class User {
     }
 
     //   To connect between user and Stock purchase
+    @JsonIgnore
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
     @JoinTable(name = "pharma_users_stock",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "inv_id"))
-    @JsonManagedReference // Ensure StockEntity uses @JsonBackReference
+    @JsonManagedReference
     private Set<StockEntity> stockEntities = new HashSet<>();
 
     @Override
