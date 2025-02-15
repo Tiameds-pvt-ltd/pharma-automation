@@ -15,6 +15,7 @@ import com.pharma.repository.StockItemRepository;
 import com.pharma.repository.StockRepository;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.StockService;
+import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,12 +44,49 @@ public class StockSerivceImpl implements StockService {
     @Autowired
     private StockItemRepository stockItemRepository;
 
-    @Override
+//    @Transactional
+//    public StockDto createStockAndAssociateWithUser(StockDto stockDto, User user) {
+//        StockEntity stockEntity = stockMapper.toEntity(stockDto);
+//        stockEntity.getUsers().add(user);
+//        user.getStockEntities().add(stockEntity);
+//        userRepository.save(user);
+//
+//        // Persist stockEntity to generate invId
+//        stockEntity = stockRepository.save(stockEntity);
+//
+//        // Loop through stock items to update or insert into ItemStockEntity
+//        for (StockItemEntity stockItem : stockEntity.getStockItemEntities()) {
+//            Optional<InventoryEntity> existingStock = inventoryRepository.findByItemId(stockItem.getItemId());
+//
+//            if (existingStock.isPresent()) {
+//                // Update package quantity if item exists
+//                InventoryEntity inventory = existingStock.get();
+//                inventory.setPackageQuantity(inventory.getPackageQuantity() + stockItem.getPackageQuantity());
+//                inventoryRepository.save(inventory);
+//            } else {
+//                // Insert new row if item is new
+//                InventoryEntity newInventory  = new InventoryEntity();
+//                newInventory.setItemId(stockItem.getItemId());
+//                newInventory.setPackageQuantity(stockItem.getPackageQuantity());
+//                inventoryRepository.save(newInventory);
+//            }
+//        }
+//        return stockMapper.toDto(stockEntity);
+//    }
+
+
     @Transactional
     public StockDto createStockAndAssociateWithUser(StockDto stockDto, User user) {
+        // Ensure stockEntities is loaded
+        user = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Hibernate.initialize(user.getStockEntities()); // Manually initialize
+
         StockEntity stockEntity = stockMapper.toEntity(stockDto);
         stockEntity.getUsers().add(user);
         user.getStockEntities().add(stockEntity);
+
         userRepository.save(user);
 
         // Persist stockEntity to generate invId
@@ -71,11 +109,8 @@ public class StockSerivceImpl implements StockService {
                 inventoryRepository.save(newInventory);
             }
         }
-
-
         return stockMapper.toDto(stockEntity);
     }
-
 
     @Override
     @Transactional
