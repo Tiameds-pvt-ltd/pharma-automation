@@ -1,22 +1,22 @@
 package com.pharma.service;
 
-
-
 import com.pharma.dto.ItemDto;
+import com.pharma.entity.User;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ItemService {
 
-    ItemDto createItem(ItemDto itemDto);
+    ItemDto createItem(ItemDto itemDto, User user);
 
-    ItemDto getItemById(Integer itemId);
+    List<ItemDto> getAllItem(Long createdById);
 
-    List<ItemDto> getAllItem();
+    ItemDto getItemById(Long createdById, UUID itemId);
 
-    ItemDto updateItem(Integer itemId, ItemDto updatedItem);
+    ItemDto updateItem(Long modifiedById, UUID itemId, ItemDto updatedItem);
 
-    void  deleteItem(Integer itemId);
+    void  deleteItem(Long createdById, UUID itemId);
 
 
 }

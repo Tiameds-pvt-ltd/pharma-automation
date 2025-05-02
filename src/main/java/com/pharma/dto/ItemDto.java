@@ -5,23 +5,33 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ItemDto {
 
-    private Integer itemId;
+    private UUID itemId;
     private String itemName;
     private String purchaseUnit;
-    private String unitType;
+    private UUID unitId;
+    private UUID variantId;
     private String manufacturer;
-    private Integer purchasePrice;
-    private Integer mrpSalePrice;
-    private Integer purchasePricePerUnit;
-    private Integer mrpSalePricePerUnit;
-    private String gstPercentage;
+    private BigDecimal purchasePrice;
+    private BigDecimal mrpSalePrice;
+    private BigDecimal purchasePricePerUnit;
+    private BigDecimal mrpSalePricePerUnit;
+    private Long cgstPercentage;
+    private Long sgstPercentage;
     private String hsnNo;
     private String consumables;
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
 
 }

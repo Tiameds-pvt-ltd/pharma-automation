@@ -1,14 +1,22 @@
 package com.pharma.controller;
 
+import com.pharma.dto.DoctorDto;
 import com.pharma.dto.SupplierDto;
 
+import com.pharma.entity.User;
+import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.service.SupplierService;
+import com.pharma.utils.ApiResponseHelper;
+import com.pharma.utils.UserAuthService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 
 @CrossOrigin
@@ -17,39 +25,119 @@ import java.util.List;
 @RequestMapping("/pharma/supplier")
 public class SupplierController {
 
+    @Autowired
     private SupplierService supplierService;
 
+    @Autowired
+    private UserAuthService userAuthService;
 
     @PostMapping("/save")
-    public ResponseEntity<SupplierDto> createSupplier(@RequestBody SupplierDto supplierDto){
-        SupplierDto saveSupplier = supplierService.createSupplier(supplierDto);
-        return new ResponseEntity<>(saveSupplier, HttpStatus.CREATED);
-    }
+    public ResponseEntity<?> createSupplier(
+            @RequestHeader("Authorization") String token,
+            @RequestBody SupplierDto supplierDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<SupplierDto> getSupplierById(@PathVariable("id") Integer supplierId){
-        SupplierDto supplierDto = supplierService.getSupplierById(supplierId);
-        return ResponseEntity.ok(supplierDto);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        SupplierDto savedSupplier = supplierService.createSupplier(supplierDto, currentUserOptional.get());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Supplier created successfully", HttpStatus.OK, savedSupplier);
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<SupplierDto>> getAllSupplier(){
-        List<SupplierDto> supplierDtos = supplierService.getAllSupplier();
-        return ResponseEntity.ok(supplierDtos);
+    public ResponseEntity<?> getAllSupplier(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        List<SupplierDto> suppliers = supplierService.getAllSupplier(currentUserOptional.get().getId());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Supplier retrieved successfully", HttpStatus.OK, suppliers);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<SupplierDto> updateSupplier(@PathVariable("id") Integer supplierId, @RequestBody SupplierDto updatedSupplier) {
-        SupplierDto supplierDto = supplierService.updateSupplier(supplierId, updatedSupplier);
-        return ResponseEntity.ok(supplierDto);
+    @GetMapping("/getById/{supplierId}")
+    public ResponseEntity<?> getSupplierById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("supplierId") UUID supplierId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        SupplierDto supplierDto = supplierService.getSupplierById(createdById, supplierId);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Supplier retrieved successfully",
+                HttpStatus.OK,
+                supplierDto
+        );
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteSupplier(@PathVariable("id") Integer supplierId) {
-        supplierService.deleteSupplier(supplierId);
-        return ResponseEntity.ok("Supplier Deleted Successfully");
+
+    @PutMapping("/update/{supplierId}")
+    public ResponseEntity<?> updateSupplier(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("supplierId") UUID supplierId,
+            @RequestBody SupplierDto updatedSupplier
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long modifiedById = currentUserOptional.get().getId();
+
+        try {
+            SupplierDto updatedSuppliers = supplierService.updateSupplier(modifiedById, supplierId, updatedSupplier);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Supplier updated successfully",
+                    HttpStatus.OK,
+                    updatedSuppliers
+            );
+        } catch (ResourceNotFoundException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
     }
 
+    @DeleteMapping("/delete/{supplierId}")
+    public ResponseEntity<?> deleteSupplier(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("supplierId") UUID supplierId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
 
+        Long createdById = currentUserOptional.get().getId();
+        try {
+            supplierService.deleteSupplier(createdById, supplierId);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Supplier deleted successfully",
+                    HttpStatus.OK,
+                    null
+            );
+        } catch (ResourceNotFoundException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
+    }
 }
 

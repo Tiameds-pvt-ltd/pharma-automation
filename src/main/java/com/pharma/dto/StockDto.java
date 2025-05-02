@@ -2,9 +2,11 @@ package com.pharma.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,20 +14,25 @@ import java.util.List;
 @AllArgsConstructor
 public class StockDto {
 
-    private Long invId;
-    private String supplierId;
+    private UUID invId;
+    private UUID supplierId;
     private String purchaseBillNo;
     private LocalDate purchaseDate;
-    private Integer creditPeriod;
+    private Long creditPeriod;
     private LocalDate paymentDueDate;
-    private Integer invoiceAmount;
-    private Double totalAmount;
-    private Double totalGst;
-    private Double totalDiscount;
-    private Double grandTotal;
+    private BigDecimal invoiceAmount;
+    private BigDecimal totalAmount;
+    private BigDecimal totalCgst;
+    private BigDecimal totalSgst;
+    private BigDecimal totalDiscount;
+    private BigDecimal grandTotal;
     private String paymentStatus="Pending";
     private String goodStatus="Received";
+    private String grnNo;
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
 
-    private List<StockItemDto> stockItemDtos = new ArrayList<>();       // List of StockItemDto
-
+    private List<StockItemDto> stockItemDtos = new ArrayList<>();
 }

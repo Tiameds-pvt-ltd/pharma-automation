@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,17 +15,23 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PharmacistDto {
 
-    private Long pharmacistId;
+    private UUID pharmacistId;
     private String pharmacistName;
     private Long contactNo;
     private String email;
     private String address;
-    private Integer zipCode;
-    private Long securityId;
+    private Long zipCode;
+    private String ownerOrNot;
+    private String securityId;
     private String securityProof;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;
     private LocalDate modifiedDate;
+
+//    private Set<PharmacyDto> pharmacyDtos;
+
+    private Set<UUID> pharmacyIds;
+
 
 }

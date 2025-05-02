@@ -2,16 +2,21 @@ package com.pharma.service.impl;
 
 import com.pharma.dto.BillDto;
 import com.pharma.dto.BillItemDto;
-import com.pharma.entity.BillEntity;
-import com.pharma.entity.BillItemEntity;
+import com.pharma.entity.*;
 import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.mapper.BillMapper;
 import com.pharma.repository.BillRepository;
+import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.BillService;
+import com.pharma.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -23,64 +28,65 @@ public class BillServiceImpl implements BillService {
     @Autowired
     private BillMapper billMapper;
 
-    @Override
-    public BillDto createBill(BillDto billDto) {
-        BillEntity billEntity = billMapper.toEntity(billDto);
-        billEntity.getBillItemEntities().forEach(item -> item.setBillEntity(billEntity));
-        BillEntity savedBill = billRepository.save(billEntity);
-        return billMapper.toDto(savedBill);    }
+    @Autowired
+    private JwtUtil jwtUtil;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Transactional
     @Override
-    public BillDto getBillById(Long billId) {
-        BillEntity billEntity = billRepository.findById(billId)
-                .orElseThrow(() -> new RuntimeException("Stock not found"));
-        return billMapper.toDto(billEntity);
+    public BillDto createBill(BillDto billDto, User user) {
+        user = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BillEntity billEntity = billMapper.toEntity(billDto);
+        billEntity.setBillId(UUID.randomUUID());
+        billEntity.setCreatedBy(user.getId());
+        billEntity.setCreatedDate(LocalDate.now());
+
+        if (billEntity.getBillItemEntities() != null) {
+            for (BillItemEntity item : billEntity.getBillItemEntities()) {
+                item.setItemId(UUID.randomUUID());
+                item.setCreatedBy(user.getId());
+                item.setCreatedDate(LocalDate.now());
+                item.setBillEntity(billEntity);
+            }
+        }
+
+        BillEntity savedBill = billRepository.save(billEntity);
+        return billMapper.toDto(savedBill);
     }
 
-
+    @Transactional
     @Override
-    public List<BillDto> getAllBill() {
-        return billRepository.findAll().stream()
+    public List<BillDto> getAllBill(Long createdById) {
+        List<BillEntity> billEntities = billRepository.findAllByCreatedBy(createdById);
+        return billEntities.stream()
                 .map(billMapper::toDto)
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
-    public BillDto updateBill(Long billId, BillDto updatedBill) {
-        BillEntity billEntity = billRepository.findById(billId).
-                orElseThrow(() -> new ResourceNotFoundException("Stock does not exists with given ID :" + billId));
+    public BillDto getBillById(Long createdById, UUID billId) {
+        Optional<BillEntity> billEntity = billRepository.findByBillIdAndCreatedBy(billId, createdById);
 
-        billEntity.setPatientId(updatedBill.getPatientId());
-        billEntity.setDoctorId(updatedBill.getDoctorId());
-        billEntity.setPatientType(updatedBill.getPatientType());
-        billEntity.setSubTotal(updatedBill.getSubTotal());
-        billEntity.setTotalGst(updatedBill.getTotalGst());
-        billEntity.setTotalDiscount(updatedBill.getTotalDiscount());
-        billEntity.setGrandTotal(updatedBill.getGrandTotal());
-        billEntity.setPaymentType(updatedBill.getPaymentType());
-        billEntity.setBillNo(updatedBill.getBillNo());
-        billEntity.setEnteredBy(updatedBill.getEnteredBy());
-
-        List<BillItemEntity> existingItems = billEntity.getBillItemEntities();
-        List<BillItemDto> updatedItems = updatedBill.getBillItemDtos();
-
-        existingItems.clear();
-        for (BillItemDto itemDTO : updatedItems) {
-            BillItemEntity itemEntity = billMapper.toEntity(itemDTO);
-            itemEntity.setBillEntity(billEntity);
-            existingItems.add(itemEntity);
+        if (billEntity.isEmpty()) {
+            throw new RuntimeException("Bill not found with ID: " + billId + " for user ID: " + createdById);
         }
-
-        BillEntity updatedEntity = billRepository.save(billEntity);
-        return billMapper.toDto(updatedEntity);
+        return billMapper.toDto(billEntity.get());
     }
 
+    @Transactional
     @Override
-    public void deleteBill(Long billId) {
-        BillEntity billEntity = billRepository.findById(billId)
-                .orElseThrow(() -> new RuntimeException("Stock not found"));
-        billRepository.deleteById(billId);
-
-
+    public void deleteBill(Long createdById, UUID billId) {
+        Optional<BillEntity> billEntity = billRepository.findByBillIdAndCreatedBy(billId, createdById);
+        if (billEntity.isEmpty()) {
+            throw new RuntimeException("Bill not found with ID: " + billId + " for user ID: " + createdById);
+        }
+        billRepository.delete(billEntity.get());
     }
+
+
 }

@@ -5,8 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,35 +20,34 @@ import java.time.LocalDate;
 public class PurchaseOrderItemEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long orderItemId;
-
-    @Column(name = "order_id")
-    private Long orderId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "order_item_id", updatable = false, nullable = false, unique = true)
+    private UUID orderItemId;
 
     @Column(name = "item_id")
-    private Long itemId;
+    private UUID itemId;
 
-    @Column(name = "purchase_bill_no")
-    private String purchaseBillNo;
+    @Column(name = "quantity")
+    private Long quantity;
 
     @Column(name = "manufacturer")
     private String manufacturer;
 
     @Column(name = "gst_percentage")
-    private Integer gstPercentage;
+    private Long gstPercentage;
 
     @Column(name = "gst_amount")
-    private Double gstAmount;
+    private BigDecimal gstAmount;
 
     @Column(name = "amount")
-    private Double amount;
+    private BigDecimal amount;
 
     @Column(name = "unit_type_id")
-    private Long unitTypeId;
+    private UUID unitTypeId;
 
     @Column(name = "variant_type_id")
-    private Long variantTypeId;
+    private UUID variantTypeId;
 
     @Column(name = "created_by")
     private Long createdBy;
@@ -56,9 +58,17 @@ public class PurchaseOrderItemEntity {
     @Column(name = "modified_by")
     private Long modifiedBy;
 
-    @Column(name = "modified_Date")
+    @Column(name = "modified_Date", insertable = false)
     private LocalDate modifiedDate;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id", nullable = false)
+    private PurchaseOrderEntity purchaseOrderEntity;
 
-
+    @PrePersist
+    public void generateUUID() {
+        if (orderItemId == null) {
+            orderItemId = UUID.randomUUID();
+        }
+    }
 }

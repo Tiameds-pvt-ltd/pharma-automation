@@ -5,8 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,11 +19,10 @@ import java.time.LocalDate;
 public class DoctorEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long doctorId;
-
-    @Column(name = "doctor_initial")
-    private String doctorInitial;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "doctor_id", updatable = false, nullable = false, unique = true)
+    private UUID doctorId;
 
     @Column(name = "doctor_name")
     private String doctorName;
@@ -35,17 +36,28 @@ public class DoctorEntity {
     @Column(name = "doctor_mobile")
     private Long doctorMobile;
 
+    @Column(name = "doctor_email")
+    private String doctorEmail;
+
     @Column(name = "doctor_venue")
     private String doctorVenue;
 
-    @Column(name = "doctor_entered_date")
-    private LocalDate doctorEnteredDate;
+    @Column(name = "created_by")
+    private Long createdBy;
 
-    @Column(name = "doctor_entered_by")
-    private Long doctorEnteredBy;
+    @Column(name = "created_date")
+    private LocalDate createdDate;
+
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+
+    @Column(name = "modified_Date")
+    private LocalDate modifiedDate;
 
     @PrePersist
-    protected void onCreate() {
-        this.doctorEnteredDate = LocalDate.now();
+    public void generateUUID() {
+        if (doctorId == null) {
+            doctorId = UUID.randomUUID();
+        }
     }
 }

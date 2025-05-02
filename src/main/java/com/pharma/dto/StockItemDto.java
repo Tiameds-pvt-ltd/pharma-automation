@@ -6,7 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
@@ -14,18 +16,26 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class StockItemDto {
-    private Integer stockId;
-    private String itemId;
+    private UUID stockId;
+    private UUID itemId;
+    private UUID pharmacyId;
     private String batchNo;
-    private Integer packageQuantity;
-    private Date expiryDate;
-    private Integer freeItem;
-    private Integer discount;
-    private Integer purchasePrice;
-    private Integer mrpSalePrice;
-    private Integer gstPercentage;
-    private Double gstAmount;
-    private Double amount;
-    private String store;
+    private Long packageQuantity;
+    private LocalDate expiryDate;
+    private Long freeItem;
+    private BigDecimal discount;
+    private BigDecimal purchasePrice;
+    private BigDecimal mrpSalePrice;
+    private BigDecimal purchasePricePerUnit;
+    private BigDecimal mrpSalePricePerUnit;
+    private Long cgstPercentage;
+    private Long sgstPercentage;
+    private BigDecimal cgstAmount;
+    private BigDecimal sgstAmount;
+    private BigDecimal amount;
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
 
 }

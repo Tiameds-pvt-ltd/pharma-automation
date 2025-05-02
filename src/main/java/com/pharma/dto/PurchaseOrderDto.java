@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,10 +17,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PurchaseOrderDto {
 
-    private Long orderId;
-    private Long pharmacyId;
-    private Long pharmacistId;
-    private Long supplierId;
+    private UUID orderId;
+    private String orderId1;
+    private UUID pharmacyId;
+    private UUID pharmacistId;
+    private UUID supplierId;
     private LocalDate orderedDate;
     private LocalDate intendedDeliveryDate;
     private BigDecimal totalAmount;
@@ -27,4 +31,6 @@ public class PurchaseOrderDto {
     private LocalDate createdDate;
     private Long modifiedBy;
     private LocalDate modifiedDate;
+
+    private List<PurchaseOrderItemDto> purchaseOrderItemDtos = new ArrayList<>();
 }

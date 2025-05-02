@@ -2,19 +2,24 @@ package com.pharma.mapper;
 
 import com.pharma.dto.PatientDetailsDto;
 import com.pharma.entity.PatientDetailsEntity;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PatientDetailsMapper {
 
-    public static PatientDetailsDto mapToDto(PatientDetailsEntity patientDetailsEntity){
+    public PatientDetailsDto mapToDto(PatientDetailsEntity patientDetailsEntity){
         return new PatientDetailsDto(
                 patientDetailsEntity.getPatientId(),
                 patientDetailsEntity.getPatientName(),
                 patientDetailsEntity.getPatientNumber(),
                 patientDetailsEntity.getPatientMobile(),
+                patientDetailsEntity.getPatientEmail(),
                 patientDetailsEntity.getPatientAddress(),
-                patientDetailsEntity.getPatientEnteredDate(),
-                patientDetailsEntity.getPatientEnteredBy()
-
+                patientDetailsEntity.getPharmacyId(),
+                patientDetailsEntity.getCreatedBy(),
+                patientDetailsEntity.getCreatedDate(),
+                patientDetailsEntity.getModifiedBy(),
+                patientDetailsEntity.getModifiedDate()
         );
     }
 
@@ -24,9 +29,13 @@ public class PatientDetailsMapper {
                 patientDetailsDto.getPatientName(),
                 patientDetailsDto.getPatientNumber(),
                 patientDetailsDto.getPatientMobile(),
+                patientDetailsDto.getPatientEmail(),
                 patientDetailsDto.getPatientAddress(),
-                patientDetailsDto.getPatientEnteredDate(),
-                patientDetailsDto.getPatientEnteredBy()
+                patientDetailsDto.getPharmacyId(),
+                patientDetailsDto.getCreatedBy(),
+                patientDetailsDto.getCreatedDate(),
+                patientDetailsDto.getModifiedBy(),
+                patientDetailsDto.getModifiedDate()
         );
     }
 }

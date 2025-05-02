@@ -5,6 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
+
+import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,8 +19,10 @@ import lombok.Setter;
 public class SupplierEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer supplierId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "supplier_id", updatable = false, nullable = false, unique = true)
+    private UUID supplierId;
 
     @Column(name = "supplier_name")
     private String supplierName;
@@ -35,4 +41,23 @@ public class SupplierEntity {
 
     @Column(name = "supplier_address")
     private String supplierAddress;
+
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "created_date")
+    private LocalDate createdDate;
+
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+
+    @Column(name = "modified_Date")
+    private LocalDate modifiedDate;
+
+    @PrePersist
+    public void generateUUID() {
+        if (supplierId == null) {
+            supplierId = UUID.randomUUID();
+        }
+    }
 }

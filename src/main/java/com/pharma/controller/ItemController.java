@@ -1,19 +1,23 @@
 package com.pharma.controller;
 
 
+import com.pharma.dto.DoctorDto;
 import com.pharma.dto.ItemDto;
 
 import com.pharma.entity.User;
+import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.service.ItemService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @CrossOrigin
 @AllArgsConstructor
@@ -21,58 +25,120 @@ import java.util.Optional;
 @RequestMapping("/pharma/item")
 public class ItemController {
 
+    @Autowired
     private UserAuthService userAuthService;
 
+    @Autowired
     private ItemService itemService;
 
     @PostMapping("/save")
-    public ResponseEntity<ItemDto> createItem(@RequestBody ItemDto itemDto){
-        ItemDto saveItem = itemService.createItem(itemDto);
-        return new ResponseEntity<>(saveItem, HttpStatus.CREATED);
-    }
+    public ResponseEntity<?> createItem(
+            @RequestHeader("Authorization") String token,
+            @RequestBody ItemDto itemDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<ItemDto> getItemById(@PathVariable("id") Integer itemId){
-        ItemDto itemDto = itemService.getItemById(itemId);
-        return ResponseEntity.ok(itemDto);
-    }
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
 
-//    @GetMapping("/getAll")
-//    public ResponseEntity<Map<String, Object>> getAllItem(@RequestHeader("Authorization") String token){
-//
-//        // Validate token format
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//
-//        // If user is not found, return unauthorized response
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage("User not found", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        System.out.println("currentUserOptional--------"+currentUserOptional);
-//
-//
-//        List<ItemDto> itemDtos = itemService.getAllItem();
-//        return ApiResponseHelper.successResponseWithDataAndMessage("Data Found", HttpStatus.OK,itemDtos);
-//    }
+        ItemDto savedItem = itemService.createItem(itemDto, currentUserOptional.get());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Item created successfully", HttpStatus.OK, savedItem);
+    }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<ItemDto>> getAllItem(){
-        List<ItemDto> itemDtos = itemService.getAllItem();
-        return ResponseEntity.ok(itemDtos);
-    }
+    public ResponseEntity<?> getAllItems(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<ItemDto> updateItem(@PathVariable("id") Integer itemId, @RequestBody ItemDto updatedItem){
-        ItemDto itemDto = itemService.updateItem(itemId, updatedItem);
-        return ResponseEntity.ok(itemDto);
-    }
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteItem(@PathVariable("id") Integer itemId){
-        itemService.deleteItem(itemId);
-        return ResponseEntity.ok("Supplier Deleted Successfully");
+        List<ItemDto> items = itemService.getAllItem(currentUserOptional.get().getId());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Items retrieved successfully", HttpStatus.OK, items);
     }
 
 
+    @GetMapping("/getById/{itemId}")
+    public ResponseEntity<?> getItemById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("itemId") UUID itemId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
 
+        Long createdById = currentUserOptional.get().getId();
+        ItemDto itemDto = itemService.getItemById(createdById, itemId);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Item retrieved successfully",
+                HttpStatus.OK,
+                itemDto
+        );
+    }
+
+    @PutMapping("/update/{itemId}")
+    public ResponseEntity<?> updateDoctorById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("itemId") UUID itemId,
+            @RequestBody ItemDto itemDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long modifiedById = currentUserOptional.get().getId();
+
+        try {
+            ItemDto updatedItem = itemService.updateItem(modifiedById, itemId, itemDto);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Item updated successfully",
+                    HttpStatus.OK,
+                    updatedItem
+            );
+        } catch (ResourceNotFoundException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
+
+    }
+
+
+    @DeleteMapping("/delete/{itemId}")
+    public ResponseEntity<?> deleteItem(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("itemId") UUID itemId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        try {
+            itemService.deleteItem(createdById, itemId);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Item deleted successfully",
+                    HttpStatus.OK,
+                    null
+            );
+        } catch (ResourceNotFoundException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
+    }
 }

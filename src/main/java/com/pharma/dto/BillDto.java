@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,7 +18,8 @@ import java.util.List;
 @AllArgsConstructor
 public class BillDto {
 
-    private Long billId;
+    private UUID billId;
+    private Long pharmacyId;
     private LocalDate billDate;
     private LocalTime billTime;
     private Long patientId;
@@ -28,9 +30,11 @@ public class BillDto {
     private BigDecimal totalDiscount;
     private BigDecimal grandTotal;
     private String paymentType;
-    private Long billNo;
-    private Long enteredBy;
     private String billStatus="Pending";
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
 
     private List<BillItemDto> billItemDtos = new ArrayList<>();
 }

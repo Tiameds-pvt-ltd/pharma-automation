@@ -1,7 +1,11 @@
 package com.pharma.controller;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.PurchaseOrderDto;
+import com.pharma.entity.User;
 import com.pharma.service.BillService;
+import com.pharma.utils.ApiResponseHelper;
+import com.pharma.utils.UserAuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -9,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @CrossOrigin
 @AllArgsConstructor
@@ -19,31 +25,84 @@ public class BillController {
     @Autowired
     private BillService billService;
 
-    @PostMapping("/save")
-    public ResponseEntity<BillDto> saveBill(@RequestBody BillDto billDto) {
-        BillDto savedBill = billService.createBill(billDto);
-        return ResponseEntity.ok(savedBill);
-    }
+    @Autowired
+    private UserAuthService userAuthService;
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<BillDto> getBillById(@PathVariable("id") Long billId) {
-        return ResponseEntity.ok(billService.getBillById(billId));
+    @PostMapping("/save")
+    public ResponseEntity<?> saveBill(
+            @RequestHeader("Authorization") String token,
+            @RequestBody BillDto billDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+        BillDto savedBill = billService.createBill(billDto, currentUserOptional.get());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Bill created successfully", HttpStatus.OK, savedBill);
     }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<BillDto>> getAllBill() {
-        return ResponseEntity.ok(billService.getAllBill());
+    public ResponseEntity<?> getAllBills(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+        User currentUser = currentUserOptional.get();
+        List<BillDto> billDtos = billService.getAllBill(currentUser.getId());
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Bill retrieved successfully", HttpStatus.OK, billDtos);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<BillDto> updateBill(@PathVariable("id") Long billId, @RequestBody BillDto updatedBill) {
-        BillDto updatedBillResponse = billService.updateBill(billId, updatedBill);
-        return new ResponseEntity<>(updatedBillResponse, HttpStatus.OK);
+    @GetMapping("/getById/{billId}")
+    public ResponseEntity<?> getBillById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("billId") UUID billId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+        Long createdById = currentUserOptional.get().getId();
+        BillDto billDto = billService.getBillById(createdById, billId);
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Purchase order retrieved successfully",
+                HttpStatus.OK,
+                billDto
+        );
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteBill(@PathVariable("id") Long billId){
-        billService.deleteBill(billId);
-        return ResponseEntity.ok("Bill Deleted Successfully");
+
+    @DeleteMapping("/delete/{billId}")
+    public ResponseEntity<?> deleteBill(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("billId") UUID billId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+        Long createdById = currentUserOptional.get().getId();
+        try {
+            billService.deleteBill(createdById, billId);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Bill deleted successfully",
+                    HttpStatus.OK,
+                    null
+            );
+        } catch (RuntimeException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
+
     }
 }

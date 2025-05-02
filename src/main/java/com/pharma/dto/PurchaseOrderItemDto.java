@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,16 +15,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PurchaseOrderItemDto {
 
-    private Long orderItemId;
-    private Long orderId;
-    private Long itemId;
-    private String purchaseBillNo;
+    private UUID orderItemId;
+    private UUID orderId;
+    private UUID itemId;
+    private Long quantity;
     private String manufacturer;
-    private Integer gstPercentage;
-    private Double gstAmount;
-    private Double amount;
-    private Long unitTypeId;
-    private Long variantTypeId;
+    private Long gstPercentage;
+    private BigDecimal gstAmount;
+    private BigDecimal amount;
+    private UUID unitTypeId;
+    private UUID variantTypeId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

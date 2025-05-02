@@ -2,18 +2,20 @@ package com.pharma.service;
 
 
 import com.pharma.dto.SupplierDto;
+import com.pharma.entity.User;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface SupplierService {
 
-    SupplierDto createSupplier(SupplierDto supplierDto);
+    SupplierDto createSupplier(SupplierDto supplierDto, User user);
 
-    SupplierDto getSupplierById(Integer supplierId);
+    List<SupplierDto> getAllSupplier(Long createdById);
 
-    List<SupplierDto> getAllSupplier();
+    SupplierDto getSupplierById(Long createdById, UUID supplierId);
 
-    SupplierDto updateSupplier(Integer supplierId, SupplierDto updatedSupplier);
+    SupplierDto updateSupplier(Long modifiedById, UUID supplierId, SupplierDto updatedSupplier);
 
-    void deleteSupplier(Integer supplierId);
+    void deleteSupplier(Long createdById, UUID supplierId);
 }

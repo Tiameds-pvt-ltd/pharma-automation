@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -14,16 +15,20 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class BillItemDto {
 
-    private Long billItemId;
+    private UUID billItemId;
     private Long billId;
-    private Long itemId;
+    private UUID itemId;
     private String batchNo;
     private LocalDate expiryDate;
-    private Integer quantity;
+    private Long quantity;
     private BigDecimal discount;
     private BigDecimal mrp;
     private BigDecimal gstPercentage;
     private BigDecimal grossTotal;
     private BigDecimal netTotal;
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
 
 }

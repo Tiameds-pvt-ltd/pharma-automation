@@ -1,13 +1,21 @@
 package com.pharma.controller;
 
+import com.pharma.dto.DoctorDto;
 import com.pharma.dto.PatientDetailsDto;
+import com.pharma.entity.User;
+import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.service.PatientDetailsService;
+import com.pharma.utils.ApiResponseHelper;
+import com.pharma.utils.UserAuthService;
 import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @CrossOrigin
 @AllArgsConstructor
@@ -17,33 +25,117 @@ public class PatientDetailsController {
 
     private PatientDetailsService patientDetailsService;
 
+    @Autowired
+    private UserAuthService userAuthService;
+
     @PostMapping("/save")
-    public ResponseEntity<PatientDetailsDto> createPatient(@RequestBody PatientDetailsDto patientDetailsDto){
-        PatientDetailsDto savePatient = patientDetailsService.createPatient(patientDetailsDto);
-        return new ResponseEntity<>(savePatient, HttpStatus.CREATED);
+    public ResponseEntity<?> createDoctor(
+            @RequestHeader("Authorization") String token,
+            @RequestBody PatientDetailsDto patientDetailsDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        PatientDetailsDto savedPatient = patientDetailsService.createPatient(patientDetailsDto, currentUserOptional.get());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Patient created successfully", HttpStatus.OK, savedPatient);
     }
 
-    @GetMapping("/getById/{id}")
-    public ResponseEntity<PatientDetailsDto> getPatientById(@PathVariable("id") Long patientId){
-        PatientDetailsDto patientDetailsDto = patientDetailsService.getPatientById(patientId);
-        return ResponseEntity.ok(patientDetailsDto);
-    }
 
     @GetMapping("/getAll")
-    public ResponseEntity<List<PatientDetailsDto>> getAllPatient(){
-        List<PatientDetailsDto> patientDetailsDtos = patientDetailsService.getAllPatient();
-        return ResponseEntity.ok(patientDetailsDtos);
+    public ResponseEntity<?> getAllDoctors(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        List<PatientDetailsDto> patients = patientDetailsService.getAllPatient(currentUserOptional.get().getId());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Patients retrieved successfully", HttpStatus.OK, patients);
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<PatientDetailsDto> updatePatient(@PathVariable("id") Long patientId, @RequestBody PatientDetailsDto updatePatient) {
-        PatientDetailsDto patientDetailsDto = patientDetailsService.updatePatient(patientId, updatePatient);
-        return ResponseEntity.ok(patientDetailsDto);
+
+    @GetMapping("/getById/{patientId}")
+    public ResponseEntity<?> getDoctorById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("patientId") UUID patientId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        PatientDetailsDto patientDetailsDto = patientDetailsService.getPatientById(createdById, patientId);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Patient retrieved successfully",
+                HttpStatus.OK,
+                patientDetailsDto
+        );
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deletePatient(@PathVariable("id") Long patientId) {
-        patientDetailsService.deletePatient(patientId);
-        return ResponseEntity.ok("Patient Deleted Successfully");
+
+    @PutMapping("/update/{patientId}")
+    public ResponseEntity<?> updatePatientById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("patientId") UUID patientId,
+            @RequestBody PatientDetailsDto patientDetailsDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long modifiedById = currentUserOptional.get().getId();
+
+        try {
+            PatientDetailsDto updatePatient = patientDetailsService.updatePatient(modifiedById, patientId, patientDetailsDto);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Patient updated successfully",
+                    HttpStatus.OK,
+                    updatePatient
+            );
+        } catch (ResourceNotFoundException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
+    }
+
+    @DeleteMapping("/delete/{patientId}")
+    public ResponseEntity<?> deletePatientById(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("patientId") UUID patientId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        try {
+            patientDetailsService.deletePatientById(createdById, patientId);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Patient deleted successfully",
+                    HttpStatus.OK,
+                    null
+            );
+        } catch (ResourceNotFoundException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
     }
 }

@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface InventoryService {
 
-    List<InventoryDto> getAllInventory();
+    List<InventoryDto> getAllInventory(Long createdById);
 
-    List<StockItemDto> getExpiredStock();
+    List<StockItemDto> getExpiredStock(Long createdById);
 }

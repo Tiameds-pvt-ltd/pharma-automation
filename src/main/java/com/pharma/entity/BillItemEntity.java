@@ -5,9 +5,11 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -18,11 +20,13 @@ import java.time.LocalDate;
 public class BillItemEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long billItemId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "order_item_id", updatable = false, nullable = false, unique = true)
+    private UUID billItemId;
 
     @Column(name = "item_id")
-    private Long itemId;
+    private UUID itemId;
 
     @Column(name = "batch_no")
     private String batchNo;
@@ -31,7 +35,7 @@ public class BillItemEntity {
     private LocalDate expiryDate;
 
     @Column(name = "quantity")
-    private Integer quantity;
+    private Long quantity;
 
     @Column(name = "discount")
     private BigDecimal discount;
@@ -42,13 +46,35 @@ public class BillItemEntity {
     @Column(name = "gst_percentage")
     private BigDecimal gstPercentage;
 
+    @Column(name = "gst_amount")
+    private BigDecimal gstAmount;
+
     @Column(name = "gross_total")
     private BigDecimal grossTotal;
 
     @Column(name = "net_total")
     private BigDecimal netTotal;
 
+    @Column(name = "created_by")
+    private Long createdBy;
+
+    @Column(name = "created_date")
+    private LocalDate createdDate;
+
+    @Column(name = "modified_by")
+    private Long modifiedBy;
+
+    @Column(name = "modified_Date", insertable = false)
+    private LocalDate modifiedDate;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "billId")
     private BillEntity billEntity;
+
+    @PrePersist
+    public void generateUUID() {
+        if (billItemId == null) {
+            billItemId = UUID.randomUUID();
+        }
+    }
 }

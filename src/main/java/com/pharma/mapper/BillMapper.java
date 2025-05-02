@@ -14,6 +14,7 @@ public class BillMapper {
     public BillDto toDto(BillEntity billEntity) {
      BillDto billDto = new BillDto();
         billDto.setBillId(billEntity.getBillId());
+        billDto.setPharmacyId(billEntity.getPharmacyId());
         billDto.setBillDate(billEntity.getBillDate());
         billDto.setBillTime(billEntity.getBillTime());
         billDto.setPatientId(billEntity.getPatientId());
@@ -24,8 +25,11 @@ public class BillMapper {
         billDto.setTotalDiscount(billEntity.getTotalDiscount());
         billDto.setGrandTotal(billEntity.getGrandTotal());
         billDto.setPaymentType(billEntity.getPaymentType());
-        billDto.setBillNo(billEntity.getBillNo());
-        billDto.setEnteredBy(billEntity.getEnteredBy());
+        billDto.setBillStatus(billEntity.getBillStatus());
+        billDto.setCreatedBy(billEntity.getCreatedBy());
+        billDto.setCreatedDate(billEntity.getCreatedDate());
+        billDto.setModifiedBy(billEntity.getModifiedBy());
+        billDto.setModifiedDate(billEntity.getModifiedDate());
         billDto.setBillItemDtos(billEntity.getBillItemEntities().stream()
                 .map(this::toDto).collect(Collectors.toList()));
         return billDto;
@@ -35,7 +39,6 @@ public class BillMapper {
 
         BillItemDto billItemDto = new BillItemDto();
         billItemDto.setBillItemId(billItemEntity.getBillItemId());
-//        billItemDto.setBillId(billItemEntity.getBillId());
         billItemDto.setItemId(billItemEntity.getItemId());
         billItemDto.setBatchNo(billItemEntity.getBatchNo());
         billItemDto.setExpiryDate(billItemEntity.getExpiryDate());
@@ -45,6 +48,10 @@ public class BillMapper {
         billItemDto.setGstPercentage(billItemEntity.getGstPercentage());
         billItemDto.setGrossTotal(billItemEntity.getGrossTotal());
         billItemDto.setNetTotal(billItemEntity.getNetTotal());
+        billItemDto.setCreatedBy(billItemEntity.getCreatedBy());
+        billItemDto.setCreatedDate(billItemEntity.getCreatedDate());
+        billItemDto.setModifiedBy(billItemEntity.getModifiedBy());
+        billItemDto.setModifiedDate(billItemEntity.getModifiedDate());
 
         return billItemDto;
     }
@@ -52,6 +59,7 @@ public class BillMapper {
     public BillEntity toEntity(BillDto billDto) {
         BillEntity billEntity = new BillEntity();
         billEntity.setBillId(billDto.getBillId());
+        billEntity.setPharmacyId(billDto.getPharmacyId());
         billEntity.setBillDate(billDto.getBillDate());
         billEntity.setBillTime(billDto.getBillTime());
         billEntity.setPatientId(billDto.getPatientId());
@@ -62,8 +70,12 @@ public class BillMapper {
         billEntity.setTotalDiscount(billDto.getTotalDiscount());
         billEntity.setGrandTotal(billDto.getGrandTotal());
         billEntity.setPaymentType(billDto.getPaymentType());
-        billEntity.setBillNo(billDto.getBillNo());
-        billEntity.setEnteredBy(billDto.getEnteredBy());
+        billEntity.setBillStatus(billDto.getBillStatus());
+        billEntity.setCreatedBy(billDto.getCreatedBy());
+        billEntity.setCreatedDate(billDto.getCreatedDate());
+        billEntity.setModifiedBy(billDto.getModifiedBy());
+        billEntity.setModifiedDate(billDto.getModifiedDate());
+
         billEntity.setBillItemEntities(billDto.getBillItemDtos().stream()
                 .map(this::toEntity).collect(Collectors.toList()));
 
@@ -74,7 +86,6 @@ public class BillMapper {
     public BillItemEntity toEntity(BillItemDto billItemDto) {
         BillItemEntity billItemEntity = new BillItemEntity();
         billItemEntity.setBillItemId(billItemDto.getBillItemId());
-//        billItemEntity.setBillId(billItemDto.getBillId());
         billItemEntity.setItemId(billItemDto.getItemId());
         billItemEntity.setBatchNo(billItemDto.getBatchNo());
         billItemEntity.setExpiryDate(billItemDto.getExpiryDate());
@@ -84,6 +95,10 @@ public class BillMapper {
         billItemEntity.setGstPercentage(billItemDto.getGstPercentage());
         billItemEntity.setGrossTotal(billItemDto.getGrossTotal());
         billItemEntity.setNetTotal(billItemDto.getNetTotal());
+        billItemEntity.setCreatedBy(billItemDto.getCreatedBy());
+        billItemEntity.setCreatedDate(billItemDto.getCreatedDate());
+        billItemEntity.setModifiedBy(billItemDto.getModifiedBy());
+        billItemEntity.setModifiedDate(billItemDto.getModifiedDate());
 
         return billItemEntity;
     }

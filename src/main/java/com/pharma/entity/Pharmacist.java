@@ -5,8 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,8 +21,10 @@ import java.time.LocalDate;
 public class Pharmacist {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long pharmacistId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "pharmacist_id", updatable = false, nullable = false, unique = true)
+    private UUID pharmacistId;
 
     @Column(name = "pharmacy_name")
     private String pharmacistName;
@@ -33,10 +39,13 @@ public class Pharmacist {
     private String address;
 
     @Column(name = "zip_code")
-    private Integer zipCode;
+    private Long zipCode;
+
+    @Column(name = "owner_or_not")
+    private String ownerOrNot;
 
     @Column(name = "security_id")
-    private Long securityId;
+    private String securityId;
 
     @Column(name = "security_proof")
     private String securityProof;
@@ -52,5 +61,16 @@ public class Pharmacist {
 
     @Column(name = "modified_Date")
     private LocalDate modifiedDate;
+
+    @PrePersist
+    public void generateUUID() {
+        if (pharmacistId == null) {
+            pharmacistId = UUID.randomUUID();
+        }
+
+    }
+
+    @ManyToMany(mappedBy = "pharmacists")
+    private Set<Pharmacy> pharmacies = new HashSet<>();
 
 }

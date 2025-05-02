@@ -1,6 +1,7 @@
 package com.pharma.controller;
 
 
+import com.pharma.dto.PurchaseOrderDto;
 import com.pharma.dto.StockDto;
 import com.pharma.dto.StockItemDto;
 import com.pharma.entity.StockItemEntity;
@@ -13,9 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
 
 @RestController
@@ -42,10 +42,9 @@ public class StockController {
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        StockDto savedStock = stockService.createStockAndAssociateWithUser(StockDto, currentUserOptional.get());
+        StockDto savedStock = stockService.saveStock(StockDto, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage("Stock created successfully", HttpStatus.OK, savedStock);
     }
-
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllStocks(
@@ -57,25 +56,25 @@ public class StockController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
         User currentUser = currentUserOptional.get();
-        List<StockDto> userStocks = stockService.getAllStocks(String.valueOf(currentUser.getId()));
+        List<StockDto> stocks = stockService.getAllStocks(currentUser.getId());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
-                "Stocks retrieved successfully", HttpStatus.OK, userStocks);
+                "Stocks retrieved successfully", HttpStatus.OK, stocks);
     }
 
 
-    @GetMapping("/getById/{id}")
+    @GetMapping("/getById/{invId}")
     public ResponseEntity<?> getStockById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("id") Long invId
+            @PathVariable("invId") UUID invId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-
         if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        String userId = String.valueOf(currentUserOptional.get().getId());
-        StockDto stockDto = stockService.getStockById(userId, invId);
+        Long createdById = currentUserOptional.get().getId();
+        StockDto stockDto = stockService.getStockById(createdById, invId);
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Stock retrieved successfully",
                 HttpStatus.OK,
@@ -83,41 +82,102 @@ public class StockController {
         );
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<StockDto> updateStock(@PathVariable("id") Long invId, @RequestBody StockDto updatedStock) {
-        StockDto updatedStockResponse = stockService.updateStock(invId, updatedStock);
-        return new ResponseEntity<>(updatedStockResponse, HttpStatus.OK);
-    }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteStock(
+    @DeleteMapping("/delete/{invId}")
+    public ResponseEntity<?> deleteStockById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("id") Long invId
+            @PathVariable("invId") UUID invId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        stockService.deleteStock(invId, currentUserOptional.get().getId().toString());
-        return ApiResponseHelper.successResponseWithDataAndMessage("Stock deleted successfully", HttpStatus.OK, null);
+        Long createdById = currentUserOptional.get().getId();
+        try {
+            stockService.deleteStock(createdById, invId);
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Stock deleted successfully",
+                    HttpStatus.OK,
+                    null
+            );
+        } catch (RuntimeException e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.NOT_FOUND,
+                    null
+            );
+        }
     }
 
-    @GetMapping("/checkBillNo")
-    public ResponseEntity<Map<String, Boolean>> checkBillNoExists(
-            @RequestParam("supplierId") Long supplierId,
-            @RequestParam("year") int year,
-            @RequestParam("purchaseBillNo") String purchaseBillNo) {
-        try {
-            boolean exists = stockService.isBillNoExists(supplierId, year, purchaseBillNo);
-            return ResponseEntity.ok(Map.of("exists", exists));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", true));
-        }
-    }
 
     @GetMapping("/getByItemId/{itemId}")
-    public List<StockItemDto> getStockByItemId(@PathVariable String itemId) {
-        return stockService.getStockByItemId(itemId);
+    public ResponseEntity<?> getStockByItemId(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("itemId") UUID itemId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+        Long createdById = currentUserOptional.get().getId();
+        List<StockItemDto> stockItems = stockService.getStockByItemId(createdById, itemId);
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Stock items retrieved successfully",
+                HttpStatus.OK,
+                stockItems
+        );
     }
+
+
+    @GetMapping("/summary")
+    public ResponseEntity<?> getStockSummaryByItem(@RequestHeader("Authorization") String token) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        User currentUser = currentUserOptional.get();
+        List<StockDto> stocks = stockService.getAllStocks(currentUser.getId());
+
+        Map<UUID, BigDecimal> amountPerItem = new HashMap<>();
+
+        for (StockDto stock : stocks) {
+            for (StockItemDto item : stock.getStockItemDtos()) {
+                UUID itemId = item.getItemId();
+                BigDecimal amount = item.getAmount() != null ? item.getAmount() : BigDecimal.ZERO;
+                amountPerItem.merge(itemId, amount, BigDecimal::add);
+            }
+        }
+
+
+        List<Map<String, Object>> response = amountPerItem.entrySet().stream().map(entry -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("itemId", entry.getKey());
+            map.put("totalAmount", entry.getValue());
+            return map;
+        }).toList();
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Stock summary fetched successfully", HttpStatus.OK, response);
+    }
+
+
+//
+//    @GetMapping("/checkBillNo")
+//    public ResponseEntity<Map<String, Boolean>> checkBillNoExists(
+//            @RequestParam("supplierId") Long supplierId,
+//            @RequestParam("year") int year,
+//            @RequestParam("purchaseBillNo") String purchaseBillNo) {
+//        try {
+//            boolean exists = stockService.isBillNoExists(supplierId, year, purchaseBillNo);
+//            return ResponseEntity.ok(Map.of("exists", exists));
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body(Map.of("error", true));
+//        }
+//    }
+
 }

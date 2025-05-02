@@ -5,8 +5,12 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,26 +21,25 @@ import java.time.LocalDate;
 public class Pharmacy {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long pharmacyId;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "pharmacy_id", updatable = false, nullable = false, unique = true)
+    private UUID pharmacyId;
 
     @Column(name = "pharmacy_name")
     private String pharmacyName;
-
-    @Column(name = "pharmacist_id")
-    private Long pharmacistId;
 
     @Column(name = "address")
     private String address;
 
     @Column(name = "zip_code")
-    private Integer zipCode;
+    private Long zipCode;
 
     @Column(name = "gst_no")
-    private Long gstNo;
+    private String gstNo;
 
     @Column(name = "license_no")
-    private Long licenseNo;
+    private String licenseNo;
 
     @Column(name = "license_proof")
     private String licenseProof;
@@ -56,4 +59,19 @@ public class Pharmacy {
     @Column(name = "modified_Date")
     private LocalDate modifiedDate;
 
+    @PrePersist
+    public void generateUUID() {
+        if (pharmacyId == null) {
+            pharmacyId = UUID.randomUUID();
+        }
+
+    }
+
+    @ManyToMany
+    @JoinTable(
+            name = "pharma_pharmacy_pharmacist",
+            joinColumns = @JoinColumn(name = "pharmacy_id"),
+            inverseJoinColumns = @JoinColumn(name = "pharmacist_id")
+    )
+    private Set<Pharmacist> pharmacists = new HashSet<>();
 }

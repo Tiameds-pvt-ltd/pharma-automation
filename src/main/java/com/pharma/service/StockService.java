@@ -6,22 +6,23 @@ import com.pharma.dto.StockItemDto;
 import com.pharma.entity.User;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface StockService {
 
-    StockDto createStockAndAssociateWithUser(StockDto stockDto, User user);
+    StockDto saveStock(StockDto stockDto, User user);
 
-    List<StockDto> getAllStocks(String userId);
+    List<StockDto> getAllStocks(Long createdById);
 
-    StockDto getStockById(String userId, Long invId);
+    StockDto getStockById(Long createdById, UUID invId);
 
-//    StockDto updateStock(Long invId, StockDto stockDto, Long userId);
+    void deleteStock(Long createdById, UUID invId);
 
-    StockDto updateStock(Long invId, StockDto updatedStock);
+//    StockDto updateStock(Long invId, StockDto updatedStock);
 
-    void deleteStock(Long invId, String userId);
+//    public boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo) ;
 
-    public boolean isBillNoExists(Long supplierId, int year, String purchaseBillNo) ;
+    List<StockItemDto> getStockByItemId(Long createdById,UUID itemId);
 
-    List<StockItemDto> getStockByItemId(String itemId);
+
 }

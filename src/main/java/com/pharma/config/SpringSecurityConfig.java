@@ -54,8 +54,6 @@ public class SpringSecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
                                 "/public/**",
-                                "/pharma/supplier/**",
-                                "/pharma/item/**",
                                 "/pharma/inventory/**",
                                 "/pharma/stock/getByItemId/**"
                         ).permitAll()  // Allow Swagger and public resources

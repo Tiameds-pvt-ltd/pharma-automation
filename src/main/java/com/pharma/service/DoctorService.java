@@ -1,19 +1,23 @@
 package com.pharma.service;
 
 import com.pharma.dto.DoctorDto;
+import com.pharma.entity.User;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface DoctorService {
 
-    DoctorDto createDoctor(DoctorDto doctorDto);
+    DoctorDto createDoctor(DoctorDto doctorDto, User user);
 
-    DoctorDto getDoctorById(Long doctorId);
+    List<DoctorDto> getAllDoctors(Long createdById);
 
-    List<DoctorDto> getAllDoctor();
+    DoctorDto getDoctorById(Long createdById, UUID doctorId);
 
-    DoctorDto updateDoctor(Long doctorId, DoctorDto updateDoctor);
+    DoctorDto updateDoctor(Long modifiedById, UUID doctorId, DoctorDto doctorDto);
 
-    void deleteDoctor(Long doctorId);
+    void deleteDoctorById(Long createdById, UUID doctorId);
+
+
 
 }

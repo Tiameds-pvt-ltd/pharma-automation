@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,11 +14,16 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class PatientDetailsDto {
 
-    private Long patientId;
+    private UUID patientId;
     private String patientName;
     private Long patientNumber;
     private Long patientMobile;
+    private String patientEmail;
     private String patientAddress;
-    private LocalDate patientEnteredDate;
-    private Long patientEnteredBy;
+    private Long pharmacyId;
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
+
 }

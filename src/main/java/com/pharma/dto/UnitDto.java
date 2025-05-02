@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -13,7 +14,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 public class UnitDto {
 
-    private Long unitId;
+    private UUID unitId;
     private String unitName;
-    private LocalDate unitDate;
+    private UUID variantId;
+    private Long createdBy;
+    private LocalDate createdDate;
+    private Long modifiedBy;
+    private LocalDate modifiedDate;
 }
