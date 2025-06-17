@@ -93,6 +93,7 @@ public class SupplierServiceImpl implements SupplierService {
         supplierEntity.setSupplierGstinNo(updatedSupplier.getSupplierGstinNo());
         supplierEntity.setSupplierGstType(updatedSupplier.getSupplierGstType());
         supplierEntity.setSupplierAddress(updatedSupplier.getSupplierAddress());
+        supplierEntity.setSupplierStatus(updatedSupplier.getSupplierStatus());
 
         supplierEntity.setModifiedBy(modifiedById);
         supplierEntity.setModifiedDate(LocalDate.now());

@@ -59,17 +59,11 @@ public class StockItemEntity {
     @Column(name = "mrp_sale_price_per_unit")
     private BigDecimal mrpSalePricePerUnit;
 
-    @Column(name = "cgst_percentage")
-    private Long cgstPercentage;
+    @Column(name = "gst_percentage")
+    private Long gstPercentage;
 
-    @Column(name = "sgst_percentage")
-    private Long sgstPercentage;
-
-    @Column(name = "cgst_amount")
-    private BigDecimal cgstAmount;
-
-    @Column(name = "sgst_amount")
-    private BigDecimal sgstAmount;
+    @Column(name = "gst_amount")
+    private BigDecimal gstAmount;
 
     @Column(name = "amount")
     private BigDecimal amount;
@@ -97,8 +91,4 @@ public class StockItemEntity {
         }
     }
 
-
-//    public Integer getId() {
-//        return stockId;
-//    }
 }

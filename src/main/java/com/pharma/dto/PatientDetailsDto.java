@@ -15,11 +15,18 @@ import java.util.UUID;
 public class PatientDetailsDto {
 
     private UUID patientId;
-    private String patientName;
-    private Long patientNumber;
-    private Long patientMobile;
-    private String patientEmail;
-    private String patientAddress;
+    private String patientId1;
+    private String firstName;
+    private String lastName;
+    private String email;
+    private Long phone;
+    private String address;
+    private String city;
+    private String state;
+    private String zip;
+    private String bloodGroup;
+    private LocalDate dateOfBirth;
+    private String gender;
     private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;

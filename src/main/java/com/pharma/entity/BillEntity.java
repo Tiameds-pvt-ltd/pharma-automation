@@ -9,6 +9,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,20 +29,23 @@ public class BillEntity {
     @Column(name = "bill_id", updatable = false, nullable = false, unique = true)
     private UUID billId;
 
+    @Column(name = "bill_id1")
+    private String billId1;
+
     @Column(name = "pharmacy_id")
-    private Long pharmacyId;
+    private UUID pharmacyId;
 
-    @Column(name = "bill_date")
-    private LocalDate billDate;
-
-    @Column(name = "bill_time")
-    private LocalTime billTime;
+    @Column(name = "bill_date_time, updatable = false")
+    private LocalDateTime billDateTime;
 
     @Column(name = "patient_id")
-    private Long patientId;
+    private UUID patientId;
 
-    @Column(name = "doctor_id")
-    private Long doctorId;
+//    @Column(name = "doctor_id")
+//    private UUID doctorId;
+
+    @Column(name = "doctor_name")
+    private UUID doctorName;
 
     @Column(name = "patient_type")
     private String patientType;
@@ -58,11 +62,17 @@ public class BillEntity {
     @Column(name = "grand_total")
     private BigDecimal grandTotal;
 
+    @Column(name = "payment_status")
+    private String paymentStatus;
+
     @Column(name = "payment_type")
     private String paymentType;
 
-    @Column(name = "bill_status")
-    private String billStatus;
+    @Column(name = "received_amount")
+    private String receivedAmount;
+
+    @Column(name = "balance_amount")
+    private String balanceAmount;
 
     @Column(name = "created_by")
     private Long createdBy;
@@ -84,8 +94,7 @@ public class BillEntity {
         if (billId == null) {
             billId = UUID.randomUUID();
         }
-        this.billDate = LocalDate.now();
-        this.billTime = LocalTime.now();
+        this.billDateTime = LocalDateTime.now();
     }
 }
 

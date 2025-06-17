@@ -1,9 +1,8 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.BillDto;
-import com.pharma.dto.BillItemDto;
 import com.pharma.entity.*;
-import com.pharma.exception.ResourceNotFoundException;
+
 import com.pharma.mapper.BillMapper;
 import com.pharma.repository.BillRepository;
 import com.pharma.repository.auth.UserRepository;
@@ -44,6 +43,9 @@ public class BillServiceImpl implements BillService {
         billEntity.setBillId(UUID.randomUUID());
         billEntity.setCreatedBy(user.getId());
         billEntity.setCreatedDate(LocalDate.now());
+
+        String newBillId1 = generateBillId1();
+        billEntity.setBillId1(newBillId1);
 
         if (billEntity.getBillItemEntities() != null) {
             for (BillItemEntity item : billEntity.getBillItemEntities()) {
@@ -89,4 +91,25 @@ public class BillServiceImpl implements BillService {
     }
 
 
+    private String generateBillId1() {
+        String yearPart = String.valueOf(LocalDate.now().getYear());
+
+        Optional<BillEntity> latestBillOpt = billRepository.findLatestBillForYear(yearPart);
+
+        int newSequence = 1;
+        if (latestBillOpt.isPresent()) {
+            String lastBillId1 = latestBillOpt.get().getBillId1();
+            String[] parts = lastBillId1.split("-");
+
+            try {
+                if (parts.length == 3) {
+                    newSequence = Integer.parseInt(parts[2]) + 1;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing Bill sequence: " + lastBillId1);
+            }
+        }
+
+        return String.format("BILL-%s-%05d", yearPart, newSequence);
+    }
 }

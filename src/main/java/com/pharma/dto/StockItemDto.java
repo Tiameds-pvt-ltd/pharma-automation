@@ -28,10 +28,8 @@ public class StockItemDto {
     private BigDecimal mrpSalePrice;
     private BigDecimal purchasePricePerUnit;
     private BigDecimal mrpSalePricePerUnit;
-    private Long cgstPercentage;
-    private Long sgstPercentage;
-    private BigDecimal cgstAmount;
-    private BigDecimal sgstAmount;
+    private Long gstPercentage;
+    private BigDecimal gstAmount;
     private BigDecimal amount;
     private Long createdBy;
     private LocalDate createdDate;

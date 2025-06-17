@@ -4,7 +4,6 @@ import com.pharma.dto.InventoryDto;
 import com.pharma.entity.InventoryEntity;
 import org.springframework.stereotype.Component;
 
-
 @Component
 public class InventoryMapper {
 

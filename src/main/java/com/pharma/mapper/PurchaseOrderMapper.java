@@ -86,8 +86,6 @@ public class PurchaseOrderMapper {
         purchaseOrderItemDto.setGstPercentage(purchaseOrderItemEntity.getGstPercentage());
         purchaseOrderItemDto.setGstAmount(purchaseOrderItemEntity.getGstAmount());
         purchaseOrderItemDto.setAmount(purchaseOrderItemEntity.getAmount());
-        purchaseOrderItemDto.setUnitTypeId(purchaseOrderItemEntity.getUnitTypeId());
-        purchaseOrderItemDto.setVariantTypeId(purchaseOrderItemEntity.getVariantTypeId());
         purchaseOrderItemDto.setCreatedBy(purchaseOrderItemEntity.getCreatedBy());
         purchaseOrderItemDto.setCreatedDate(purchaseOrderItemEntity.getCreatedDate());
         purchaseOrderItemDto.setModifiedBy(purchaseOrderItemEntity.getModifiedBy());
@@ -110,8 +108,6 @@ public class PurchaseOrderMapper {
         purchaseOrderItemEntity.setGstPercentage(purchaseOrderItemDto.getGstPercentage());
         purchaseOrderItemEntity.setGstAmount(purchaseOrderItemDto.getGstAmount());
         purchaseOrderItemEntity.setAmount(purchaseOrderItemDto.getAmount());
-        purchaseOrderItemEntity.setUnitTypeId(purchaseOrderItemDto.getUnitTypeId());
-        purchaseOrderItemEntity.setVariantTypeId(purchaseOrderItemDto.getVariantTypeId());
         purchaseOrderItemEntity.setCreatedBy(purchaseOrderItemDto.getCreatedBy());
         purchaseOrderItemEntity.setCreatedDate(purchaseOrderItemDto.getCreatedDate());
         purchaseOrderItemEntity.setModifiedBy(purchaseOrderItemDto.getModifiedBy());

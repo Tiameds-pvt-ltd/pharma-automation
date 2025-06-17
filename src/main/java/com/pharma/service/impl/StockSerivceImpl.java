@@ -6,6 +6,7 @@ import com.pharma.entity.*;
 import com.pharma.mapper.StockMapper;
 
 
+import com.pharma.repository.InventoryDetailsRepository;
 import com.pharma.repository.InventoryRepository;
 import com.pharma.repository.StockItemRepository;
 import com.pharma.repository.StockRepository;
@@ -17,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -43,6 +43,9 @@ public class StockSerivceImpl implements StockService {
 
     @Autowired
     private StockItemRepository stockItemRepository;
+
+    @Autowired
+    private InventoryDetailsRepository inventoryDetailsRepository;
 
     @Transactional
     @Override
@@ -98,8 +101,38 @@ public class StockSerivceImpl implements StockService {
 
                     inventoryRepository.save(newInventory);
                 }
+
+                Optional<InventoryDetailsEntity> existingDetailOpt =
+                        inventoryDetailsRepository.findByItemIdAndBatchNo(stockItem.getItemId(), stockItem.getBatchNo());
+
+                if (existingDetailOpt.isPresent()) {
+                    InventoryDetailsEntity existingDetail = existingDetailOpt.get();
+                    existingDetail.setPackageQuantity(
+                            existingDetail.getPackageQuantity() + stockItem.getPackageQuantity()
+                    );
+                    existingDetail.setModifiedBy(user.getId());
+                    existingDetail.setModifiedDate(LocalDate.now());
+                    inventoryDetailsRepository.save(existingDetail);
+                } else {
+                    InventoryDetailsEntity newDetail = new InventoryDetailsEntity();
+                    newDetail.setItemId(stockItem.getItemId());
+                    newDetail.setBatchNo(stockItem.getBatchNo());
+                    newDetail.setPackageQuantity(stockItem.getPackageQuantity());
+                    newDetail.setExpiryDate(stockItem.getExpiryDate());
+                    newDetail.setPurchasePrice(stockItem.getPurchasePrice());
+                    newDetail.setMrpSalePrice(stockItem.getMrpSalePrice());
+                    newDetail.setPurchasePricePerUnit(stockItem.getPurchasePricePerUnit());
+                    newDetail.setMrpSalePricePerUnit(stockItem.getMrpSalePricePerUnit());
+                    newDetail.setGstPercentage(stockItem.getGstPercentage());
+                    newDetail.setGstAmount(stockItem.getGstAmount());
+                    newDetail.setCreatedBy(user.getId());
+                    newDetail.setCreatedDate(LocalDate.now());
+                    inventoryDetailsRepository.save(newDetail);
+                }
             }
         }
+
+
         return stockMapper.toDto(stockEntity);
     }
 
@@ -152,10 +185,8 @@ public class StockSerivceImpl implements StockService {
                 stockItem.getMrpSalePrice(),
                 stockItem.getPurchasePricePerUnit(),
                 stockItem.getMrpSalePricePerUnit(),
-                stockItem.getCgstPercentage(),
-                stockItem.getSgstPercentage(),
-                stockItem.getCgstAmount(),
-                stockItem.getSgstAmount(),
+                stockItem.getGstPercentage(),
+                stockItem.getGstAmount(),
                 stockItem.getAmount(),
                 stockItem.getCreatedBy(),
                 stockItem.getCreatedDate(),
@@ -166,10 +197,9 @@ public class StockSerivceImpl implements StockService {
 
 
     private String generateGrnNo() {
-        LocalDate today = LocalDate.now();
-        String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String yearPart = String.valueOf(LocalDate.now().getYear());
 
-        Optional<StockEntity> latestGrnOpt = stockRepository.findLatestGrnNo(datePart);
+        Optional<StockEntity> latestGrnOpt = stockRepository.findLatestGrnNo(yearPart);
 
         int newSequence = 1;
         if (latestGrnOpt.isPresent()) {
@@ -184,74 +214,11 @@ public class StockSerivceImpl implements StockService {
                 System.err.println("Error parsing GRN No sequence: " + lastGrnNo);
             }
         }
-        return String.format("GRN-%s-%05d", datePart, newSequence);
+
+        return String.format("GRN-%s-%05d", yearPart, newSequence);
     }
 
-//    @Override
-//    public boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo) {
-//        return false;
-//    }
-
-
-
-
-//    @Override
-//    @Transactional
-//    public List<StockDto> getAllStocks(String userId) {
-//        User user = userRepository.findById(Long.valueOf(userId))
-//                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-//        List<StockEntity> userStocks = new ArrayList<>(user.getStockEntities());
-//        return userStocks.stream()
-//                .map(stockMapper::toDto)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Override
-//    @Transactional
-//    public StockDto getStockById(String userId, Long invId) {
-//        User user = userRepository.findById(Long.valueOf(userId))
-//                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-//        StockEntity stockEntity = stockRepository.findById(invId)
-//                .filter(stock -> stock.getUsers().contains(user))
-//                .orElseThrow(() -> new RuntimeException("Stock not found with ID: " + invId + " for the user."));
-//        return stockMapper.toDto(stockEntity);
-//    }
-//
-//
-//    @Override
-//    @Transactional
-//    public void deleteStock(Long invId, String userId) {
-//        User user = userRepository.findById(Long.valueOf(userId))
-//                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
-//        StockEntity stockEntity = stockRepository.findById(invId)
-//                .filter(stock -> stock.getUsers().contains(user))
-//                .orElseThrow(() -> new RuntimeException("Stock not found with ID: " + invId + " for the user."));
-//        stockEntity.getUsers().forEach(u -> u.getStockEntities().remove(stockEntity));
-//        userRepository.saveAll(stockEntity.getUsers());
-//        stockRepository.delete(stockEntity);
-//    }
-//
-//    @Override
-//    @Transactional
-//    public List<StockItemDto> getStockByItemId(String itemId) {
-//        List<StockItemEntity> stockItems = stockItemRepository.findByItemId(itemId);
-//
-//        // Convert Entity to DTO to remove infinite recursion issue
-//        return stockItems.stream().map(stockItem -> new StockItemDto(
-//                stockItem.getStockId(),
-//                stockItem.getItemId(),
-//                stockItem.getBatchNo(),
-//                stockItem.getPackageQuantity(),
-//                stockItem.getExpiryDate(),
-//                stockItem.getFreeItem(),
-//                stockItem.getDiscount(),
-//                stockItem.getPurchasePrice(),
-//                stockItem.getMrpSalePrice(),
-//                stockItem.getGstPercentage(),
-//                stockItem.getGstAmount(),
-//                stockItem.getAmount(),
-//                stockItem.getStore()
-//        )).collect(Collectors.toList());
-//    }
-
+    public List<StockItemEntity> getItemsBySupplierId(UUID supplierId) {
+        return stockItemRepository.findItemsBySupplierId(supplierId);
+    }
 }

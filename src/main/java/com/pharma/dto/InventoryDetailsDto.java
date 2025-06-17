@@ -13,25 +13,21 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemDto {
+public class InventoryDetailsDto {
 
+    private UUID invDetailsId;
     private UUID itemId;
-    private String itemName;
-    private Long purchaseUnit;
-    private String variantName;
-    private String unitName;
-    private String manufacturer;
+    private String batchNo;
+    private Long packageQuantity;
+    private LocalDate expiryDate;
     private BigDecimal purchasePrice;
     private BigDecimal mrpSalePrice;
     private BigDecimal purchasePricePerUnit;
     private BigDecimal mrpSalePricePerUnit;
     private Long gstPercentage;
-    private String genericName;
-    private String hsnNo;
-    private String consumables;
+    private BigDecimal gstAmount;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;
     private LocalDate modifiedDate;
-
 }

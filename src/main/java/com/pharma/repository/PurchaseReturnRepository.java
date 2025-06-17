@@ -18,6 +18,9 @@ public interface PurchaseReturnRepository extends JpaRepository<PurchaseReturnEn
 
     Optional<PurchaseReturnEntity> findByReturnIdAndCreatedBy(UUID returnId, Long createdBy);
 
-    @Query("SELECT r FROM PurchaseReturnEntity r WHERE r.returnId1 LIKE CONCAT('RTN-', :date, '-%') ORDER BY r.returnId1 DESC LIMIT 1")
-    Optional<PurchaseReturnEntity> findLatestReturnForToday(@Param("date") String date);
+//    @Query("SELECT r FROM PurchaseReturnEntity r WHERE r.returnId1 LIKE CONCAT('RTN-', :date, '-%') ORDER BY r.returnId1 DESC LIMIT 1")
+//    Optional<PurchaseReturnEntity> findLatestReturnForToday(@Param("date") String date);
+
+    @Query("SELECT p FROM PurchaseReturnEntity p WHERE p.returnId1 LIKE CONCAT('RTN-', :year, '-%') ORDER BY p.returnId1 DESC LIMIT 1")
+    Optional<PurchaseReturnEntity> findLatestReturnForYear(@Param("year") String year);
 }

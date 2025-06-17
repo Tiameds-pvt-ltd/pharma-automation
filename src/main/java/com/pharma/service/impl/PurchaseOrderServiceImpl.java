@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -96,10 +95,9 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 
     private String generateOrderId1() {
-        LocalDate today = LocalDate.now();
-        String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String yearPart = String.valueOf(LocalDate.now().getYear());
 
-        Optional<PurchaseOrderEntity> latestOrderOpt = purchaseOrderRepository.findLatestOrderForToday(datePart);
+        Optional<PurchaseOrderEntity> latestOrderOpt = purchaseOrderRepository.findLatestOrderForYear(yearPart);
 
         int newSequence = 1;
         if (latestOrderOpt.isPresent()) {
@@ -114,8 +112,11 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                 System.err.println("Error parsing order sequence: " + lastOrderId1);
             }
         }
-        return String.format("ORD-%s-%05d", datePart, newSequence);
+
+        return String.format("ORD-%s-%05d", yearPart, newSequence);
     }
+
+
 
 
 }

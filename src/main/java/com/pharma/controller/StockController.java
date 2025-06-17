@@ -1,12 +1,11 @@
 package com.pharma.controller;
 
-
-import com.pharma.dto.PurchaseOrderDto;
 import com.pharma.dto.StockDto;
 import com.pharma.dto.StockItemDto;
 import com.pharma.entity.StockItemEntity;
 import com.pharma.entity.User;
 import com.pharma.service.StockService;
+import com.pharma.service.impl.StockSerivceImpl;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +24,10 @@ public class StockController {
     @Autowired
     private StockService stockService;
 
+    @Autowired
+    private StockSerivceImpl stockSerivceImpl;
+
+    @Autowired
     private final UserAuthService userAuthService;
 
     @Autowired
@@ -164,6 +167,11 @@ public class StockController {
                 "Stock summary fetched successfully", HttpStatus.OK, response);
     }
 
+    @GetMapping("/{supplierId}/items")
+    public ResponseEntity<List<StockItemEntity>> getItemsBySupplier(@PathVariable UUID supplierId) {
+        List<StockItemEntity> items = stockSerivceImpl.getItemsBySupplierId(supplierId);
+        return ResponseEntity.ok(items);
+    }
 
 //
 //    @GetMapping("/checkBillNo")

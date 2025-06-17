@@ -16,14 +16,14 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "pharma_billing_item")
-public class BillItemEntity {
+@Table(name = "pharma_inventory_details")
+public class InventoryDetailsEntity {
 
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "order_item_id", updatable = false, nullable = false, unique = true)
-    private UUID billItemId;
+    @Column(name = "inv_item_id", updatable = false, nullable = false, unique = true)
+    private UUID invDetailsId;
 
     @Column(name = "item_id")
     private UUID itemId;
@@ -31,32 +31,29 @@ public class BillItemEntity {
     @Column(name = "batch_no")
     private String batchNo;
 
-    @Column(name = "expiry_date")
-    private LocalDate expiryDate;
-
     @Column(name = "package_quantity")
     private Long packageQuantity;
 
-    @Column(name = "discount_percentage")
-    private BigDecimal discountPercentage;
+    @Column(name = "expiry_date")
+    private LocalDate expiryDate;
 
-    @Column(name = "discount_amount")
-    private BigDecimal discountAmount;
+    @Column(name = "purchase_price")
+    private BigDecimal purchasePrice;
 
-    @Column(name = "mrp_per_unit")
-    private BigDecimal mrpPerUnit;
+    @Column(name = "mrp_sale_price")
+    private BigDecimal mrpSalePrice;
+
+    @Column(name = "purchase_price_per_unit")
+    private BigDecimal purchasePricePerUnit;
+
+    @Column(name = "mrp_sale_price_per_unit")
+    private BigDecimal mrpSalePricePerUnit;
 
     @Column(name = "gst_percentage")
-    private BigDecimal gstPercentage;
+    private Long gstPercentage;
 
     @Column(name = "gst_amount")
     private BigDecimal gstAmount;
-
-    @Column(name = "gross_total")
-    private BigDecimal grossTotal;
-
-    @Column(name = "net_total")
-    private BigDecimal netTotal;
 
     @Column(name = "created_by")
     private Long createdBy;
@@ -67,17 +64,13 @@ public class BillItemEntity {
     @Column(name = "modified_by")
     private Long modifiedBy;
 
-    @Column(name = "modified_Date", insertable = false)
+    @Column(name = "modified_Date")
     private LocalDate modifiedDate;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "billId")
-    private BillEntity billEntity;
 
     @PrePersist
     public void generateUUID() {
-        if (billItemId == null) {
-            billItemId = UUID.randomUUID();
+        if (invDetailsId == null) {
+            invDetailsId = UUID.randomUUID();
         }
     }
 }

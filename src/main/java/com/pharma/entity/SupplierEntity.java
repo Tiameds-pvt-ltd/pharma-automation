@@ -42,6 +42,9 @@ public class SupplierEntity {
     @Column(name = "supplier_address")
     private String supplierAddress;
 
+    @Column(name = "supplier_status")
+    private Boolean supplierStatus = true;
+
     @Column(name = "created_by")
     private Long createdBy;
 
@@ -58,6 +61,10 @@ public class SupplierEntity {
     public void generateUUID() {
         if (supplierId == null) {
             supplierId = UUID.randomUUID();
+        }
+
+        if (supplierStatus == null) {
+            supplierStatus = true;
         }
     }
 }

@@ -16,4 +16,9 @@ public interface SupplierRepository extends JpaRepository<SupplierEntity, UUID> 
     List<SupplierEntity> findAllByCreatedBy(Long createdBy);
 
     Optional<SupplierEntity> findBySupplierIdAndCreatedBy(UUID supplierId, Long createdBy);
+
+    boolean existsBySupplierName(String supplierName);
+    boolean existsBySupplierMobile(Long supplierMobile);
+    boolean existsBySupplierGstinNo(String supplierGstinNo);
+
 }

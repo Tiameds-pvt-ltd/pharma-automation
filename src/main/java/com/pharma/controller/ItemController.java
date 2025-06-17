@@ -6,6 +6,7 @@ import com.pharma.dto.ItemDto;
 
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
+import com.pharma.repository.ItemRepository;
 import com.pharma.service.ItemService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -30,6 +31,9 @@ public class ItemController {
 
     @Autowired
     private ItemService itemService;
+
+    @Autowired
+    private ItemRepository itemRepository;
 
     @PostMapping("/save")
     public ResponseEntity<?> createItem(
@@ -141,4 +145,14 @@ public class ItemController {
             );
         }
     }
+
+
+    @PostMapping("/check-duplicate")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateItem(@RequestBody ItemDto request) {
+        boolean exists = itemRepository.existsByItemNameAndManufacturer(
+                request.getItemName(), request.getManufacturer()
+        );
+        return ResponseEntity.ok(Map.of("duplicate", exists));
+    }
+
 }

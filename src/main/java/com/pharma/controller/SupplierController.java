@@ -1,10 +1,9 @@
 package com.pharma.controller;
 
-import com.pharma.dto.DoctorDto;
 import com.pharma.dto.SupplierDto;
-
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
+import com.pharma.repository.SupplierRepository;
 import com.pharma.service.SupplierService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -13,11 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
+import java.util.*;
 
 @CrossOrigin
 @AllArgsConstructor
@@ -30,6 +25,10 @@ public class SupplierController {
 
     @Autowired
     private UserAuthService userAuthService;
+
+    @Autowired
+    private SupplierRepository supplierRepository;
+
 
     @PostMapping("/save")
     public ResponseEntity<?> createSupplier(
@@ -139,5 +138,17 @@ public class SupplierController {
             );
         }
     }
+
+
+    @PostMapping("/check-duplicate")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicateSupplier(@RequestBody SupplierDto request) {
+        Map<String, Boolean> result = new HashMap<>();
+        result.put("supplierName", supplierRepository.existsBySupplierName(request.getSupplierName()));
+        result.put("supplierMobile", supplierRepository.existsBySupplierMobile(request.getSupplierMobile()));
+        result.put("supplierGstinNo", supplierRepository.existsBySupplierGstinNo(request.getSupplierGstinNo()));
+
+        return ResponseEntity.ok(result);
+    }
+
 }
 

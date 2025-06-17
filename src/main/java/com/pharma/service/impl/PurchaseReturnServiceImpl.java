@@ -86,10 +86,9 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     }
 
     private String generateReturnId1() {
-        LocalDate today = LocalDate.now();
-        String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+        String yearPart = String.valueOf(LocalDate.now().getYear());
 
-        Optional<PurchaseReturnEntity> latestReturnOpt = purchaseReturnRepository.findLatestReturnForToday(datePart);
+        Optional<PurchaseReturnEntity> latestReturnOpt = purchaseReturnRepository.findLatestReturnForYear(yearPart);
 
         int newSequence = 1;
         if (latestReturnOpt.isPresent()) {
@@ -101,9 +100,32 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
                     newSequence = Integer.parseInt(parts[2]) + 1;
                 }
             } catch (NumberFormatException e) {
-                System.err.println("Error parsing return sequence: " + lastReturnId1);
+                System.err.println("Error parsing order sequence: " + lastReturnId1);
             }
         }
-        return String.format("RTN-%s-%05d", datePart, newSequence);
+
+        return String.format("RTN-%s-%05d", yearPart, newSequence);
     }
+
+//    private String generateReturnId1() {
+//        LocalDate today = LocalDate.now();
+//        String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
+//
+//        Optional<PurchaseReturnEntity> latestReturnOpt = purchaseReturnRepository.findLatestReturnForToday(datePart);
+//
+//        int newSequence = 1;
+//        if (latestReturnOpt.isPresent()) {
+//            String lastReturnId1 = latestReturnOpt.get().getReturnId1();
+//            String[] parts = lastReturnId1.split("-");
+//
+//            try {
+//                if (parts.length == 3) {
+//                    newSequence = Integer.parseInt(parts[2]) + 1;
+//                }
+//            } catch (NumberFormatException e) {
+//                System.err.println("Error parsing return sequence: " + lastReturnId1);
+//            }
+//        }
+//        return String.format("RTN-%s-%05d", datePart, newSequence);
+//    }
 }

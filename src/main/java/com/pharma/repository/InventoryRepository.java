@@ -1,7 +1,6 @@
 package com.pharma.repository;
 
 import com.pharma.entity.InventoryEntity;
-import com.pharma.entity.UnitEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

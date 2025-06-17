@@ -87,15 +87,15 @@ public class ItemServiceImpl implements ItemService {
 
         itemEntity.setItemName(updatedItem.getItemName());
         itemEntity.setPurchaseUnit(updatedItem.getPurchaseUnit());
-        itemEntity.setUnitId(updatedItem.getUnitId());
-        itemEntity.setVariantId(updatedItem.getVariantId());
+        itemEntity.setVariantName(updatedItem.getVariantName());
+        itemEntity.setUnitName(updatedItem.getUnitName());
         itemEntity.setManufacturer(updatedItem.getManufacturer());
         itemEntity.setPurchasePrice(updatedItem.getPurchasePrice());
         itemEntity.setMrpSalePrice(updatedItem.getMrpSalePrice());
         itemEntity.setPurchasePricePerUnit(updatedItem.getPurchasePricePerUnit());
         itemEntity.setMrpSalePricePerUnit(updatedItem.getMrpSalePricePerUnit());
-        itemEntity.setCgstPercentage(updatedItem.getCgstPercentage());
-        itemEntity.setSgstPercentage(updatedItem.getSgstPercentage());
+        itemEntity.setGstPercentage(updatedItem.getGstPercentage());
+        itemEntity.setGenericName(updatedItem.getGenericName());
         itemEntity.setHsnNo(updatedItem.getHsnNo());
         itemEntity.setConsumables(updatedItem.getConsumables());
 

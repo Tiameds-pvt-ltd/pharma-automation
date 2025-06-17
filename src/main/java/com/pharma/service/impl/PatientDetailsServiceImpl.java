@@ -1,12 +1,10 @@
 package com.pharma.service.impl;
 
-import com.pharma.dto.DoctorDto;
+
 import com.pharma.dto.PatientDetailsDto;
-import com.pharma.entity.DoctorEntity;
 import com.pharma.entity.PatientDetailsEntity;
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
-import com.pharma.mapper.DoctorMapper;
 import com.pharma.mapper.PatientDetailsMapper;
 import com.pharma.repository.PatientDetailsRepository;
 import com.pharma.repository.auth.UserRepository;
@@ -50,6 +48,9 @@ public class PatientDetailsServiceImpl implements PatientDetailsService {
         patientDetailsEntity.setCreatedBy(user.getId());
         patientDetailsEntity.setCreatedDate(LocalDate.now());
 
+        String newPatientId1 = generatePatientId1();
+        patientDetailsEntity.setPatientId1(newPatientId1);
+
         PatientDetailsEntity savedPatient = patientDetailsRepository.save(patientDetailsEntity);
         return patientDetailsMapper.mapToDto(savedPatient);
     }
@@ -85,11 +86,17 @@ public class PatientDetailsServiceImpl implements PatientDetailsService {
 
         PatientDetailsEntity patientDetailsEntity = patientEntityOptional.get();
 
-        patientDetailsEntity.setPatientName(patientDetailsDto.getPatientName());
-        patientDetailsEntity.setPatientNumber(patientDetailsDto.getPatientNumber());
-        patientDetailsEntity.setPatientMobile(patientDetailsDto.getPatientMobile());
-        patientDetailsEntity.setPatientEmail(patientDetailsDto.getPatientEmail());
-        patientDetailsEntity.setPatientAddress(patientDetailsDto.getPatientAddress());
+        patientDetailsEntity.setFirstName(patientDetailsDto.getFirstName());
+        patientDetailsEntity.setLastName(patientDetailsDto.getLastName());
+        patientDetailsEntity.setEmail(patientDetailsDto.getEmail());
+        patientDetailsEntity.setPhone(patientDetailsDto.getPhone());
+        patientDetailsEntity.setAddress(patientDetailsDto.getAddress());
+        patientDetailsEntity.setCity(patientDetailsDto.getCity());
+        patientDetailsEntity.setState(patientDetailsDto.getState());
+        patientDetailsEntity.setZip(patientDetailsDto.getZip());
+        patientDetailsEntity.setBloodGroup(patientDetailsDto.getBloodGroup());
+        patientDetailsEntity.setDateOfBirth(patientDetailsDto.getDateOfBirth());
+        patientDetailsEntity.setGender(patientDetailsDto.getGender());
 
         patientDetailsEntity.setModifiedBy(modifiedById);
         patientDetailsEntity.setModifiedDate(LocalDate.now());
@@ -110,5 +117,27 @@ public class PatientDetailsServiceImpl implements PatientDetailsService {
 
         patientDetailsRepository.delete(patientDetailsEntity.get());
 
+    }
+
+    private String generatePatientId1() {
+        String yearPart = String.valueOf(LocalDate.now().getYear());
+
+        Optional<PatientDetailsEntity> latestPatientOpt = patientDetailsRepository.findLatestPatientForYear(yearPart);
+
+        int newSequence = 1;
+        if (latestPatientOpt.isPresent()) {
+            String lastPatientId1 = latestPatientOpt.get().getPatientId1();
+            String[] parts = lastPatientId1.split("-");
+
+            try {
+                if (parts.length == 3) {
+                    newSequence = Integer.parseInt(parts[2]) + 1;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Error parsing Patient sequence: " + lastPatientId1);
+            }
+        }
+
+        return String.format("PAT-%s-%05d", yearPart, newSequence);
     }
 }

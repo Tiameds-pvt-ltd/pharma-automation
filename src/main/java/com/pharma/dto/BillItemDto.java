@@ -20,10 +20,12 @@ public class BillItemDto {
     private UUID itemId;
     private String batchNo;
     private LocalDate expiryDate;
-    private Long quantity;
-    private BigDecimal discount;
-    private BigDecimal mrp;
+    private Long packageQuantity;
+    private BigDecimal discountPercentage;
+    private BigDecimal discountAmount;
+    private BigDecimal mrpPerUnit;
     private BigDecimal gstPercentage;
+    private BigDecimal gstAmount;
     private BigDecimal grossTotal;
     private BigDecimal netTotal;
     private Long createdBy;

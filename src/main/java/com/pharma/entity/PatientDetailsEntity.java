@@ -24,20 +24,41 @@ public class PatientDetailsEntity {
     @Column(name = "patient_id", updatable = false, nullable = false, unique = true)
     private UUID patientId;
 
-    @Column(name = "patient_name")
-    private String patientName;
+    @Column(name = "patient_id1")
+    private String patientId1;
 
-    @Column(name = "patient_no")
-    private Long patientNumber;
+    @Column(name = "first_name")
+    private String firstName;
 
-    @Column(name = "patient_mobile")
-    private Long patientMobile;
+    @Column(name = "last_name")
+    private String lastName;
 
-    @Column(name = "patient_email")
-    private String patientEmail;
+    @Column(name = "email")
+    private String email;
 
-    @Column(name = "patient_address")
-    private String patientAddress;
+    @Column(name = "phone")
+    private Long phone;
+
+    @Column(name = "address")
+    private String address;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "zip")
+    private String zip;
+
+    @Column(name = "blood_group")
+    private String bloodGroup;
+
+    @Column(name = "date_of_birth")
+    private LocalDate dateOfBirth;
+
+    @Column(name="gender")
+    private String gender;
 
     @Column(name = "pharmacy_id")
     private Long pharmacyId;

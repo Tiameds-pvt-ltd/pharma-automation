@@ -43,12 +43,6 @@ public class PurchaseOrderItemEntity {
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @Column(name = "unit_type_id")
-    private UUID unitTypeId;
-
-    @Column(name = "variant_type_id")
-    private UUID variantTypeId;
-
     @Column(name = "created_by")
     private Long createdBy;
 

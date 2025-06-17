@@ -23,8 +23,6 @@ public class PurchaseOrderItemDto {
     private Long gstPercentage;
     private BigDecimal gstAmount;
     private BigDecimal amount;
-    private UUID unitTypeId;
-    private UUID variantTypeId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

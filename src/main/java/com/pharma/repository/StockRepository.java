@@ -25,7 +25,10 @@ public interface StockRepository extends JpaRepository<StockEntity, UUID> {
                                                @Param("purchaseBillNo") String purchaseBillNo);
 
 
-    @Query("SELECT s FROM StockEntity s WHERE s.grnNo LIKE CONCAT('GRN-', :date, '-%') ORDER BY s.grnNo DESC LIMIT 1")
-    Optional<StockEntity> findLatestGrnNo(@Param("date") String date);
+//    @Query("SELECT s FROM StockEntity s WHERE s.grnNo LIKE CONCAT('GRN-', :date, '-%') ORDER BY s.grnNo DESC LIMIT 1")
+//    Optional<StockEntity> findLatestGrnNo(@Param("date") String date);
+
+    @Query("SELECT p FROM StockEntity p WHERE p.grnNo LIKE CONCAT('GRN-', :year, '-%') ORDER BY p.grnNo DESC LIMIT 1")
+    Optional<StockEntity> findLatestGrnNo(@Param("year") String year);
 
 }

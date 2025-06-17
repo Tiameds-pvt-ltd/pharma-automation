@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
- @Getter
+@Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -29,13 +29,13 @@ public class ItemEntity {
     private String itemName;
 
     @Column(name = "purchase_unit")
-    private String purchaseUnit;
+    private Long purchaseUnit;
 
-    @Column(name = "unit_id")
-    private UUID unitId;
+    @Column(name = "variant_name")
+    private String variantName;
 
-    @Column(name = "variant_id")
-    private UUID variantId;
+    @Column(name = "unit_name")
+    private String unitName;
 
     @Column(name = "manufacturer")
     private String manufacturer;
@@ -52,11 +52,11 @@ public class ItemEntity {
     @Column(name = "mrp_sale_price_per_unit")
     private BigDecimal mrpSalePricePerUnit;
 
-    @Column(name = "cgst_percentage")
-    private Long cgstPercentage;
+    @Column(name = "gst_percentage")
+    private Long gstPercentage;
 
-    @Column(name = "sgst_percentage")
-    private Long sgstPercentage;
+    @Column(name = "generic_name")
+    private String genericName;
 
     @Column(name = "hsn_no")
     private String hsnNo;

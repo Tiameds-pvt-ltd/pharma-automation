@@ -1,6 +1,7 @@
 package com.pharma.service;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.InventoryDto;
 import com.pharma.entity.User;
 
 import java.util.List;
@@ -15,4 +16,10 @@ public interface BillService {
 
 //    BillDto updateBill(Long billId, BillDto updatedBill);
     void deleteBill(Long createdById, UUID billId);
+
+    interface InventoryDetailsService {
+
+        List<InventoryDto> getAllInventoryDetails(Long createdById);
+
+    }
 }

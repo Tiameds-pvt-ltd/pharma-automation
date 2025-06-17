@@ -98,10 +98,8 @@ public class StockMapper {
         stockItemDto.setMrpSalePrice(stockItemEntity.getMrpSalePrice());
         stockItemDto.setPurchasePricePerUnit(stockItemEntity.getPurchasePricePerUnit());
         stockItemDto.setMrpSalePricePerUnit(stockItemEntity.getMrpSalePricePerUnit());
-        stockItemDto.setCgstPercentage(stockItemEntity.getCgstPercentage());
-        stockItemDto.setSgstPercentage(stockItemEntity.getSgstPercentage());
-        stockItemDto.setCgstAmount(stockItemEntity.getCgstAmount());
-        stockItemDto.setSgstAmount(stockItemEntity.getSgstAmount());
+        stockItemDto.setGstPercentage(stockItemEntity.getGstPercentage());
+        stockItemDto.setGstAmount(stockItemEntity.getGstAmount());
         stockItemDto.setAmount(stockItemEntity.getAmount());
         stockItemDto.setCreatedBy(stockItemEntity.getCreatedBy());
         stockItemDto.setCreatedDate(stockItemEntity.getCreatedDate());
@@ -126,12 +124,10 @@ public class StockMapper {
         stockItemEntity.setDiscount(stockItemDto.getDiscount());
         stockItemEntity.setPurchasePrice(stockItemDto.getPurchasePrice());
         stockItemEntity.setMrpSalePrice(stockItemDto.getMrpSalePrice());
-        stockItemEntity.setCgstPercentage(stockItemDto.getCgstPercentage());
-        stockItemEntity.setSgstPercentage(stockItemDto.getSgstPercentage());
         stockItemEntity.setPurchasePricePerUnit(stockItemDto.getPurchasePricePerUnit());
         stockItemEntity.setMrpSalePricePerUnit(stockItemDto.getMrpSalePricePerUnit());
-        stockItemEntity.setCgstAmount(stockItemDto.getCgstAmount());
-        stockItemEntity.setSgstAmount(stockItemDto.getSgstAmount());
+        stockItemEntity.setGstPercentage(stockItemDto.getGstPercentage());
+        stockItemEntity.setGstAmount(stockItemDto.getGstAmount());
         stockItemEntity.setAmount(stockItemDto.getAmount());
         stockItemEntity.setCreatedBy(stockItemDto.getCreatedBy());
         stockItemEntity.setCreatedDate(stockItemDto.getCreatedDate());

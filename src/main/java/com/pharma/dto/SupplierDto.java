@@ -21,6 +21,7 @@ public class SupplierDto {
     private String supplierGstinNo;
     private String supplierGstType;
     private String supplierAddress;
+    private Boolean supplierStatus;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;
