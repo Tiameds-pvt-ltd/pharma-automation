@@ -168,6 +168,7 @@ public class StockSerivceImpl implements StockService {
 
     }
 
+    @Transactional
     @Override
     public List<StockItemDto> getStockByItemId(Long createdById, UUID itemId) {
         List<StockItemEntity> stockItems = stockItemRepository.findByItemIdAndCreatedBy(itemId, createdById);
@@ -196,6 +197,7 @@ public class StockSerivceImpl implements StockService {
     }
 
 
+
     private String generateGrnNo() {
         String yearPart = String.valueOf(LocalDate.now().getYear());
 
@@ -221,4 +223,18 @@ public class StockSerivceImpl implements StockService {
     public List<StockItemEntity> getItemsBySupplierId(UUID supplierId) {
         return stockItemRepository.findItemsBySupplierId(supplierId);
     }
+
+    @Transactional
+    @Override
+    public void confirmPayment(Long createdById, UUID invId) {
+        StockEntity stockEntity = stockRepository.findByInvIdAndCreatedBy(invId, createdById)
+                .orElseThrow(() -> new RuntimeException("Stock not found with ID: " + invId + " for user ID: " + createdById));
+
+        stockEntity.setPaymentStatus("Paid");
+        stockEntity.setModifiedBy(createdById);
+        stockEntity.setModifiedDate(LocalDate.now());
+
+        stockRepository.save(stockEntity);
+    }
+
 }

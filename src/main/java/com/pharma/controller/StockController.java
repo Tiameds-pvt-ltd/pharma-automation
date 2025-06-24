@@ -173,6 +173,30 @@ public class StockController {
         return ResponseEntity.ok(items);
     }
 
+
+    @PutMapping("/confirmPayment/{invId}")
+    public ResponseEntity<?> confirmPayment(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID invId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        User currentUser = currentUserOptional.get();
+
+        try {
+            stockService.confirmPayment(currentUser.getId(), invId);
+
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Payment confirmed successfully", HttpStatus.OK, null);
+        } catch (RuntimeException e) {
+            return ApiResponseHelper.errorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
 //
 //    @GetMapping("/checkBillNo")
 //    public ResponseEntity<Map<String, Boolean>> checkBillNoExists(

@@ -18,7 +18,7 @@ public class BillMapper {
         billDto.setPharmacyId(billEntity.getPharmacyId());
         billDto.setBillDateTime(billEntity.getBillDateTime());
         billDto.setPatientId(billEntity.getPatientId());
-//        billDto.setDoctorId(billEntity.getDoctorId());
+        billDto.setDoctorId(billEntity.getDoctorId());
         billDto.setDoctorName(billEntity.getDoctorName());
         billDto.setPatientType(billEntity.getPatientType());
         billDto.setSubTotal(billEntity.getSubTotal());
@@ -48,7 +48,7 @@ public class BillMapper {
         billItemDto.setPackageQuantity(billItemEntity.getPackageQuantity());
         billItemDto.setDiscountPercentage(billItemEntity.getDiscountPercentage());
         billItemDto.setDiscountAmount(billItemEntity.getDiscountAmount());
-        billItemDto.setMrpPerUnit(billItemEntity.getMrpPerUnit());
+        billItemDto.setMrpSalePricePerUnit(billItemEntity.getMrpSalePricePerUnit());
         billItemDto.setGstPercentage(billItemEntity.getGstPercentage());
         billItemDto.setGstAmount(billItemEntity.getGstAmount());
         billItemDto.setGrossTotal(billItemEntity.getGrossTotal());
@@ -68,7 +68,7 @@ public class BillMapper {
         billEntity.setPharmacyId(billDto.getPharmacyId());
         billEntity.setBillDateTime(billDto.getBillDateTime());
         billEntity.setPatientId(billDto.getPatientId());
-//        billEntity.setDoctorId(billDto.getDoctorId());
+        billEntity.setDoctorId(billDto.getDoctorId());
         billEntity.setDoctorName(billDto.getDoctorName());
         billEntity.setPatientType(billDto.getPatientType());
         billEntity.setSubTotal(billDto.getSubTotal());
@@ -100,7 +100,7 @@ public class BillMapper {
         billItemEntity.setPackageQuantity(billItemDto.getPackageQuantity());
         billItemEntity.setDiscountPercentage(billItemDto.getDiscountPercentage());
         billItemEntity.setDiscountAmount(billItemDto.getDiscountAmount());
-        billItemEntity.setMrpPerUnit(billItemDto.getMrpPerUnit());
+        billItemEntity.setMrpSalePricePerUnit(billItemDto.getMrpSalePricePerUnit());
         billItemEntity.setGstPercentage(billItemDto.getGstPercentage());
         billItemEntity.setGstAmount(billItemDto.getGstAmount());
         billItemEntity.setGrossTotal(billItemDto.getGrossTotal());

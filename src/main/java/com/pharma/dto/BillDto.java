@@ -24,7 +24,7 @@ public class BillDto {
     private UUID pharmacyId;
     private LocalDateTime billDateTime;
     private UUID patientId;
-//    private UUID doctorId;
+    private UUID doctorId;
     private UUID doctorName;
     private String patientType;
     private BigDecimal subTotal;

@@ -22,7 +22,7 @@ public class BillItemEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "order_item_id", updatable = false, nullable = false, unique = true)
+    @Column(name = "bill_item_id", updatable = false, nullable = false, unique = true)
     private UUID billItemId;
 
     @Column(name = "item_id")
@@ -43,8 +43,8 @@ public class BillItemEntity {
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
-    @Column(name = "mrp_per_unit")
-    private BigDecimal mrpPerUnit;
+    @Column(name = "mrp_sale_price_per_unit")
+    private BigDecimal mrpSalePricePerUnit;
 
     @Column(name = "gst_percentage")
     private BigDecimal gstPercentage;

@@ -81,7 +81,7 @@ public class PurchaseOrderMapper {
         PurchaseOrderItemDto purchaseOrderItemDto = new PurchaseOrderItemDto();
         purchaseOrderItemDto.setOrderItemId(purchaseOrderItemEntity.getOrderItemId());
         purchaseOrderItemDto.setItemId(purchaseOrderItemEntity.getItemId());
-        purchaseOrderItemDto.setQuantity(purchaseOrderItemEntity.getQuantity());
+        purchaseOrderItemDto.setPackageQuantity(purchaseOrderItemEntity.getPackageQuantity());
         purchaseOrderItemDto.setManufacturer(purchaseOrderItemEntity.getManufacturer());
         purchaseOrderItemDto.setGstPercentage(purchaseOrderItemEntity.getGstPercentage());
         purchaseOrderItemDto.setGstAmount(purchaseOrderItemEntity.getGstAmount());
@@ -103,7 +103,7 @@ public class PurchaseOrderMapper {
         PurchaseOrderItemEntity purchaseOrderItemEntity = new PurchaseOrderItemEntity();
         purchaseOrderItemEntity.setOrderItemId(purchaseOrderItemDto.getOrderItemId());
         purchaseOrderItemEntity.setItemId(purchaseOrderItemDto.getItemId());
-        purchaseOrderItemEntity.setQuantity(purchaseOrderItemDto.getQuantity());
+        purchaseOrderItemEntity.setPackageQuantity(purchaseOrderItemDto.getPackageQuantity());
         purchaseOrderItemEntity.setManufacturer(purchaseOrderItemDto.getManufacturer());
         purchaseOrderItemEntity.setGstPercentage(purchaseOrderItemDto.getGstPercentage());
         purchaseOrderItemEntity.setGstAmount(purchaseOrderItemDto.getGstAmount());

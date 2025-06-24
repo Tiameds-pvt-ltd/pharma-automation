@@ -41,8 +41,8 @@ public class BillEntity {
     @Column(name = "patient_id")
     private UUID patientId;
 
-//    @Column(name = "doctor_id")
-//    private UUID doctorId;
+    @Column(name = "doctor_id")
+    private UUID doctorId;
 
     @Column(name = "doctor_name")
     private UUID doctorName;

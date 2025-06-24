@@ -5,6 +5,8 @@ import com.pharma.entity.*;
 
 import com.pharma.mapper.BillMapper;
 import com.pharma.repository.BillRepository;
+import com.pharma.repository.InventoryDetailsRepository;
+import com.pharma.repository.InventoryRepository;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.BillService;
 import com.pharma.utils.JwtUtil;
@@ -33,6 +35,38 @@ public class BillServiceImpl implements BillService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private InventoryDetailsRepository inventoryDetailsRepository;
+//    @Transactional
+//    @Override
+//    public BillDto createBill(BillDto billDto, User user) {
+//        user = userRepository.findById(user.getId())
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        BillEntity billEntity = billMapper.toEntity(billDto);
+//        billEntity.setBillId(UUID.randomUUID());
+//        billEntity.setCreatedBy(user.getId());
+//        billEntity.setCreatedDate(LocalDate.now());
+//
+//        String newBillId1 = generateBillId1();
+//        billEntity.setBillId1(newBillId1);
+//
+//        if (billEntity.getBillItemEntities() != null) {
+//            for (BillItemEntity item : billEntity.getBillItemEntities()) {
+//                item.setBillItemId(UUID.randomUUID());
+//                item.setCreatedBy(user.getId());
+//                item.setCreatedDate(LocalDate.now());
+//                item.setBillEntity(billEntity);
+//            }
+//        }
+//
+//        BillEntity savedBill = billRepository.save(billEntity);
+//        return billMapper.toDto(savedBill);
+//    }
+
     @Transactional
     @Override
     public BillDto createBill(BillDto billDto, User user) {
@@ -49,10 +83,48 @@ public class BillServiceImpl implements BillService {
 
         if (billEntity.getBillItemEntities() != null) {
             for (BillItemEntity item : billEntity.getBillItemEntities()) {
-                item.setItemId(UUID.randomUUID());
+                item.setBillItemId(UUID.randomUUID());
                 item.setCreatedBy(user.getId());
                 item.setCreatedDate(LocalDate.now());
                 item.setBillEntity(billEntity);
+
+                Optional<InventoryEntity> inventoryOpt = inventoryRepository.findByItemId(item.getItemId());
+                if (inventoryOpt.isPresent()) {
+                    InventoryEntity inventory = inventoryOpt.get();
+
+                    synchronized (this) {
+                        Long newQty = inventory.getPackageQuantity() - item.getPackageQuantity();
+                        if (newQty < 0) {
+                            throw new RuntimeException("Insufficient stock in inventory for item ID: " + item.getItemId());
+                        }
+                        inventory.setPackageQuantity(newQty);
+                        inventory.setModifiedBy(user.getId());
+                        inventory.setModifiedDate(LocalDate.now());
+                        inventoryRepository.save(inventory);
+                    }
+                } else {
+                    throw new RuntimeException("Inventory not found for item ID: " + item.getItemId());
+                }
+
+                // ----- Subtract from InventoryDetailsEntity -----
+                Optional<InventoryDetailsEntity> detailsOpt = inventoryDetailsRepository
+                        .findByItemIdAndBatchNo(item.getItemId(), item.getBatchNo());
+
+                if (detailsOpt.isPresent()) {
+                    InventoryDetailsEntity details = detailsOpt.get();
+                    Long newQty = details.getPackageQuantity() - item.getPackageQuantity();
+                    if (newQty < 0) {
+                        throw new RuntimeException("Insufficient batch stock for item ID: " + item.getItemId() +
+                                ", Batch No: " + item.getBatchNo());
+                    }
+                    details.setPackageQuantity(newQty);
+                    details.setModifiedBy(user.getId());
+                    details.setModifiedDate(LocalDate.now());
+                    inventoryDetailsRepository.save(details);
+                } else {
+                    throw new RuntimeException("Inventory details not found for item ID: " + item.getItemId() +
+                            ", Batch No: " + item.getBatchNo());
+                }
             }
         }
 

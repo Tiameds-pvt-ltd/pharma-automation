@@ -1,8 +1,10 @@
 package com.pharma.controller;
 
 import com.pharma.dto.DoctorDto;
+import com.pharma.dto.PatientDetailsDto;
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
+import com.pharma.repository.DoctorRepository;
 import com.pharma.service.DoctorService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,6 +30,9 @@ public class DoctorController {
 
     @Autowired
     private UserAuthService userAuthService;
+
+    @Autowired
+    private DoctorRepository doctorRepository;
 
     @PostMapping("/save")
     public ResponseEntity<?> createDoctor(
@@ -140,5 +146,13 @@ public class DoctorController {
         }
     }
 
+
+    @PostMapping("/check-duplicate")
+    public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestBody DoctorDto request) {
+        boolean exists = doctorRepository.existsByDoctorNameAndDoctorMobile(
+                request.getDoctorName(), request.getDoctorMobile()
+        );
+        return ResponseEntity.ok(Map.of("duplicate", exists));
+    }
 
 }

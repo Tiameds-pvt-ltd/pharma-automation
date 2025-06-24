@@ -23,7 +23,7 @@ public class BillItemDto {
     private Long packageQuantity;
     private BigDecimal discountPercentage;
     private BigDecimal discountAmount;
-    private BigDecimal mrpPerUnit;
+    private BigDecimal mrpSalePricePerUnit;
     private BigDecimal gstPercentage;
     private BigDecimal gstAmount;
     private BigDecimal grossTotal;

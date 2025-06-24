@@ -18,7 +18,7 @@ public class PurchaseOrderItemDto {
     private UUID orderItemId;
     private UUID orderId;
     private UUID itemId;
-    private Long quantity;
+    private Long packageQuantity;
     private String manufacturer;
     private Long gstPercentage;
     private BigDecimal gstAmount;

@@ -42,6 +42,9 @@ public class DoctorEntity {
     @Column(name = "doctor_venue")
     private String doctorVenue;
 
+    @Column(name = "doctor_license_number")
+    private String doctorLicenseNumber;
+
     @Column(name = "created_by")
     private Long createdBy;
 

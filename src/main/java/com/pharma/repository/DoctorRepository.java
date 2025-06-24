@@ -15,4 +15,5 @@ public interface DoctorRepository extends JpaRepository<DoctorEntity, UUID> {
 
     Optional<DoctorEntity> findByDoctorIdAndCreatedBy(UUID doctorId, Long createdBy);
 
+    boolean existsByDoctorNameAndDoctorMobile(String doctorName, Long doctorMobile);
 }

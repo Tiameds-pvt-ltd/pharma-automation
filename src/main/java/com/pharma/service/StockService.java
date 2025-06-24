@@ -18,6 +18,8 @@ public interface StockService {
 
     void deleteStock(Long createdById, UUID invId);
 
+    void confirmPayment(Long createdById, UUID invId);
+
 //    StockDto updateStock(Long invId, StockDto updatedStock);
 
 //    public boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo) ;

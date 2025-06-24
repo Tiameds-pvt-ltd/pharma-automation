@@ -28,8 +28,8 @@ public class PurchaseOrderItemEntity {
     @Column(name = "item_id")
     private UUID itemId;
 
-    @Column(name = "quantity")
-    private Long quantity;
+    @Column(name = "package_quantity")
+    private Long packageQuantity;
 
     @Column(name = "manufacturer")
     private String manufacturer;
