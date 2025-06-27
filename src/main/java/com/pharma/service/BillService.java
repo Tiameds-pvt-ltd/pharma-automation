@@ -14,7 +14,6 @@ public interface BillService {
 
     BillDto getBillById(Long createdById, UUID billId);
 
-//    BillDto updateBill(Long billId, BillDto updatedBill);
     void deleteBill(Long createdById, UUID billId);
 
     interface InventoryDetailsService {

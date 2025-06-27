@@ -10,7 +10,6 @@ import org.hibernate.annotations.GenericGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -20,23 +19,22 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "pharma_billing")
-public class BillEntity {
-
+@Table(name = "pharma_billing_return")
+public class BillReturnEntity {
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "bill_id", updatable = false, nullable = false, unique = true)
-    private UUID billId;
+    @Column(name = "bill_return_id", updatable = false, nullable = false, unique = true)
+    private UUID billReturnId;
 
-    @Column(name = "bill_id1")
-    private String billId1;
+    @Column(name = "bill_return_id1")
+    private String billReturnId1;
 
     @Column(name = "pharmacy_id")
     private UUID pharmacyId;
 
-    @Column(name = "bill_date_time, updatable = false")
-    private LocalDateTime billDateTime;
+    @Column(name = "bill_return_date_time", updatable = false)
+    private LocalDateTime billReturnDateTime;
 
     @Column(name = "patient_id")
     private UUID patientId;
@@ -56,23 +54,8 @@ public class BillEntity {
     @Column(name = "total_gst")
     private BigDecimal totalGst;
 
-    @Column(name = "total_discount")
-    private BigDecimal totalDiscount;
-
     @Column(name = "grand_total")
     private BigDecimal grandTotal;
-
-    @Column(name = "payment_status")
-    private String paymentStatus;
-
-    @Column(name = "payment_type")
-    private String paymentType;
-
-    @Column(name = "received_amount")
-    private String receivedAmount;
-
-    @Column(name = "balance_amount")
-    private String balanceAmount;
 
     @Column(name = "created_by")
     private Long createdBy;
@@ -86,16 +69,14 @@ public class BillEntity {
     @Column(name = "modified_Date", insertable = false)
     private LocalDate modifiedDate;
 
-    @OneToMany(mappedBy = "billEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BillItemEntity> billItemEntities = new ArrayList<>();
+    @OneToMany(mappedBy = "billReturnEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BillReturnItemEntity> billReturnItemEntities = new ArrayList<>();
 
     @PrePersist
     public void generateUUID() {
-        if (billId == null) {
-            billId = UUID.randomUUID();
+        if (billReturnId == null) {
+            billReturnId = UUID.randomUUID();
         }
-        this.billDateTime = LocalDateTime.now();
+        this.billReturnDateTime = LocalDateTime.now();
     }
 }
-
-
