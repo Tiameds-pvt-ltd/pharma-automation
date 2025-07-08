@@ -22,6 +22,7 @@ public class BillReturnDto {
     private String billReturnId1;
     private UUID pharmacyId;
     private LocalDateTime billReturnDateTime;
+    private String billId1;
     private UUID patientId;
     private UUID doctorId;
     private String doctorName;

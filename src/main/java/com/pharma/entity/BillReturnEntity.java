@@ -36,6 +36,9 @@ public class BillReturnEntity {
     @Column(name = "bill_return_date_time", updatable = false)
     private LocalDateTime billReturnDateTime;
 
+    @Column(name = "bill_id1")
+    private String billId1;
+
     @Column(name = "patient_id")
     private UUID patientId;
 

@@ -18,6 +18,7 @@ public class BillReturnMapper {
         billReturnDto.setBillReturnId1(billReturnEntity.getBillReturnId1());
         billReturnDto.setPharmacyId(billReturnEntity.getPharmacyId());
         billReturnDto.setBillReturnDateTime(billReturnEntity.getBillReturnDateTime());
+        billReturnDto.setBillId1(billReturnEntity.getBillId1());
         billReturnDto.setPatientId(billReturnEntity.getPatientId());
         billReturnDto.setDoctorId(billReturnEntity.getDoctorId());
         billReturnDto.setDoctorName(billReturnEntity.getDoctorName());
@@ -62,6 +63,7 @@ public class BillReturnMapper {
         billReturnEntity.setBillReturnId1(billReturnDto.getBillReturnId1());
         billReturnEntity.setPharmacyId(billReturnDto.getPharmacyId());
         billReturnEntity.setBillReturnDateTime(billReturnDto.getBillReturnDateTime());
+        billReturnEntity.setBillId1(billReturnDto.getBillId1());
         billReturnEntity.setPatientId(billReturnDto.getPatientId());
         billReturnEntity.setDoctorId(billReturnDto.getDoctorId());
         billReturnEntity.setDoctorName(billReturnDto.getDoctorName());
