@@ -18,7 +18,6 @@ import java.util.UUID;
 public class StockItemDto {
     private UUID stockId;
     private UUID itemId;
-    private UUID pharmacyId;
     private String batchNo;
     private Long packageQuantity;
     private LocalDate expiryDate;

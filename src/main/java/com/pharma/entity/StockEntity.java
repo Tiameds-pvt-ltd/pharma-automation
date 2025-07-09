@@ -28,6 +28,9 @@ public class StockEntity {
     @Column(name = "supplier_id")
     private UUID supplierId;
 
+    @Column(name = "pharmacy_id")
+    private UUID pharmacyId;
+
     @Column(name = "purchase_bill_no")
     private String purchaseBillNo;
 

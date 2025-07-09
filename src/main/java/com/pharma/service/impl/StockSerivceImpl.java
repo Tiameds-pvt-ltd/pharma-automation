@@ -176,7 +176,6 @@ public class StockSerivceImpl implements StockService {
         return stockItems.stream().map(stockItem -> new StockItemDto(
                 stockItem.getStockId(),
                 stockItem.getItemId(),
-                stockItem.getPharmacyId(),
                 stockItem.getBatchNo(),
                 stockItem.getPackageQuantity(),
                 stockItem.getExpiryDate(),

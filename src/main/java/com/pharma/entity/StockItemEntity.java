@@ -29,9 +29,6 @@ public class StockItemEntity {
     @Column(name = "item_id")
     private UUID itemId;
 
-    @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
-
     @Column(name = "batch_no")
     private String batchNo;
 

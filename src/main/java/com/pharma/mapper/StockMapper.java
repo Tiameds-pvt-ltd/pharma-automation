@@ -20,6 +20,7 @@ public class StockMapper {
         StockDto stockDto = new StockDto();
         stockDto.setInvId(stockEntity.getInvId());
         stockDto.setSupplierId(stockEntity.getSupplierId());
+        stockDto.setPharmacyId(stockEntity.getPharmacyId());
         stockDto.setPurchaseBillNo(stockEntity.getPurchaseBillNo());
         stockDto.setPurchaseDate(stockEntity.getPurchaseDate());
         stockDto.setCreditPeriod(stockEntity.getCreditPeriod());
@@ -53,6 +54,7 @@ public class StockMapper {
 
         StockEntity stockEntity = new StockEntity();
         stockEntity.setSupplierId(stockDto.getSupplierId());
+        stockEntity.setPharmacyId(stockDto.getPharmacyId());
         stockEntity.setPurchaseBillNo(stockDto.getPurchaseBillNo());
         stockEntity.setPurchaseDate(stockDto.getPurchaseDate());
         stockEntity.setCreditPeriod(stockDto.getCreditPeriod());
@@ -88,7 +90,6 @@ public class StockMapper {
         StockItemDto stockItemDto = new StockItemDto();
         stockItemDto.setStockId(stockItemEntity.getStockId());
         stockItemDto.setItemId(stockItemEntity.getItemId());
-        stockItemDto.setPharmacyId(stockItemEntity.getPharmacyId());
         stockItemDto.setBatchNo(stockItemEntity.getBatchNo());
         stockItemDto.setPackageQuantity(stockItemEntity.getPackageQuantity());
         stockItemDto.setExpiryDate(stockItemEntity.getExpiryDate());
@@ -116,7 +117,6 @@ public class StockMapper {
 
         StockItemEntity stockItemEntity = new StockItemEntity();
         stockItemEntity.setItemId(stockItemDto.getItemId());
-        stockItemEntity.setPharmacyId(stockItemDto.getPharmacyId());
         stockItemEntity.setBatchNo(stockItemDto.getBatchNo());
         stockItemEntity.setPackageQuantity(stockItemDto.getPackageQuantity());
         stockItemEntity.setExpiryDate(stockItemDto.getExpiryDate());
