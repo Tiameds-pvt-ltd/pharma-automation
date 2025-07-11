@@ -2,6 +2,7 @@ package com.pharma.controller;
 
 import com.pharma.dto.BillDto;
 import com.pharma.dto.BillReturnDto;
+import com.pharma.dto.BillReturnListDto;
 import com.pharma.entity.User;
 import com.pharma.service.BillReturnService;
 import com.pharma.utils.ApiResponseHelper;
@@ -106,4 +107,21 @@ public class BillReturnController {
         }
 
     }
+
+    @GetMapping("/list")
+    public ResponseEntity<?> getBillReturnLists(@RequestHeader("Authorization") String token) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        User currentUser = currentUserOptional.get();
+        List<BillReturnListDto> returnList = billReturnService.getBillReturnListsByCreatedBy(currentUser.getId());
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Bill Return list retrieved successfully", HttpStatus.OK, returnList);
+    }
+
 }

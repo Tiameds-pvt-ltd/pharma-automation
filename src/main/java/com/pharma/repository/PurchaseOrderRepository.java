@@ -15,9 +15,6 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrderEnti
 
     Optional<PurchaseOrderEntity> findByOrderIdAndCreatedBy(UUID orderId, Long createdBy);
 
-//    @Query("SELECT p FROM PurchaseOrderEntity p WHERE p.orderId1 LIKE CONCAT('ORD-', :date, '-%') ORDER BY p.orderId1 DESC LIMIT 1")
-//    Optional<PurchaseOrderEntity> findLatestOrderForToday(@Param("date") String date);
-
     @Query("SELECT p FROM PurchaseOrderEntity p WHERE p.orderId1 LIKE CONCAT('ORD-', :year, '-%') ORDER BY p.orderId1 DESC LIMIT 1")
     Optional<PurchaseOrderEntity> findLatestOrderForYear(@Param("year") String year);
 

@@ -1,6 +1,7 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.BillReturnDto;
+import com.pharma.dto.BillReturnListDto;
 import com.pharma.entity.*;
 import com.pharma.mapper.BillReturnMapper;
 import com.pharma.repository.BillReturnRepository;
@@ -87,6 +88,11 @@ public class BillReturnServiceImpl implements BillReturnService {
             throw new RuntimeException("Bill Return not found with ID: " + billReturnEntity + " for user ID: " + createdById);
         }
         billReturnRepository.delete(billReturnEntity.get());
+    }
+
+    @Override
+    public List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById) {
+        return billReturnRepository.fetchBillReturnListsByCreatedBy(createdById);
     }
 
     private String generateBillReturnId1() {
