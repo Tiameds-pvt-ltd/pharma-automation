@@ -17,4 +17,11 @@ public interface BillRepository extends JpaRepository<BillEntity, UUID> {
 
     @Query("SELECT p FROM BillEntity p WHERE p.billId1 LIKE CONCAT('BILL-', :year, '-%') ORDER BY p.billId1 DESC LIMIT 1")
     Optional<BillEntity> findLatestBillForYear(@Param("year") String year);
+
+
+    @Query(value = "SELECT (p.package_quantity - b.package_quantity) AS package_quantity " +
+            "FROM pharma_stock_purchase_item p " +
+            "INNER JOIN pharma_billing_item b ON p.item_id = b.item_id AND p.batch_no = b.batch_no " +
+            "WHERE p.item_id = :itemId AND p.batch_no = :batchNo", nativeQuery = true)
+    Object getPackageQuantityRaw(@Param("itemId") String itemId, @Param("batchNo") String batchNo);
 }

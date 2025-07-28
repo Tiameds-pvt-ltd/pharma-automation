@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class PharmacyRequestDto {
     private PharmacyDto pharmacyDto;
-    private PharmacistDto pharmacistDto;
+//    private PharmacistDto pharmacistDto;
 }

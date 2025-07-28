@@ -15,13 +15,14 @@ public class PharmacyMapper {
 
         PharmacyDto pharmacyDto = new PharmacyDto();
         pharmacyDto.setPharmacyId(pharmacy.getPharmacyId());
-        pharmacyDto.setPharmacyName(pharmacy.getPharmacyName());
+        pharmacyDto.setName(pharmacy.getName());
         pharmacyDto.setAddress(pharmacy.getAddress());
         pharmacyDto.setZipCode(pharmacy.getZipCode());
         pharmacyDto.setGstNo(pharmacy.getGstNo());
         pharmacyDto.setLicenseNo(pharmacy.getLicenseNo());
         pharmacyDto.setLicenseProof(pharmacy.getLicenseProof());
         pharmacyDto.setGstProof(pharmacy.getGstProof());
+        pharmacyDto.setIsActive(pharmacy.getIsActive());
         pharmacyDto.setCreatedBy(pharmacy.getCreatedBy());
         pharmacyDto.setCreatedDate(pharmacy.getCreatedDate());
         pharmacyDto.setModifiedBy(pharmacy.getModifiedBy());
@@ -37,13 +38,14 @@ public class PharmacyMapper {
 
         Pharmacy pharmacy = new Pharmacy();
         pharmacy.setPharmacyId(pharmacyDto.getPharmacyId());
-        pharmacy.setPharmacyName(pharmacyDto.getPharmacyName());
+        pharmacy.setName(pharmacyDto.getName());
         pharmacy.setAddress(pharmacyDto.getAddress());
         pharmacy.setZipCode(pharmacyDto.getZipCode());
         pharmacy.setGstNo(pharmacyDto.getGstNo());
         pharmacy.setLicenseNo(pharmacyDto.getLicenseNo());
         pharmacy.setLicenseProof(pharmacyDto.getLicenseProof());
         pharmacy.setGstProof(pharmacyDto.getGstProof());
+        pharmacy.setIsActive(pharmacyDto.getIsActive());
         pharmacy.setCreatedBy(pharmacyDto.getCreatedBy());
         pharmacy.setCreatedDate(pharmacyDto.getCreatedDate());
         pharmacy.setModifiedBy(pharmacyDto.getModifiedBy());

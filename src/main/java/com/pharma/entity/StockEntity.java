@@ -29,7 +29,7 @@ public class StockEntity {
     private UUID supplierId;
 
     @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
+    private Long pharmacyId;
 
     @Column(name = "purchase_bill_no")
     private String purchaseBillNo;

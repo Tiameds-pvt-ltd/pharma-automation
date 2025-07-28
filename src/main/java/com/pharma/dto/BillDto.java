@@ -21,7 +21,7 @@ public class BillDto {
 
     private UUID billId;
     private String billId1;
-    private UUID pharmacyId;
+    private Long pharmacyId;
     private LocalDateTime billDateTime;
     private UUID patientId;
     private UUID doctorId;
@@ -33,8 +33,10 @@ public class BillDto {
     private BigDecimal grandTotal;
     private String paymentStatus;
     private String paymentType;
-    private String receivedAmount;
-    private String balanceAmount;
+    private BigDecimal receivedAmount;
+    private BigDecimal balanceAmount;
+    private BigDecimal upi;
+    private BigDecimal cash;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

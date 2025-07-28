@@ -1,5 +1,6 @@
 package com.pharma.service.impl;
 
+import com.pharma.dto.ExpiredStockDto;
 import com.pharma.dto.InventoryDto;
 import com.pharma.dto.StockItemDto;
 import com.pharma.entity.InventoryEntity;
@@ -49,6 +50,11 @@ public class InventoryServiceImpl implements InventoryService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
+    public List<ExpiredStockDto> getExpiredStockWithSupplier(Long createdById) {
+        return inventoryRepository.findExpiredStockWithSupplier(createdById);
+    }
 
 
 //    @Override

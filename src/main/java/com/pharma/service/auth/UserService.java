@@ -182,4 +182,10 @@ public class UserService {
         return userRepository.save(existingUser);
     }
 
+
+    public User getUserWithPharmacies(Long id) {
+        return userRepository.findByIdWithPharmacies(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
 }

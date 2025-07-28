@@ -1,6 +1,7 @@
 package com.pharma.controller;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.PackageQuantityDto;
 import com.pharma.entity.User;
 import com.pharma.service.BillService;
 import com.pharma.utils.ApiResponseHelper;
@@ -103,5 +104,13 @@ public class BillController {
             );
         }
 
+    }
+
+    @GetMapping("/getPackageQuantity")
+    public PackageQuantityDto getPackageQuantityDifference(
+            @RequestParam String itemId,
+            @RequestParam String batchNo
+    ) {
+        return billService.getPackageQuantityDifference(itemId, batchNo);
     }
 }

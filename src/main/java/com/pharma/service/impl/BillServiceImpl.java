@@ -1,6 +1,7 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.PackageQuantityDto;
 import com.pharma.entity.*;
 
 import com.pharma.mapper.BillMapper;
@@ -40,32 +41,6 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     private InventoryDetailsRepository inventoryDetailsRepository;
-//    @Transactional
-//    @Override
-//    public BillDto createBill(BillDto billDto, User user) {
-//        user = userRepository.findById(user.getId())
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        BillEntity billEntity = billMapper.toEntity(billDto);
-//        billEntity.setBillId(UUID.randomUUID());
-//        billEntity.setCreatedBy(user.getId());
-//        billEntity.setCreatedDate(LocalDate.now());
-//
-//        String newBillId1 = generateBillId1();
-//        billEntity.setBillId1(newBillId1);
-//
-//        if (billEntity.getBillItemEntities() != null) {
-//            for (BillItemEntity item : billEntity.getBillItemEntities()) {
-//                item.setBillItemId(UUID.randomUUID());
-//                item.setCreatedBy(user.getId());
-//                item.setCreatedDate(LocalDate.now());
-//                item.setBillEntity(billEntity);
-//            }
-//        }
-//
-//        BillEntity savedBill = billRepository.save(billEntity);
-//        return billMapper.toDto(savedBill);
-//    }
 
     @Transactional
     @Override
@@ -183,5 +158,23 @@ public class BillServiceImpl implements BillService {
         }
 
         return String.format("BILL-%s-%05d", yearPart, newSequence);
+    }
+
+    @Transactional
+    @Override
+    public PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo) {
+        Object result = billRepository.getPackageQuantityRaw(itemId, batchNo);
+        if (result == null) {
+            return new PackageQuantityDto(0L);
+        }
+
+        Long quantity;
+        if (result instanceof Number) {
+            quantity = ((Number) result).longValue();
+        } else {
+            quantity = Long.parseLong(result.toString());
+        }
+
+        return new PackageQuantityDto( quantity);
     }
 }

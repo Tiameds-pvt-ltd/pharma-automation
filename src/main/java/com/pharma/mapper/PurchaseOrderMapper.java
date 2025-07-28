@@ -21,7 +21,6 @@ public class PurchaseOrderMapper {
         purchaseOrderDto.setOrderId(purchaseOrderEntity.getOrderId());
         purchaseOrderDto.setOrderId1(purchaseOrderEntity.getOrderId1());
         purchaseOrderDto.setPharmacyId(purchaseOrderEntity.getPharmacyId());
-        purchaseOrderDto.setPharmacistId(purchaseOrderEntity.getPharmacistId());
         purchaseOrderDto.setSupplierId(purchaseOrderEntity.getSupplierId());
         purchaseOrderDto.setOrderedDate(purchaseOrderEntity.getOrderedDate());
         purchaseOrderDto.setIntendedDeliveryDate(purchaseOrderEntity.getIntendedDeliveryDate());
@@ -51,7 +50,6 @@ public class PurchaseOrderMapper {
         purchaseOrderEntity.setOrderId(purchaseOrderDto.getOrderId());
         purchaseOrderEntity.setOrderId1(purchaseOrderDto.getOrderId1());
         purchaseOrderEntity.setPharmacyId(purchaseOrderDto.getPharmacyId());
-        purchaseOrderEntity.setPharmacistId(purchaseOrderDto.getPharmacistId());
         purchaseOrderEntity.setSupplierId(purchaseOrderDto.getSupplierId());
         purchaseOrderEntity.setOrderedDate(purchaseOrderDto.getOrderedDate());
         purchaseOrderEntity.setIntendedDeliveryDate(purchaseOrderDto.getIntendedDeliveryDate());

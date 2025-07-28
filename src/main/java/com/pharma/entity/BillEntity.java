@@ -33,7 +33,7 @@ public class BillEntity {
     private String billId1;
 
     @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
+    private Long pharmacyId;
 
     @Column(name = "bill_date_time, updatable = false")
     private LocalDateTime billDateTime;
@@ -69,10 +69,16 @@ public class BillEntity {
     private String paymentType;
 
     @Column(name = "received_amount")
-    private String receivedAmount;
+    private BigDecimal receivedAmount;
 
     @Column(name = "balance_amount")
-    private String balanceAmount;
+    private BigDecimal balanceAmount;
+
+    @Column(name = "upi")
+    private BigDecimal upi;
+
+    @Column(name = "cash")
+    private BigDecimal cash;
 
     @Column(name = "created_by")
     private Long createdBy;

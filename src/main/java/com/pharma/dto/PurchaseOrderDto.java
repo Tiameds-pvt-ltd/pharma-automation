@@ -19,8 +19,7 @@ public class PurchaseOrderDto {
 
     private UUID orderId;
     private String orderId1;
-    private UUID pharmacyId;
-    private UUID pharmacistId;
+    private Long pharmacyId;
     private UUID supplierId;
     private LocalDate orderedDate;
     private LocalDate intendedDeliveryDate;

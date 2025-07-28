@@ -176,5 +176,11 @@ public class UserController {
                 HttpStatus.OK,
                 "Login successful", token, loginResponse));
     }
+
+    @GetMapping("/{id}/pharmacies")
+    public ResponseEntity<?> getUserPharmacies(@PathVariable Long id) {
+        User user = userService.getUserWithPharmacies(id);
+        return ResponseEntity.ok(user.getPharmacies());
+    }
 }
 

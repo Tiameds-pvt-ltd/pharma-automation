@@ -1,5 +1,6 @@
 package com.pharma.controller;
 
+import com.pharma.dto.ExpiredStockDto;
 import com.pharma.dto.InventoryDto;
 import com.pharma.dto.StockItemDto;
 import com.pharma.entity.User;
@@ -60,16 +61,25 @@ public class InventoryController {
         );
     }
 
+    @GetMapping("/expiredStockWithSupplier")
+    public ResponseEntity<?> getExpiredStockWithSupplier(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
 
-//    @GetMapping("/getAll")
-//    public ResponseEntity<List<InventoryDto>> getAllInventory(){
-//        List<InventoryDto> inventoryDtos = inventoryService.getAllInventory();
-//        return ResponseEntity.ok(inventoryDtos);
-//    }
-//
-//    @GetMapping("/expiredStock")
-//    public List<StockItemDto> getExpiredStock() {
-//        return inventoryService.getExpiredStock();
-//    }
+        Long createdById = currentUserOptional.get().getId();
+        List<ExpiredStockDto> expiredStock = inventoryService.getExpiredStockWithSupplier(createdById);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Expired stock with supplier retrieved successfully",
+                HttpStatus.OK,
+                expiredStock
+        );
+    }
+
 
 }

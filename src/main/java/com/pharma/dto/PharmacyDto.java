@@ -15,22 +15,18 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PharmacyDto {
 
-    private UUID pharmacyId;
-    private String pharmacyName;
+    private Long pharmacyId;
+    private String name;
     private String address;
     private Long zipCode;
     private String gstNo;
     private String licenseNo;
     private String licenseProof;
     private String gstProof;
+    private Boolean isActive;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;
     private LocalDate modifiedDate;
-
-//    private Set<PharmacistDto> pharmacistDtos;
-
-    private Set<UUID> pharmacistIds;
-
 
 }

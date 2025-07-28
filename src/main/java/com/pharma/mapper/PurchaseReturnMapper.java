@@ -22,6 +22,8 @@ public class PurchaseReturnMapper {
         purchaseReturnDto.setReturnDate(purchaseReturnEntity.getReturnDate());
         purchaseReturnDto.setSupplierId(purchaseReturnEntity.getSupplierId());
         purchaseReturnDto.setPurchaseBillNo(purchaseReturnEntity.getPurchaseBillNo());
+        purchaseReturnDto.setTotalAmount(purchaseReturnEntity.getTotalAmount());
+        purchaseReturnDto.setTotalGst(purchaseReturnEntity.getTotalGst());
         purchaseReturnDto.setReturnAmount(purchaseReturnEntity.getReturnAmount());
         purchaseReturnDto.setPharmacyId(purchaseReturnEntity.getPharmacyId());
         purchaseReturnDto.setRemark(purchaseReturnEntity.getRemark());
@@ -50,9 +52,10 @@ public class PurchaseReturnMapper {
         purchaseReturnEntity.setReturnId1(purchaseReturnDto.getReturnId1());
         purchaseReturnEntity.setInvId(purchaseReturnDto.getInvId());
         purchaseReturnEntity.setReturnDate(purchaseReturnDto.getReturnDate());
-
         purchaseReturnEntity.setSupplierId(purchaseReturnDto.getSupplierId());
         purchaseReturnEntity.setPurchaseBillNo(purchaseReturnDto.getPurchaseBillNo());
+        purchaseReturnEntity.setTotalAmount(purchaseReturnDto.getTotalAmount());
+        purchaseReturnEntity.setTotalGst(purchaseReturnDto.getTotalGst());
         purchaseReturnEntity.setReturnAmount(purchaseReturnDto.getReturnAmount());
         purchaseReturnEntity.setPharmacyId(purchaseReturnDto.getPharmacyId());
         purchaseReturnEntity.setRemark(purchaseReturnDto.getRemark());
@@ -84,6 +87,7 @@ public class PurchaseReturnMapper {
 
         purchaseReturnItemDto.setReturnType(purchaseReturnItemEntity.getReturnType());
         purchaseReturnItemDto.setReturnQuantity(purchaseReturnItemEntity.getReturnQuantity());
+        purchaseReturnItemDto.setGstPercentage(purchaseReturnItemEntity.getGstPercentage());
         purchaseReturnItemDto.setDiscrepancyIn(purchaseReturnItemEntity.getDiscrepancyIn());
         purchaseReturnItemDto.setDiscrepancy(purchaseReturnItemEntity.getDiscrepancy());
 
@@ -107,6 +111,7 @@ public class PurchaseReturnMapper {
 
         purchaseReturnItemEntity.setReturnType(purchaseReturnItemDto.getReturnType());
         purchaseReturnItemEntity.setReturnQuantity(purchaseReturnItemDto.getReturnQuantity());
+        purchaseReturnItemEntity.setGstPercentage(purchaseReturnItemDto.getGstPercentage());
         purchaseReturnItemEntity.setDiscrepancyIn(purchaseReturnItemDto.getDiscrepancyIn());
         purchaseReturnItemEntity.setDiscrepancy(purchaseReturnItemDto.getDiscrepancy());
 

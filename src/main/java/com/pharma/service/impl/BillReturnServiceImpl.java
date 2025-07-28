@@ -5,6 +5,8 @@ import com.pharma.dto.BillReturnListDto;
 import com.pharma.entity.*;
 import com.pharma.mapper.BillReturnMapper;
 import com.pharma.repository.BillReturnRepository;
+import com.pharma.repository.InventoryDetailsRepository;
+import com.pharma.repository.InventoryRepository;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.BillReturnService;
 import com.pharma.utils.JwtUtil;
@@ -33,6 +35,39 @@ public class BillReturnServiceImpl implements BillReturnService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
+    @Autowired
+    private InventoryDetailsRepository inventoryDetailsRepository;
+
+//    @Transactional
+//    @Override
+//    public BillReturnDto createBillReturn(BillReturnDto billReturnDto, User user) {
+//        user = userRepository.findById(user.getId())
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        BillReturnEntity billReturnEntity = billReturnMapper.toEntity(billReturnDto);
+//        billReturnEntity.setBillReturnId(UUID.randomUUID());
+//        billReturnEntity.setCreatedBy(user.getId());
+//        billReturnEntity.setCreatedDate(LocalDate.now());
+//
+//        String newBillReturnId1 = generateBillReturnId1();
+//        billReturnEntity.setBillReturnId1(newBillReturnId1);
+//
+//        if (billReturnEntity.getBillReturnItemEntities() != null) {
+//            for (BillReturnItemEntity item : billReturnEntity.getBillReturnItemEntities()) {
+//                item.setBillReturnItemId(UUID.randomUUID());
+//                item.setCreatedBy(user.getId());
+//                item.setCreatedDate(LocalDate.now());
+//                item.setBillReturnEntity(billReturnEntity);
+//            }
+//        }
+//
+//        BillReturnEntity savedEntity = billReturnRepository.save(billReturnEntity);
+//        return billReturnMapper.toDto(savedEntity);
+//    }
+
     @Transactional
     @Override
     public BillReturnDto createBillReturn(BillReturnDto billReturnDto, User user) {
@@ -53,12 +88,44 @@ public class BillReturnServiceImpl implements BillReturnService {
                 item.setCreatedBy(user.getId());
                 item.setCreatedDate(LocalDate.now());
                 item.setBillReturnEntity(billReturnEntity);
+
+                // 🔼 ADD BACK to InventoryEntity (total stock)
+                Optional<InventoryEntity> inventoryOpt = inventoryRepository.findByItemId(item.getItemId());
+                if (inventoryOpt.isPresent()) {
+                    InventoryEntity inventory = inventoryOpt.get();
+                    synchronized (this) {
+                        Long updatedQty = inventory.getPackageQuantity() + item.getPackageQuantity();
+                        inventory.setPackageQuantity(updatedQty);
+                        inventory.setModifiedBy(user.getId());
+                        inventory.setModifiedDate(LocalDate.now());
+                        inventoryRepository.save(inventory);
+                    }
+                } else {
+                    throw new RuntimeException("Inventory not found for item ID: " + item.getItemId());
+                }
+
+                // 🔼 ADD BACK to InventoryDetailsEntity (batch stock)
+                Optional<InventoryDetailsEntity> detailsOpt = inventoryDetailsRepository
+                        .findByItemIdAndBatchNo(item.getItemId(), item.getBatchNo());
+
+                if (detailsOpt.isPresent()) {
+                    InventoryDetailsEntity details = detailsOpt.get();
+                    Long updatedQty = details.getPackageQuantity() + item.getPackageQuantity();
+                    details.setPackageQuantity(updatedQty);
+                    details.setModifiedBy(user.getId());
+                    details.setModifiedDate(LocalDate.now());
+                    inventoryDetailsRepository.save(details);
+                } else {
+                    throw new RuntimeException("Inventory details not found for item ID: " + item.getItemId() +
+                            ", Batch No: " + item.getBatchNo());
+                }
             }
         }
 
         BillReturnEntity savedEntity = billReturnRepository.save(billReturnEntity);
         return billReturnMapper.toDto(savedEntity);
     }
+
 
     @Transactional
     @Override

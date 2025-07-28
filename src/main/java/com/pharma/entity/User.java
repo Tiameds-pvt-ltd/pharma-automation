@@ -1,5 +1,6 @@
 package com.pharma.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -118,5 +119,9 @@ public class User {
     }
 
 
+    @ManyToMany(mappedBy = "members",
+            fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonBackReference
+    private Set<Pharmacy> pharmacies = new HashSet<>();
 
 }

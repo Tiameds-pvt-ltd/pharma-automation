@@ -3,12 +3,15 @@ package com.pharma.service.impl;
 import com.pharma.dto.PurchaseReturnDto;
 import com.pharma.entity.*;
 import com.pharma.mapper.PurchaseReturnMapper;
+import com.pharma.repository.InventoryDetailsRepository;
+import com.pharma.repository.InventoryRepository;
 import com.pharma.repository.PurchaseReturnRepository;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.PurchaseReturnService;
 import com.pharma.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +35,14 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private InventoryDetailsRepository inventoryDetailsRepository;
+
+    @Autowired
+    private InventoryRepository inventoryRepository;
+
     @Override
+    @Transactional
     public PurchaseReturnDto savePurchaseReturn(PurchaseReturnDto purchaseReturnDto, User user) {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -51,6 +61,44 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
                 item.setCreatedBy(user.getId());
                 item.setCreatedDate(LocalDate.now());
                 item.setPurchaseReturnEntity(purchaseReturnEntity);
+
+                // 🔻 Deduct from InventoryEntity (total stock)
+                Optional<InventoryEntity> inventoryOpt = inventoryRepository.findByItemId(item.getItemId());
+                if (inventoryOpt.isPresent()) {
+                    InventoryEntity inventory = inventoryOpt.get();
+                    synchronized (this) {
+                        long updatedQty = inventory.getPackageQuantity() - item.getReturnQuantity();
+                        if (updatedQty < 0) {
+                            throw new RuntimeException("Insufficient stock for item ID: " + item.getItemId());
+                        }
+                        inventory.setPackageQuantity(updatedQty);
+                        inventory.setModifiedBy(user.getId());
+                        inventory.setModifiedDate(LocalDate.now());
+                        inventoryRepository.save(inventory);
+                    }
+                } else {
+                    throw new RuntimeException("Inventory not found for item ID: " + item.getItemId());
+                }
+
+                // 🔻 Deduct from InventoryDetailsEntity (batch stock)
+                Optional<InventoryDetailsEntity> detailsOpt =
+                        inventoryDetailsRepository.findByItemIdAndBatchNo(item.getItemId(), item.getBatchNo());
+
+                if (detailsOpt.isPresent()) {
+                    InventoryDetailsEntity details = detailsOpt.get();
+                    long updatedQty = details.getPackageQuantity() - item.getReturnQuantity();
+                    if (updatedQty < 0) {
+                        throw new RuntimeException("Insufficient batch stock for item ID: " + item.getItemId() +
+                                ", Batch No: " + item.getBatchNo());
+                    }
+                    details.setPackageQuantity(updatedQty);
+                    details.setModifiedBy(user.getId());
+                    details.setModifiedDate(LocalDate.now());
+                    inventoryDetailsRepository.save(details);
+                } else {
+                    throw new RuntimeException("Inventory details not found for item ID: " + item.getItemId() +
+                            ", Batch No: " + item.getBatchNo());
+                }
             }
         }
 
@@ -58,6 +106,9 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         return purchaseReturnMapper.toDto(savedEntity);
     }
 
+
+
+    @Transactional
     @Override
     public List<PurchaseReturnDto> getAllPurchaseReturn(Long createdById) {
         List<PurchaseReturnEntity> purchaseReturns = purchaseReturnRepository.findAllByCreatedBy(createdById);
@@ -66,6 +117,7 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public PurchaseReturnDto getPurchaseReturnById(Long createdById, UUID returnId) {
         Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndCreatedBy(returnId, createdById);
@@ -76,6 +128,7 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         return purchaseReturnMapper.toDto(purchaseReturnEntity.get());
     }
 
+    @Transactional
     @Override
     public void deletePurchaseReturnById(Long createdById, UUID returnId) {
         Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndCreatedBy(returnId, createdById);
@@ -107,25 +160,5 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         return String.format("RTN-%s-%05d", yearPart, newSequence);
     }
 
-//    private String generateReturnId1() {
-//        LocalDate today = LocalDate.now();
-//        String datePart = today.format(DateTimeFormatter.ofPattern("yyyyMMdd"));
-//
-//        Optional<PurchaseReturnEntity> latestReturnOpt = purchaseReturnRepository.findLatestReturnForToday(datePart);
-//
-//        int newSequence = 1;
-//        if (latestReturnOpt.isPresent()) {
-//            String lastReturnId1 = latestReturnOpt.get().getReturnId1();
-//            String[] parts = lastReturnId1.split("-");
-//
-//            try {
-//                if (parts.length == 3) {
-//                    newSequence = Integer.parseInt(parts[2]) + 1;
-//                }
-//            } catch (NumberFormatException e) {
-//                System.err.println("Error parsing return sequence: " + lastReturnId1);
-//            }
-//        }
-//        return String.format("RTN-%s-%05d", datePart, newSequence);
-//    }
+
 }

@@ -8,9 +8,6 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-
-
-import java.util.List;
 import java.util.Optional;
 
 @Transactional
@@ -22,8 +19,14 @@ public interface UserRepository extends CrudRepository<User, Long> {
     boolean existsByUsername(String username);
 
     boolean existsByEmail(String email);
+
     Optional<User> findByEmail(String email);
+
     @NotNull
     Optional<User> findById(@NotNull Long id);
+
+    @Query("SELECT u FROM User u LEFT JOIN FETCH u.pharmacies WHERE u.id = :id")
+    Optional<User> findByIdWithPharmacies(@Param("id") Long id);
+
 
 }

@@ -1,20 +1,22 @@
 package com.pharma.repository;
 
-import com.pharma.entity.Pharmacist;
 import com.pharma.entity.Pharmacy;
+import com.pharma.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
-public interface PharmacyRepository extends JpaRepository<Pharmacy, UUID> {
 
-    boolean existsByPharmacyNameAndPharmacists(String pharmacyName, Pharmacist pharmacist);
+public interface PharmacyRepository extends JpaRepository<Pharmacy, Long> {
+
+//  boolean existsByNameAndUser(String name, User user);
 
     List<Pharmacy> findAllByCreatedBy(Long createdById);
 
-    Optional<Pharmacy> findByPharmacyIdAndCreatedBy(UUID pharmacyId, Long createdById);
+    Optional<Pharmacy> findByPharmacyIdAndCreatedBy(Long pharmacyId, Long createdById);
 
+    Optional<Pharmacy> findById(Long pharmacyId);
 
+    boolean existsByName(String name);
 }

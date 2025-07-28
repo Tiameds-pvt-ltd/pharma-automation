@@ -16,7 +16,7 @@ public class StockDto {
 
     private UUID invId;
     private UUID supplierId;
-    private UUID pharmacyId;
+    private Long pharmacyId;
     private String purchaseBillNo;
     private LocalDate purchaseDate;
     private Long creditPeriod;

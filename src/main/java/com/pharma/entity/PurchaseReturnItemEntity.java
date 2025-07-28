@@ -37,47 +37,14 @@ public class PurchaseReturnItemEntity {
     @Column(name = "return_quantity")
     private Long returnQuantity;
 
+    @Column(name = "gst_percentage")
+    private Long gstPercentage;
+
     @Column(name = "discrepancy_in")
     private String discrepancyIn;
 
     @Column(name = "discrepancy")
     private String discrepancy;
-
-//    @Column(name = "expiry_date")
-//    private LocalDate expiryDate;
-//
-//    @Column(name = "free_item")
-//    private Long freeItem;
-//
-//    @Column(name = "discount")
-//    private BigDecimal discount;
-//
-//    @Column(name = "purchase_price")
-//    private BigDecimal purchasePrice;
-//
-//    @Column(name = "mrp_sale_price")
-//    private BigDecimal mrpSalePrice;
-//
-//    @Column(name = "purchase_price_per_unit")
-//    private BigDecimal purchasePricePerUnit;
-//
-//    @Column(name = "mrp_sale_price_per_unit")
-//    private BigDecimal mrpSalePricePerUnit;
-//
-//    @Column(name = "cgst_percentage")
-//    private Long cgstPercentage;
-//
-//    @Column(name = "sgst_percentage")
-//    private Long sgstPercentage;
-//
-//    @Column(name = "cgst_amount")
-//    private BigDecimal cgstAmount;
-//
-//    @Column(name = "sgst_amount")
-//    private BigDecimal sgstAmount;
-//
-//    @Column(name = "amount")
-//    private BigDecimal amount;
 
     @Column(name = "created_by")
     private Long createdBy;

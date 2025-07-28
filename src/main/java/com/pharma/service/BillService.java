@@ -2,6 +2,7 @@ package com.pharma.service;
 
 import com.pharma.dto.BillDto;
 import com.pharma.dto.InventoryDto;
+import com.pharma.dto.PackageQuantityDto;
 import com.pharma.entity.User;
 
 import java.util.List;
@@ -21,4 +22,6 @@ public interface BillService {
         List<InventoryDto> getAllInventoryDetails(Long createdById);
 
     }
+
+    PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo);
 }

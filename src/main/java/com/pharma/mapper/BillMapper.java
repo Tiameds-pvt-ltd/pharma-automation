@@ -29,6 +29,8 @@ public class BillMapper {
         billDto.setPaymentType(billEntity.getPaymentType());
         billDto.setReceivedAmount(billEntity.getReceivedAmount());
         billDto.setBalanceAmount(billEntity.getBalanceAmount());
+        billDto.setUpi(billEntity.getUpi());
+        billDto.setCash(billEntity.getCash());
         billDto.setCreatedBy(billEntity.getCreatedBy());
         billDto.setCreatedDate(billEntity.getCreatedDate());
         billDto.setModifiedBy(billEntity.getModifiedBy());
@@ -79,6 +81,8 @@ public class BillMapper {
         billEntity.setPaymentType(billDto.getPaymentType());
         billEntity.setReceivedAmount(billDto.getReceivedAmount());
         billEntity.setBalanceAmount(billDto.getBalanceAmount());
+        billEntity.setUpi(billDto.getUpi());
+        billEntity.setCash(billDto.getCash());
         billEntity.setCreatedBy(billDto.getCreatedBy());
         billEntity.setCreatedDate(billDto.getCreatedDate());
         billEntity.setModifiedBy(billDto.getModifiedBy());

@@ -43,22 +43,20 @@ public class PurchaseReturnEntity {
     @Column(name = "purchase_bill_no")
     private String purchaseBillNo;
 
+    @Column(name = "total_amount")
+    private BigDecimal totalAmount;
+
+    @Column(name = "total_gst")
+    private BigDecimal totalGst;
+
     @Column(name = "return_amount")
     private BigDecimal returnAmount;
 
     @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
+    private Long pharmacyId;
 
     @Column(name = "remark")
     private String remark;
-//    @Column(name = "return_reason")
-//    private String returnReason;
-//
-//    @Column(name = "return_type")
-//    private String returnType;
-//
-//    @Column(name = "refund_type")
-//    private String refundType;
 
     @Column(name = "created_by")
     private Long createdBy;

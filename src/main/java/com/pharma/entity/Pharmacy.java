@@ -1,5 +1,6 @@
 package com.pharma.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,13 +22,12 @@ import java.util.UUID;
 public class Pharmacy {
 
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-    @Column(name = "pharmacy_id", updatable = false, nullable = false, unique = true)
-    private UUID pharmacyId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "pharmacy_id")
+    private  Long pharmacyId;
 
-    @Column(name = "pharmacy_name")
-    private String pharmacyName;
+    @Column(name = "name")
+    private String name;
 
     @Column(name = "address")
     private String address;
@@ -47,6 +47,9 @@ public class Pharmacy {
     @Column(name = "gst_proof")
     private String gstProof;
 
+    @Column(nullable = false)
+    private Boolean isActive;
+
     @Column(name = "created_by")
     private Long createdBy;
 
@@ -59,19 +62,12 @@ public class Pharmacy {
     @Column(name = "modified_Date")
     private LocalDate modifiedDate;
 
-    @PrePersist
-    public void generateUUID() {
-        if (pharmacyId == null) {
-            pharmacyId = UUID.randomUUID();
-        }
-
-    }
-
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
-            name = "pharma_pharmacy_pharmacist",
+            name = "pharmacy_members",
             joinColumns = @JoinColumn(name = "pharmacy_id"),
-            inverseJoinColumns = @JoinColumn(name = "pharmacist_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    private Set<Pharmacist> pharmacists = new HashSet<>();
+    @JsonManagedReference
+    private Set<User> members = new HashSet<>();
 }

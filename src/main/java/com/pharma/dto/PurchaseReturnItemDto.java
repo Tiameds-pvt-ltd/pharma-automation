@@ -19,6 +19,7 @@ public class PurchaseReturnItemDto {
     private String batchNo;
     private String returnType;
     private Long returnQuantity;
+    private Long gstPercentage;
     private String discrepancyIn;
     private String discrepancy;
     private Long createdBy;

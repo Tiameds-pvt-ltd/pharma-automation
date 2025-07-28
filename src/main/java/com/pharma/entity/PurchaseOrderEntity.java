@@ -31,10 +31,7 @@ public class PurchaseOrderEntity {
     private String orderId1;
 
     @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
-
-    @Column(name = "pharmacist_id")
-    private UUID pharmacistId;
+    private Long pharmacyId;
 
     @Column(name = "supplier_id")
     private UUID supplierId;

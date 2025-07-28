@@ -1,8 +1,10 @@
 package com.pharma.repository;
 
+import com.pharma.dto.ExpiredStockDto;
 import com.pharma.entity.InventoryEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,5 +24,23 @@ public interface InventoryRepository extends JpaRepository <InventoryEntity, UUI
 
     List<InventoryEntity> findAllByCreatedBy(Long createdBy);
 
-
+    @Query("""
+    SELECT new com.pharma.dto.ExpiredStockDto(
+        i.itemId,
+        itm.itemName,
+        i.batchNo,
+        i.packageQuantity,
+        i.expiryDate,
+        s.supplierId,
+        sup.supplierName
+    )
+    FROM InventoryDetailsEntity i
+    JOIN StockItemEntity e ON i.itemId = e.itemId AND i.batchNo = e.batchNo
+    JOIN e.stockEntity s
+    JOIN ItemEntity itm ON i.itemId = itm.itemId
+    JOIN SupplierEntity sup ON s.supplierId = sup.supplierId
+    WHERE i.expiryDate <= CURRENT_DATE
+      AND i.createdBy = :createdById
+""")
+    List<ExpiredStockDto> findExpiredStockWithSupplier(@Param("createdById") Long createdById);
 }

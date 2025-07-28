@@ -23,8 +23,10 @@ public class PurchaseReturnDto {
     private LocalDate returnDate;
     private UUID supplierId;
     private String purchaseBillNo;
+    private BigDecimal totalAmount;
+    private BigDecimal totalGst;
     private BigDecimal returnAmount;
-    private UUID pharmacyId;
+    private Long pharmacyId;
     private String remark;
     private Long createdBy;
     private LocalDate createdDate;

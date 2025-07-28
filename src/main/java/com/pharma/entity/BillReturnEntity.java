@@ -31,7 +31,7 @@ public class BillReturnEntity {
     private String billReturnId1;
 
     @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
+    private Long pharmacyId;
 
     @Column(name = "bill_return_date_time", updatable = false)
     private LocalDateTime billReturnDateTime;
