@@ -55,8 +55,11 @@ public class StockEntity {
     @Column(name = "total_sgst")
     private BigDecimal totalSgst;
 
-    @Column(name = "total_discount")
-    private BigDecimal totalDiscount;
+    @Column(name = "total_discount_percentage")
+    private BigDecimal totalDiscountPercentage;
+
+    @Column(name = "total_discount_amount")
+    private BigDecimal totalDiscountAmount;
 
     @Column(name = "grand_total")
     private BigDecimal grandTotal;
@@ -93,27 +96,5 @@ public class StockEntity {
 
     }
 
-//    @Override
-//    public boolean equals(Object o) {
-//        if (this == o) return true;
-//        if (o == null || getClass() != o.getClass()) return false;
-//        StockEntity that = (StockEntity) o;
-//        return Objects.equals(invId, that.invId);
-//    }
-//
-//    @Override
-//    public int hashCode() {
-//        return Objects.hash(invId);
-//    }
-//
-//    @ManyToMany(mappedBy = "stockEntities", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-//    private Set<User> users = new HashSet<>();
-//
-//    @PreRemove
-//    private void preRemove() {
-//        for (User user : users) {
-//            user.getStockEntities().remove(this);
-//        }
-//    }
 
 }

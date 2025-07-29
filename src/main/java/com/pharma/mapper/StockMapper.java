@@ -29,7 +29,8 @@ public class StockMapper {
         stockDto.setTotalAmount(stockEntity.getTotalAmount());
         stockDto.setTotalCgst(stockEntity.getTotalCgst());
         stockDto.setTotalSgst(stockEntity.getTotalSgst());
-        stockDto.setTotalDiscount(stockEntity.getTotalDiscount());
+        stockDto.setTotalDiscountPercentage(stockEntity.getTotalDiscountPercentage());
+        stockDto.setTotalDiscountAmount(stockEntity.getTotalDiscountAmount());
         stockDto.setGrandTotal(stockEntity.getGrandTotal());
         stockDto.setPaymentStatus(stockEntity.getPaymentStatus());
         stockDto.setGoodStatus(stockEntity.getGoodStatus());
@@ -63,7 +64,8 @@ public class StockMapper {
         stockEntity.setTotalAmount(stockDto.getTotalAmount());
         stockEntity.setTotalCgst(stockDto.getTotalCgst());
         stockEntity.setTotalSgst(stockDto.getTotalSgst());
-        stockEntity.setTotalDiscount(stockDto.getTotalDiscount());
+        stockEntity.setTotalDiscountPercentage(stockDto.getTotalDiscountPercentage());
+        stockEntity.setTotalDiscountAmount(stockDto.getTotalDiscountAmount());
         stockEntity.setGrandTotal(stockDto.getGrandTotal());
         stockEntity.setPaymentStatus(stockDto.getPaymentStatus());
         stockEntity.setGoodStatus(stockDto.getGoodStatus());
@@ -94,7 +96,8 @@ public class StockMapper {
         stockItemDto.setPackageQuantity(stockItemEntity.getPackageQuantity());
         stockItemDto.setExpiryDate(stockItemEntity.getExpiryDate());
         stockItemDto.setFreeItem(stockItemEntity.getFreeItem());
-        stockItemDto.setDiscount(stockItemEntity.getDiscount());
+        stockItemDto.setDiscountPercentage(stockItemEntity.getDiscountPercentage());
+        stockItemDto.setDiscountAmount(stockItemEntity.getDiscountAmount());
         stockItemDto.setPurchasePrice(stockItemEntity.getPurchasePrice());
         stockItemDto.setMrpSalePrice(stockItemEntity.getMrpSalePrice());
         stockItemDto.setPurchasePricePerUnit(stockItemEntity.getPurchasePricePerUnit());
@@ -121,7 +124,8 @@ public class StockMapper {
         stockItemEntity.setPackageQuantity(stockItemDto.getPackageQuantity());
         stockItemEntity.setExpiryDate(stockItemDto.getExpiryDate());
         stockItemEntity.setFreeItem(stockItemDto.getFreeItem());
-        stockItemEntity.setDiscount(stockItemDto.getDiscount());
+        stockItemEntity.setDiscountPercentage(stockItemDto.getDiscountPercentage());
+        stockItemEntity.setDiscountAmount(stockItemDto.getDiscountAmount());
         stockItemEntity.setPurchasePrice(stockItemDto.getPurchasePrice());
         stockItemEntity.setMrpSalePrice(stockItemDto.getMrpSalePrice());
         stockItemEntity.setPurchasePricePerUnit(stockItemDto.getPurchasePricePerUnit());
@@ -135,34 +139,5 @@ public class StockMapper {
         stockItemEntity.setModifiedDate(stockItemDto.getModifiedDate());
         return stockItemEntity;
     }
-
-
-//    public void updateEntityFromDto(StockDto stockDto, StockEntity stockEntity) {
-//        if (stockDto == null || stockEntity == null) {
-//            return;
-//        }
-//
-//        stockEntity.setSupplierId(stockDto.getSupplierId());
-//        stockEntity.setPurchaseBillNo(stockDto.getPurchaseBillNo());
-//        stockEntity.setPurchaseDate(stockDto.getPurchaseDate());
-//        stockEntity.setCreditPeriod(stockDto.getCreditPeriod());
-//        stockEntity.setPaymentDueDate(stockDto.getPaymentDueDate());
-//        stockEntity.setInvoiceAmount(stockDto.getInvoiceAmount() != null ? BigDecimal.valueOf(stockDto.getInvoiceAmount()) : null);
-//        stockEntity.setTotalAmount(stockDto.getTotalAmount() != null ? BigDecimal.valueOf(stockDto.getTotalAmount()) : null);
-//        stockEntity.setTotalGst(stockDto.getTotalGst() != null ? BigDecimal.valueOf(stockDto.getTotalGst()) : null);
-//        stockEntity.setTotalDiscount(stockDto.getTotalDiscount() != null ? BigDecimal.valueOf(stockDto.getTotalDiscount()) : null);
-//        stockEntity.setGrandTotal(stockDto.getGrandTotal() != null ? BigDecimal.valueOf(stockDto.getGrandTotal()) : null);
-//        stockEntity.setPaymentStatus(stockDto.getPaymentStatus().toUpperCase());
-//        stockEntity.setGoodStatus(stockDto.getGoodStatus().toUpperCase());
-//
-//        // Update StockItemEntities if provided in StockDto
-//        if (stockDto.getStockItemDtos() != null && !stockDto.getStockItemDtos().isEmpty()) {
-//            List<StockItemEntity> stockItemEntities = stockDto.getStockItemDtos().stream()
-//                    .map(this::toEntity) // Reuse existing toEntity method for StockItemDto
-//                    .collect(Collectors.toList());
-//            stockItemEntities.forEach(item -> item.setStockEntity(stockEntity)); // Maintain bi-directional mapping
-//            stockEntity.setStockItemEntities(stockItemEntities);
-//        }
-//    }
 
 }

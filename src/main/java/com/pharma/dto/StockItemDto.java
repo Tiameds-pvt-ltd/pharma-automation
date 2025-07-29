@@ -22,7 +22,8 @@ public class StockItemDto {
     private Long packageQuantity;
     private LocalDate expiryDate;
     private Long freeItem;
-    private BigDecimal discount;
+    private BigDecimal discountPercentage;
+    private BigDecimal discountAmount;
     private BigDecimal purchasePrice;
     private BigDecimal mrpSalePrice;
     private BigDecimal purchasePricePerUnit;

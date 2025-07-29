@@ -25,7 +25,8 @@ public class StockDto {
     private BigDecimal totalAmount;
     private BigDecimal totalCgst;
     private BigDecimal totalSgst;
-    private BigDecimal totalDiscount;
+    private BigDecimal totalDiscountPercentage;
+    private BigDecimal totalDiscountAmount;
     private BigDecimal grandTotal;
     private String paymentStatus="Pending";
     private String goodStatus="Received";
