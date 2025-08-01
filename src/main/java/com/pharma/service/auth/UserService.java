@@ -32,6 +32,39 @@ public class UserService {
         this.moduleRepository = moduleRepository;
     }
 
+//    @Transactional
+//    public void saveUser(User user) {
+//        if (user == null) {
+//            throw new IllegalArgumentException("User cannot be null");
+//        }
+//
+//        // Find or create the USER role
+//        Role userRole = roleRepository.findByName("ADMIN")
+//                .orElseGet(() -> {
+//                    Role newRole = new Role();
+//                    newRole.setName("USER");
+//                    try {
+//                        return roleRepository.save(newRole);
+//                    } catch (Exception e) {
+//                        log.error("Error saving role: {}", newRole.getName(), e);
+//                        throw new RuntimeException("Role could not be saved", e);
+//                    }
+//                });
+//
+//        // Assign the USER role to the new user
+//        Set<Role> roles = new HashSet<>();
+//        roles.add(userRole);
+//        user.setRoles(roles);
+//
+//        log.info("Assigning roles to user: {} with roles: {}", user.getUsername(), roles);
+//        try {
+//            userRepository.save(user);
+//        } catch (Exception e) {
+//            log.error("Error saving user: {}", user.getUsername(), e);
+//            throw new RuntimeException("User could not be saved", e);
+//        }
+//    }
+
     @Transactional
     public void saveUser(User user) {
         if (user == null) {
@@ -39,10 +72,10 @@ public class UserService {
         }
 
         // Find or create the USER role
-        Role userRole = roleRepository.findByName("ADMIN")
+        Role userRole = roleRepository.findByName("SUPERADMIN")
                 .orElseGet(() -> {
                     Role newRole = new Role();
-                    newRole.setName("USER");
+                    newRole.setName("SUPERADMIN");
                     try {
                         return roleRepository.save(newRole);
                     } catch (Exception e) {
@@ -50,7 +83,6 @@ public class UserService {
                         throw new RuntimeException("Role could not be saved", e);
                     }
                 });
-
         // Assign the USER role to the new user
         Set<Role> roles = new HashSet<>();
         roles.add(userRole);
@@ -64,8 +96,6 @@ public class UserService {
             throw new RuntimeException("User could not be saved", e);
         }
     }
-
-
 
     public boolean existsByUsername(String username) {
         return userRepository.existsByUsername(username);

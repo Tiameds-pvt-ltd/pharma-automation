@@ -35,7 +35,7 @@ public class BillEntity {
     @Column(name = "pharmacy_id")
     private Long pharmacyId;
 
-    @Column(name = "bill_date_time, updatable = false")
+    @Column(name = "bill_date_time", updatable = false)
     private LocalDateTime billDateTime;
 
     @Column(name = "patient_id")

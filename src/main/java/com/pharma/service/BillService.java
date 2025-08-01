@@ -1,10 +1,12 @@
 package com.pharma.service;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.BillingSummaryDto;
 import com.pharma.dto.InventoryDto;
 import com.pharma.dto.PackageQuantityDto;
 import com.pharma.entity.User;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,4 +26,6 @@ public interface BillService {
     }
 
     PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo);
+
+    BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate);
 }

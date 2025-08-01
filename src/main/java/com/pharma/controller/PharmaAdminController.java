@@ -114,7 +114,7 @@ public class PharmaAdminController {
 //        }
         //check the user is already a member of the lab using username and email
         if (pharmacy.getMembers().stream().anyMatch(user -> user.getUsername().equals(registerRequest.getUsername()) || user.getEmail().equals(registerRequest.getEmail()))) {
-            return ApiResponseHelper.errorResponse("User is already a member of this lab", HttpStatus.CONFLICT);
+            return ApiResponseHelper.errorResponse("User is already a member of this pharmacy", HttpStatus.CONFLICT);
         }
 
         // deligate to memberUserServices to create user and add to lab send currentuser and registerRequest
@@ -128,7 +128,7 @@ public class PharmaAdminController {
         // Create a new user and add to the lab
         memberUserServices.createUserAndAddToPharmacy(registerRequest, pharmacy, currentUser);
 
-        return ApiResponseHelper.successResponse("User created and added to lab successfully", HttpStatus.OK);
+        return ApiResponseHelper.successResponse("User created and added to pharmacy successfully", HttpStatus.OK);
     }
 
 

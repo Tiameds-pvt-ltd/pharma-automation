@@ -1,6 +1,7 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.BillingSummaryDto;
 import com.pharma.dto.PackageQuantityDto;
 import com.pharma.entity.*;
 
@@ -176,5 +177,11 @@ public class BillServiceImpl implements BillService {
         }
 
         return new PackageQuantityDto( quantity);
+    }
+
+    @Transactional
+    @Override
+    public BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate) {
+        return billRepository.getBillingSummaryByDateAndCreatedBy(selectedDate, createdBy);
     }
 }

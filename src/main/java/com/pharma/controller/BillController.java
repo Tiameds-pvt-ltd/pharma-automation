@@ -1,6 +1,7 @@
 package com.pharma.controller;
 
 import com.pharma.dto.BillDto;
+import com.pharma.dto.BillingSummaryDto;
 import com.pharma.dto.PackageQuantityDto;
 import com.pharma.entity.User;
 import com.pharma.service.BillService;
@@ -8,10 +9,12 @@ import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -113,4 +116,27 @@ public class BillController {
     ) {
         return billService.getPackageQuantityDifference(itemId, batchNo);
     }
+
+
+    @GetMapping("/billingSummary")
+    public ResponseEntity<?> getSummaryByDate(
+            @RequestHeader("Authorization") String token,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        BillingSummaryDto summaryDto = billService.getSummaryByDate(createdById, date);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Billing summary retrieved successfully",
+                HttpStatus.OK,
+                summaryDto
+        );
+    }
+
 }
