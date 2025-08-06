@@ -1,6 +1,7 @@
 package com.pharma.repository;
 
 import com.pharma.dto.BillingSummaryDto;
+import com.pharma.dto.PaymentSummaryDto;
 import com.pharma.entity.BillEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -59,6 +60,57 @@ public interface BillRepository extends JpaRepository<BillEntity, UUID> {
       ) AS b
     """, nativeQuery = true)
     BillingSummaryDto getBillingSummaryByDateAndCreatedBy(
+            @Param("selectedDate") LocalDate selectedDate,
+            @Param("createdBy") Long createdBy
+    );
+
+    @Query(value = """
+    SELECT 
+      COALESCE(SUM(CASE 
+        WHEN payment_type IN ('creditCard', 'debitCard') THEN grand_total 
+        ELSE 0 
+      END), 0) AS card_total,
+
+      COALESCE(COUNT(CASE 
+        WHEN payment_type IN ('creditCard', 'debitCard') THEN 1 
+        ELSE NULL 
+      END), 0) AS card_count,
+
+      COALESCE(SUM(CASE 
+        WHEN payment_type IN ('upi', 'net_banking') THEN grand_total 
+        ELSE 0 
+      END), 0) AS upi_net_total,
+
+      COALESCE(COUNT(CASE 
+        WHEN payment_type IN ('upi', 'net_banking') THEN 1 
+        ELSE NULL 
+      END), 0) AS upi_net_count,
+
+      COALESCE(SUM(CASE 
+        WHEN payment_type = 'cash' THEN grand_total 
+        ELSE 0 
+      END), 0) AS cash_total,
+
+      COALESCE(COUNT(CASE 
+        WHEN payment_type = 'cash' THEN 1 
+        ELSE NULL 
+      END), 0) AS cash_count,
+
+      COALESCE(SUM(CASE 
+        WHEN payment_type = 'upiCash' THEN grand_total 
+        ELSE 0 
+      END), 0) AS upi_cash_total,
+
+      COALESCE(COUNT(CASE 
+        WHEN payment_type = 'upiCash' THEN 1 
+        ELSE NULL 
+      END), 0) AS upi_cash_count
+
+    FROM pharma_billing
+    WHERE DATE(bill_date_time) = :selectedDate
+      AND created_by = :createdBy
+    """, nativeQuery = true)
+    PaymentSummaryDto getPaymentSummaryByDateAndCreatedBy(
             @Param("selectedDate") LocalDate selectedDate,
             @Param("createdBy") Long createdBy
     );

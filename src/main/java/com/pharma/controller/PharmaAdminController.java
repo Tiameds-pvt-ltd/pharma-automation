@@ -222,4 +222,38 @@ public class PharmaAdminController {
         userRepository.save(userToUpdate);
         return ApiResponseHelper.successResponse("Password reset successfully", HttpStatus.OK);
     }
+
+
+    @Transactional
+    @GetMapping("/get-members-by-userId")
+    public ResponseEntity<?> getMembersByUserAndPharmacy(
+            @RequestParam("userId") Long userId,
+            @RequestParam("pharmacyId") Long pharmacyId,
+            @RequestHeader("Authorization") String token) {
+
+        // Step 1: Authenticate the token
+        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Step 2: Validate pharmacy existence
+        Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId).orElse(null);
+        if (pharmacy == null) {
+            return ApiResponseHelper.errorResponse("Pharmacy not found", HttpStatus.NOT_FOUND);
+        }
+
+        // Step 3: Check if the given userId belongs to this pharmacy
+        boolean isUserInPharmacy = pharmacy.getMembers().stream()
+                .anyMatch(user -> user.getId().equals(userId));
+
+        if (!isUserInPharmacy) {
+            return ApiResponseHelper.errorResponse("User is not a member of this pharmacy", HttpStatus.FORBIDDEN);
+        }
+
+        // Step 4: Fetch members of the pharmacy
+        List<UserInPharmaDto> memberDTOs = MemberUserServices.getMembersInPharmacy(pharmacy);
+        return ApiResponseHelper.successResponse("Pharmacy members retrieved successfully", memberDTOs);
+    }
+
 }

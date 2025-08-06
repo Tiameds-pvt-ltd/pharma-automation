@@ -3,6 +3,7 @@ package com.pharma.controller;
 import com.pharma.dto.BillDto;
 import com.pharma.dto.BillingSummaryDto;
 import com.pharma.dto.PackageQuantityDto;
+import com.pharma.dto.PaymentSummaryDto;
 import com.pharma.entity.User;
 import com.pharma.service.BillService;
 import com.pharma.utils.ApiResponseHelper;
@@ -138,5 +139,27 @@ public class BillController {
                 summaryDto
         );
     }
+
+    @GetMapping("/paymentSummary")
+    public ResponseEntity<?> getPaymentSummaryByDate(
+            @RequestHeader("Authorization") String token,
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        PaymentSummaryDto summaryDto = billService.getPaymentSummaryByDate(createdById, date);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Payment summary retrieved successfully",
+                HttpStatus.OK,
+                summaryDto
+        );
+    }
+
 
 }

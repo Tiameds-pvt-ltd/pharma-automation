@@ -3,6 +3,7 @@ package com.pharma.service.impl;
 import com.pharma.dto.BillDto;
 import com.pharma.dto.BillingSummaryDto;
 import com.pharma.dto.PackageQuantityDto;
+import com.pharma.dto.PaymentSummaryDto;
 import com.pharma.entity.*;
 
 import com.pharma.mapper.BillMapper;
@@ -184,4 +185,11 @@ public class BillServiceImpl implements BillService {
     public BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate) {
         return billRepository.getBillingSummaryByDateAndCreatedBy(selectedDate, createdBy);
     }
+
+    @Transactional
+    @Override
+    public PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate) {
+        return billRepository.getPaymentSummaryByDateAndCreatedBy(selectedDate, createdBy);
+    }
+
 }
