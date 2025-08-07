@@ -28,4 +28,7 @@ public interface BillService {
 
     PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate);
 
+    List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth);
+
+
 }

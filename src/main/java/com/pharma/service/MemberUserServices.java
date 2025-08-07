@@ -111,4 +111,21 @@ public class MemberUserServices {
             throw new RuntimeException("Error updating user: " + e.getMessage(), e);
         }
     }
+
+    public static UserInPharmaDto convertToDto(User user) {
+        return new UserInPharmaDto(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.isEnabled(),
+                user.getPhone(),
+                user.getCity(),
+                user.getRoles().stream()
+                        .map(Role::getName)
+                        .collect(Collectors.toList())
+        );
+    }
+
 }

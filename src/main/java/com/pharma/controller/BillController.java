@@ -1,9 +1,6 @@
 package com.pharma.controller;
 
-import com.pharma.dto.BillDto;
-import com.pharma.dto.BillingSummaryDto;
-import com.pharma.dto.PackageQuantityDto;
-import com.pharma.dto.PaymentSummaryDto;
+import com.pharma.dto.*;
 import com.pharma.entity.User;
 import com.pharma.service.BillService;
 import com.pharma.utils.ApiResponseHelper;
@@ -162,4 +159,31 @@ public class BillController {
     }
 
 
+    @GetMapping("/billGstSummary")
+    public ResponseEntity<?> getBillingGstSummary(
+            @RequestHeader("Authorization") String token,
+            @RequestParam(value = "date", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam(value = "month", required = false) String month
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        if (date == null && (month == null || month.isBlank())) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Date or Month is required", HttpStatus.BAD_REQUEST, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+
+        List<BillingGstSummaryDto> summary = billService.getBillingGstSummary(createdById, date, month);
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Billing GST summary retrieved successfully",
+                HttpStatus.OK,
+                summary
+        );
+    }
 }

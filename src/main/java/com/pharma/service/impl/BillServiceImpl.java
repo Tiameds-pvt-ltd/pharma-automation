@@ -1,9 +1,6 @@
 package com.pharma.service.impl;
 
-import com.pharma.dto.BillDto;
-import com.pharma.dto.BillingSummaryDto;
-import com.pharma.dto.PackageQuantityDto;
-import com.pharma.dto.PaymentSummaryDto;
+import com.pharma.dto.*;
 import com.pharma.entity.*;
 
 import com.pharma.mapper.BillMapper;
@@ -191,5 +188,18 @@ public class BillServiceImpl implements BillService {
     public PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate) {
         return billRepository.getPaymentSummaryByDateAndCreatedBy(selectedDate, createdBy);
     }
+
+    @Transactional
+    @Override
+    public List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth) {
+        if (inputDate != null) {
+            return billRepository.getBillingGstSummaryByDate(createdBy, inputDate);
+        } else if (inputMonth != null && !inputMonth.isBlank()) {
+            return billRepository.getBillingGstSummaryByMonth(createdBy, inputMonth);
+        } else {
+            return List.of(); // or throw an exception
+        }
+    }
+
 
 }

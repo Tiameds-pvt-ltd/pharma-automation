@@ -1,5 +1,6 @@
 package com.pharma.repository;
 
+import com.pharma.dto.BillingGstSummaryDto;
 import com.pharma.dto.BillingSummaryDto;
 import com.pharma.dto.PaymentSummaryDto;
 import com.pharma.entity.BillEntity;
@@ -113,6 +114,39 @@ public interface BillRepository extends JpaRepository<BillEntity, UUID> {
     PaymentSummaryDto getPaymentSummaryByDateAndCreatedBy(
             @Param("selectedDate") LocalDate selectedDate,
             @Param("createdBy") Long createdBy
+    );
+
+
+    @Query(value = """
+    SELECT 
+        bill_id1 AS billId1, 
+        DATE(bill_date_time) AS billDate, 
+        sub_total AS subTotal, 
+        total_gst AS totalGst, 
+        grand_total AS grandTotal
+    FROM pharma_billing
+    WHERE created_by = :createdBy
+      AND DATE(bill_date_time) = :inputDate
+    """, nativeQuery = true)
+    List<BillingGstSummaryDto> getBillingGstSummaryByDate(
+            @Param("createdBy") Long createdBy,
+            @Param("inputDate") LocalDate inputDate
+    );
+
+    @Query(value = """
+    SELECT 
+        bill_id1 AS billId1, 
+        DATE(bill_date_time) AS billDate, 
+        sub_total AS subTotal, 
+        total_gst AS totalGst, 
+        grand_total AS grandTotal
+    FROM pharma_billing
+    WHERE created_by = :createdBy
+      AND TO_CHAR(bill_date_time, 'YYYY-MM') = :inputMonth
+    """, nativeQuery = true)
+    List<BillingGstSummaryDto> getBillingGstSummaryByMonth(
+            @Param("createdBy") Long createdBy,
+            @Param("inputMonth") String inputMonth
     );
 
 }
