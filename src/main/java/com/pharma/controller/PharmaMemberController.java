@@ -48,19 +48,29 @@ public class PharmaMemberController {
         if (pharmacy.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage("No Pharmacy found", HttpStatus.OK, null);
         }
-        List<PharmacyListDto> pharmacyListDtos = pharmacy.stream()
-                .map(pharmacy1 -> new PharmacyListDto(
+        List<PharmacyDto> pharmacyDtos = pharmacy.stream()
+                .map(pharmacy1 -> new PharmacyDto(
                         pharmacy1.getPharmacyId(),
                         pharmacy1.getName(),
                         pharmacy1.getAddress(),
                         pharmacy1.getCity(),
                         pharmacy1.getState(),
-                        pharmacy1.getIsActive(),
                         pharmacy1.getDescription(),
-                        pharmacy1.getCreatedBy().getUsername()
+                        pharmacy1.getIsActive(),
+                        pharmacy1.getGstNo(),
+                        pharmacy1.getLicenseNo(),
+                        pharmacy1.getPharmaLogo(),
+                        pharmacy1.getPharmaZip(),
+                        pharmacy1.getPharmaCountry(),
+                        pharmacy1.getPharmaPhone(),
+                        pharmacy1.getPharmaEmail(),
+                        pharmacy1.getCreatedBy() != null ? pharmacy1.getCreatedBy().getId() : null,
+                        pharmacy1.getCreatedDate(),
+                        pharmacy1.getModifiedBy(),
+                        pharmacy1.getModifiedDate()
                 ))
                 .toList();
-        return ApiResponseHelper.successResponseWithDataAndMessage("Pharmacy fetched successfully", HttpStatus.OK, pharmacyListDtos);
+        return ApiResponseHelper.successResponseWithDataAndMessage("Pharmacy fetched successfully", HttpStatus.OK, pharmacyDtos);
     }
 
 
