@@ -4,10 +4,13 @@ import com.pharma.dto.PharmacyDto;
 
 import com.pharma.entity.User;
 import com.pharma.service.PharmacyService;
+import com.pharma.service.impl.UserPharmaService;
+import com.pharma.utils.ApiResponse;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +28,15 @@ public class PharmacyController {
     @Autowired
     private UserAuthService userAuthService;
 
-    @PostMapping("/save")
+    @Autowired
+    private UserPharmaService userPharmaService;
+
+//    @PostMapping(
+//            value = "/save",
+//            consumes = { MediaType.APPLICATION_JSON_VALUE, "application/json;charset=UTF-8" },
+//            produces = MediaType.APPLICATION_JSON_VALUE
+//    )
+@PostMapping("/save")
     public ResponseEntity<?> savePharmacy(
             @RequestHeader("Authorization") String token,
             @RequestBody PharmacyDto pharmacyDto
@@ -38,6 +49,11 @@ public class PharmacyController {
         }
 
         User user = currentUserOptional.get();
+
+        if (userPharmaService.existsPharmaByName(pharmacyDto.getName())) {
+            ApiResponse<String> response = new ApiResponse<>("error", "Lab already exists", null);
+            return new ResponseEntity(response, HttpStatus.BAD_REQUEST);
+        }
 
         PharmacyDto savedPharmacy = pharmacyService.savePharmacy(pharmacyDto, user);
 

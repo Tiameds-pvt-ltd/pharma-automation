@@ -4,7 +4,6 @@ package com.pharma.controller;
 import com.pharma.dto.MemberRegisterDto;
 import com.pharma.dto.UserInPharmaDto;
 import com.pharma.dto.auth.MemberDetailsUpdate;
-import com.pharma.dto.auth.RegisterRequest;
 import com.pharma.entity.Pharmacy;
 import com.pharma.entity.User;
 import com.pharma.repository.PharmacyRepository;
@@ -24,9 +23,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-
 
 @RestController
 @RequestMapping("/user-management")

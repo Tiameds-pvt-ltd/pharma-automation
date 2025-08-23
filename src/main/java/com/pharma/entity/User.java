@@ -21,7 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "pharma_users")
-@ToString(exclude = {"password", "createdBy","stockEntities"})
+@ToString(exclude = {"password", "createdBy","stockEntities", "pharmacies"})
 public class User {
 
     @Id
@@ -85,12 +85,13 @@ public class User {
 
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     @JoinTable(name = "users_modules", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "module_id"))
-    @JsonManagedReference
+    @JsonIgnore
     private Set<ModuleEntity> modules = new HashSet<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by", referencedColumnName = "user_id")
     private User createdBy;
+
 
     public String getFullName() {
         return firstName + " " + lastName;
@@ -121,7 +122,10 @@ public class User {
 
     @ManyToMany(mappedBy = "members",
             fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JsonBackReference
+    @JsonBackReference(value = "pharmacy-members")
     private Set<Pharmacy> pharmacies = new HashSet<>();
 
+
 }
+
+

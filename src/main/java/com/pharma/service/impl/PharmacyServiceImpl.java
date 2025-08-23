@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,21 +34,18 @@ public class PharmacyServiceImpl implements PharmacyService {
     @Transactional
     @Override
     public PharmacyDto savePharmacy(PharmacyDto pharmacyDto, User user) {
-        pharmacyDto.setCreatedBy(user.getId());
-        pharmacyDto.setModifiedBy(user.getId());
-
-        Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto);
+        Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto, user);
+        pharmacy.setCreatedDate(LocalDate.now());
         pharmacy.getMembers().add(user);
-
         Pharmacy savedPharmacy = pharmacyRepository.save(pharmacy);
-
         return pharmacyMapper.toDto(savedPharmacy);
     }
 
     @Transactional
     @Override
     public List<PharmacyDto> getPharmaciesCreatedByUser(User user) {
-        List<Pharmacy> pharmacies = pharmacyRepository.findAllByCreatedBy(user.getId());
+//        List<Pharmacy> pharmacies = pharmacyRepository.findAllByCreatedBy(user.getId());
+        List<Pharmacy> pharmacies = pharmacyRepository.findAllByCreatedBy(user);
         return pharmacies.stream()
                 .map(pharmacyMapper::toDto)
                 .collect(Collectors.toList());
