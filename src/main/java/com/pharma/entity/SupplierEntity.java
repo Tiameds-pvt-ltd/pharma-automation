@@ -45,6 +45,9 @@ public class SupplierEntity {
     @Column(name = "supplier_status")
     private Boolean supplierStatus = true;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

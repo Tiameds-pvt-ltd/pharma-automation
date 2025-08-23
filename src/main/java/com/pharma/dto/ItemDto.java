@@ -29,6 +29,7 @@ public class ItemDto {
     private String genericName;
     private String hsnNo;
     private String consumables;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

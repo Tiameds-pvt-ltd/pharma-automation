@@ -64,6 +64,9 @@ public class ItemEntity {
     @Column(name = "consumables")
     private String consumables;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
      @Column(name = "created_by")
      private Long createdBy;
 
