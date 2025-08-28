@@ -34,6 +34,9 @@ public class PharmacyServiceImpl implements PharmacyService {
     @Transactional
     @Override
     public PharmacyDto savePharmacy(PharmacyDto pharmacyDto, User user) {
+        user = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto, user);
         pharmacy.setCreatedDate(LocalDate.now());
         pharmacy.getMembers().add(user);
