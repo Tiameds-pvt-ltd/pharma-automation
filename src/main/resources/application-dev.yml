@@ -2,7 +2,7 @@ spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/pharmacy  # Database URL
     username: postgres
-    password: 8538
+    password: root
     driver-class-name: org.postgresql.Driver
 
   jpa:

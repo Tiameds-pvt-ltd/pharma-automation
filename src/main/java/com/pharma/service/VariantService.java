@@ -12,7 +12,9 @@ public interface VariantService {
 
     VariantDto createVariant(VariantDto variantDto, User user);
 
-    List<VariantDto> getAllVariant(Long createdById);
+//    List<VariantDto> getAllVariant(Long createdById);
+
+    List<VariantDto> getAllVariants();
 
     VariantDto getVariantById(Long createdById, UUID variantId);
 //

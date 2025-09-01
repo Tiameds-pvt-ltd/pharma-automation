@@ -37,74 +37,6 @@ public class VariantServiceImpl implements VariantService {
     @Autowired
     private UserRepository userRepository;
 
-//    @Transactional
-//    @Override
-//    public VariantDto createVariant(VariantDto variantDto, User user) {
-//        user = userRepository.findById(user.getId())
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        VariantEntity variantEntity = variantMapper.mapToEntity(variantDto);
-//        variantEntity.setVariantId(UUID.randomUUID());
-//        variantEntity.setCreatedBy(user.getId());
-//        variantEntity.setCreatedDate(LocalDate.now());
-//
-//        VariantEntity savedVarint = variantRepository.save(variantEntity);
-//        return variantMapper.mapToDto(savedVarint);
-//    }
-//
-//    @Transactional
-//    @Override
-//    public List<VariantDto> getAllVariant(Long createdById) {
-//        List<VariantEntity> variants = variantRepository.findAllByCreatedBy(createdById);
-//        return variants.stream()
-//                .map(variantMapper::mapToDto)
-//                .collect(Collectors.toList());
-//    }
-//
-//    @Transactional
-//    @Override
-//    public VariantDto getVariantById(Long createdById, UUID variantId) {
-//        Optional<VariantEntity> variantEntity = variantRepository.findByVariantIdAndCreatedBy(variantId, createdById);
-//
-//        if (variantEntity.isEmpty()) {
-//            throw new ResourceNotFoundException("Variant not found with ID: " + variantId + " for user ID: " + createdById);
-//        }
-//        return variantMapper.mapToDto(variantEntity.get());
-//    }
-//
-//    @Override
-//    public VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant) {
-//        Optional<VariantEntity> variantEntityOptional = variantRepository.findById(variantId);
-//
-//        if (variantEntityOptional.isEmpty()) {
-//            throw new ResourceNotFoundException("Variant not found with ID: " + variantId);
-//        }
-//
-//        VariantEntity variantEntity = variantEntityOptional.get();
-//
-//        variantEntity.setVariantName(updateVariant.getVariantName());
-//
-//        variantEntity.setModifiedBy(modifiedById);
-//        variantEntity.setModifiedDate(LocalDate.now());
-//
-//        VariantEntity updatedVariant = variantRepository.save(variantEntity);
-//        return variantMapper.mapToDto(updatedVariant);
-//    }
-//
-//
-//    @Transactional
-//    @Override
-//    public void deleteVariant(Long createdById, UUID variantId) {
-//        Optional<VariantEntity> variantEntity = variantRepository.findByVariantIdAndCreatedBy(variantId, createdById);
-//
-//        if (variantEntity.isEmpty()) {
-//            throw new ResourceNotFoundException("Variant not found with ID: " + variantId + " for user ID: " + createdById);
-//        }
-//
-//        variantRepository.delete(variantEntity.get());
-//
-//    }
-
 
     @Transactional
     @Override
@@ -130,13 +62,22 @@ public class VariantServiceImpl implements VariantService {
         return variantMapper.toDto(savedEntity);
     }
 
+//    @Override
+//    @Transactional()
+//    public List<VariantDto> getAllVariant(Long createdById) {
+//        List<VariantEntity> variants = variantRepository.findAllByCreatedBy(createdById);
+//        return variants.stream()
+//                .map(variantMapper::toDto)
+//                .collect(Collectors.toList());
+//    }
+
     @Override
-    @Transactional()
-    public List<VariantDto> getAllVariant(Long createdById) {
-        List<VariantEntity> variants = variantRepository.findAllByCreatedBy(createdById);
-        return variants.stream()
+    @Transactional(readOnly = true)
+    public List<VariantDto> getAllVariants() {
+        List<VariantEntity> entities = variantRepository.findAll();
+        return entities.stream()
                 .map(variantMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
