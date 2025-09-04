@@ -41,33 +41,6 @@ public class BillReturnServiceImpl implements BillReturnService {
     @Autowired
     private InventoryDetailsRepository inventoryDetailsRepository;
 
-//    @Transactional
-//    @Override
-//    public BillReturnDto createBillReturn(BillReturnDto billReturnDto, User user) {
-//        user = userRepository.findById(user.getId())
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        BillReturnEntity billReturnEntity = billReturnMapper.toEntity(billReturnDto);
-//        billReturnEntity.setBillReturnId(UUID.randomUUID());
-//        billReturnEntity.setCreatedBy(user.getId());
-//        billReturnEntity.setCreatedDate(LocalDate.now());
-//
-//        String newBillReturnId1 = generateBillReturnId1();
-//        billReturnEntity.setBillReturnId1(newBillReturnId1);
-//
-//        if (billReturnEntity.getBillReturnItemEntities() != null) {
-//            for (BillReturnItemEntity item : billReturnEntity.getBillReturnItemEntities()) {
-//                item.setBillReturnItemId(UUID.randomUUID());
-//                item.setCreatedBy(user.getId());
-//                item.setCreatedDate(LocalDate.now());
-//                item.setBillReturnEntity(billReturnEntity);
-//            }
-//        }
-//
-//        BillReturnEntity savedEntity = billReturnRepository.save(billReturnEntity);
-//        return billReturnMapper.toDto(savedEntity);
-//    }
-
     @Transactional
     @Override
     public BillReturnDto createBillReturn(BillReturnDto billReturnDto, User user) {
@@ -94,7 +67,7 @@ public class BillReturnServiceImpl implements BillReturnService {
                 if (inventoryOpt.isPresent()) {
                     InventoryEntity inventory = inventoryOpt.get();
                     synchronized (this) {
-                        Long updatedQty = inventory.getPackageQuantity() + item.getPackageQuantity();
+                        Long updatedQty = inventory.getPackageQuantity() + item.getReturnQuantity();
                         inventory.setPackageQuantity(updatedQty);
                         inventory.setModifiedBy(user.getId());
                         inventory.setModifiedDate(LocalDate.now());
@@ -110,7 +83,7 @@ public class BillReturnServiceImpl implements BillReturnService {
 
                 if (detailsOpt.isPresent()) {
                     InventoryDetailsEntity details = detailsOpt.get();
-                    Long updatedQty = details.getPackageQuantity() + item.getPackageQuantity();
+                    Long updatedQty = details.getPackageQuantity() + item.getReturnQuantity();
                     details.setPackageQuantity(updatedQty);
                     details.setModifiedBy(user.getId());
                     details.setModifiedDate(LocalDate.now());
