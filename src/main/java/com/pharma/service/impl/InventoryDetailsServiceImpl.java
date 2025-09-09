@@ -1,6 +1,7 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.ExpiredStockDto;
+import com.pharma.dto.ExpiredStockView;
 import com.pharma.dto.InventoryDetailsDto;
 import com.pharma.entity.InventoryDetailsEntity;
 import com.pharma.mapper.InventoryDetailsMapper;
@@ -35,6 +36,12 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
     @Override
     public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long createdById) {
         return inventoryDetailsRepository.findCurrentYearStockWithSupplier(createdById);
+    }
+
+    @Transactional
+    @Override
+    public List<ExpiredStockView> getNextThreeMonthsStockWithSupplier(Long createdById) {
+        return inventoryDetailsRepository.findNextThreeMonthsStockWithSupplier(createdById);
     }
 
 }

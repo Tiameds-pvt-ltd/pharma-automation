@@ -1,6 +1,7 @@
 package com.pharma.controller;
 
 import com.pharma.dto.ExpiredStockDto;
+import com.pharma.dto.ExpiredStockView;
 import com.pharma.dto.InventoryDetailsDto;
 import com.pharma.dto.InventoryDto;
 import com.pharma.entity.User;
@@ -60,6 +61,29 @@ public class InventoryDetailsController {
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Current year stock with supplier retrieved successfully",
+                HttpStatus.OK,
+                stockList
+        );
+    }
+
+
+    @GetMapping("/nextThreeMonthsStockWithSupplier")
+    public ResponseEntity<?> getNextThreeMonthsStockWithSupplier(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null
+            );
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        List<ExpiredStockView> stockList =
+                inventoryDetailsService.getNextThreeMonthsStockWithSupplier(createdById);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Next 3 months stock with supplier retrieved successfully",
                 HttpStatus.OK,
                 stockList
         );
