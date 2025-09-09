@@ -1,5 +1,6 @@
 package com.pharma.controller;
 
+import com.pharma.dto.ExpiredStockDto;
 import com.pharma.dto.InventoryDetailsDto;
 import com.pharma.dto.InventoryDto;
 import com.pharma.entity.User;
@@ -43,4 +44,24 @@ public class InventoryDetailsController {
     }
 
 
+    @GetMapping("/currentYearStockWithSupplier")
+    public ResponseEntity<?> getCurrentYearStockWithSupplier(
+            @RequestHeader("Authorization") String token
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        List<ExpiredStockDto> stockList =
+                inventoryDetailsService.getCurrentYearStockWithSupplier(createdById);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Current year stock with supplier retrieved successfully",
+                HttpStatus.OK,
+                stockList
+        );
+    }
 }

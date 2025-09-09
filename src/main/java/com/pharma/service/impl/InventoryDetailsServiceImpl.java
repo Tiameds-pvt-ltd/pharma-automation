@@ -1,10 +1,12 @@
 package com.pharma.service.impl;
 
+import com.pharma.dto.ExpiredStockDto;
 import com.pharma.dto.InventoryDetailsDto;
 import com.pharma.entity.InventoryDetailsEntity;
 import com.pharma.mapper.InventoryDetailsMapper;
 import com.pharma.repository.InventoryDetailsRepository;
 import com.pharma.service.InventoryDetailsService;
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -27,6 +29,12 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
         return inventoryDetailsEntities.stream()
                 .map(inventoryDetailsMapper::mapToDto)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long createdById) {
+        return inventoryDetailsRepository.findCurrentYearStockWithSupplier(createdById);
     }
 
 }
