@@ -76,6 +76,6 @@ public class InventoryDetailsEntity {
         }
     }
 
-    @OneToMany(mappedBy = "inventoryDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StockEditEntity> stockEditEntities = new ArrayList<>();
+//    @OneToMany(mappedBy = "inventoryDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<StockEditEntity> stockEditEntities = new ArrayList<>();
 }

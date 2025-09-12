@@ -33,5 +33,5 @@ public class InventoryDetailsDto {
     private Long modifiedBy;
     private LocalDate modifiedDate;
 
-    private List<StockEditDto> stockEditDtos = new ArrayList<>();
+//    private List<StockEditDto> stockEditDtos = new ArrayList<>();
 }
