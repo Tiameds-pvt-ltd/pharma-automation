@@ -237,4 +237,11 @@ public class StockSerivceImpl implements StockService {
         stockRepository.save(stockEntity);
     }
 
+
+    @Override
+    public boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo) {
+        List<String> results = stockRepository.findBillNoBySupplierIdAndYear(supplierId, year, purchaseBillNo);
+        return !results.isEmpty();
+    }
+
 }

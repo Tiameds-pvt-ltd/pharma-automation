@@ -9,6 +9,8 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -73,4 +75,7 @@ public class InventoryDetailsEntity {
             invDetailsId = UUID.randomUUID();
         }
     }
+
+    @OneToMany(mappedBy = "inventoryDetailsEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StockEditEntity> stockEditEntities = new ArrayList<>();
 }

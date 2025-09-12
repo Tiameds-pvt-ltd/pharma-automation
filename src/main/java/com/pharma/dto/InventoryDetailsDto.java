@@ -7,6 +7,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -30,4 +32,6 @@ public class InventoryDetailsDto {
     private LocalDate createdDate;
     private Long modifiedBy;
     private LocalDate modifiedDate;
+
+    private List<StockEditDto> stockEditDtos = new ArrayList<>();
 }

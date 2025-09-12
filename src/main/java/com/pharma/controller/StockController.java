@@ -197,19 +197,19 @@ public class StockController {
         }
     }
 
-//
-//    @GetMapping("/checkBillNo")
-//    public ResponseEntity<Map<String, Boolean>> checkBillNoExists(
-//            @RequestParam("supplierId") Long supplierId,
-//            @RequestParam("year") int year,
-//            @RequestParam("purchaseBillNo") String purchaseBillNo) {
-//        try {
-//            boolean exists = stockService.isBillNoExists(supplierId, year, purchaseBillNo);
-//            return ResponseEntity.ok(Map.of("exists", exists));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Map.of("error", true));
-//        }
-//    }
+
+    @GetMapping("/checkBillNo")
+    public ResponseEntity<Map<String, Boolean>> checkBillNoExists(
+            @RequestParam("supplierId") UUID supplierId,
+            @RequestParam("year") int year,
+            @RequestParam("purchaseBillNo") String purchaseBillNo) {
+        try {
+            boolean exists = stockService.isBillNoExists(supplierId, year, purchaseBillNo);
+            return ResponseEntity.ok(Map.of("exists", exists));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", true));
+        }
+    }
 
 }
