@@ -1,9 +1,6 @@
 package com.pharma.controller;
 
-import com.pharma.dto.ExpiredStockDto;
-import com.pharma.dto.ExpiredStockView;
-import com.pharma.dto.InventoryDetailsDto;
-import com.pharma.dto.InventoryDto;
+import com.pharma.dto.*;
 import com.pharma.entity.User;
 import com.pharma.service.InventoryDetailsService;
 import com.pharma.utils.ApiResponseHelper;
@@ -87,5 +84,20 @@ public class InventoryDetailsController {
                 HttpStatus.OK,
                 stockList
         );
+    }
+
+
+    @PostMapping("/save")
+    public ResponseEntity<?> savePurchaseOrder(
+            @RequestHeader("Authorization") String token,
+            @RequestBody InventoryDetailsDto inventoryDetailsDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+        InventoryDetailsDto savedInventoryDetails = inventoryDetailsService.saveInventoryDetails(inventoryDetailsDto, currentUserOptional.get());
+        return ApiResponseHelper.successResponseWithDataAndMessage("Inventory Details created successfully", HttpStatus.OK, savedInventoryDetails);
     }
 }
