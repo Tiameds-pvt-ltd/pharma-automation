@@ -3,6 +3,7 @@ package com.pharma.service;
 
 import com.pharma.dto.StockDto;
 import com.pharma.dto.StockItemDto;
+import com.pharma.dto.StockSummaryDto;
 import com.pharma.entity.User;
 
 import java.util.List;
@@ -23,5 +24,9 @@ public interface StockService {
     List<StockItemDto> getStockByItemId(Long createdById,UUID itemId);
 
     boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo);
+
+    List<StockSummaryDto> getStocksByPaymentStatusAndSupplierAndCreatedBy(String paymentStatus, UUID supplierId, Long createdBy);
+
+    StockItemDto updateStockItem(Long modifiedById, UUID invId, UUID itemId, String batchNo, StockItemDto updatedItem);
 
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -16,5 +17,9 @@ public interface StockItemRepository extends JpaRepository<StockItemEntity, UUID
 
     @Query("SELECT s FROM StockItemEntity s WHERE s.stockEntity.supplierId = :supplierId")
     List<StockItemEntity> findItemsBySupplierId(@Param("supplierId") UUID supplierId);
+
+//    Optional<StockItemEntity> findByStockEntity_InvIdAndItemIdAndBatchNoAndModifiedBy(UUID invId, UUID itemId, String batchNo, Long modifiedBy);
+
+    Optional<StockItemEntity> findByStockEntity_InvIdAndItemIdAndBatchNo(UUID invId, UUID itemId, String batchNo);
 
 }

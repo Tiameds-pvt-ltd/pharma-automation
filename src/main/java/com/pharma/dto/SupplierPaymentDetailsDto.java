@@ -20,6 +20,7 @@ public class SupplierPaymentDetailsDto {
     private UUID paymentDetailsId;
     private String purchaseBillNo;
     private BigDecimal clearedAmount;
+    private UUID invId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

@@ -57,25 +57,6 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
 
-//    @Override
-//    public List<InventoryDto> getAllInventory() {
-//        List<InventoryEntity> inventoryEntities = inventoryRepository.findAll();
-//        return inventoryEntities.stream().map((inventoryEntity) -> InventoryMapper.mapToDto(inventoryEntity)).collect(Collectors.toList());
-//    }
-//
-//    @Override
-//    public List<StockItemDto> getExpiredStock() {
-//        List<Object[]> results = inventoryRepository.getExpiredStock();
-//
-//        return results.stream()
-//                .map(obj -> {
-//                    StockItemDto dto = new StockItemDto();
-//                    dto.setItemId((UUID) obj[0]);
-//                    dto.setPackageQuantity(((Number) obj[1]).longValue());
-//                    return dto;
-//                })
-//                .collect(Collectors.toList());
-//    }
 
 
 }

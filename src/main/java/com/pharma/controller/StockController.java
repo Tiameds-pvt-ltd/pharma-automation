@@ -2,6 +2,7 @@ package com.pharma.controller;
 
 import com.pharma.dto.StockDto;
 import com.pharma.dto.StockItemDto;
+import com.pharma.dto.StockSummaryDto;
 import com.pharma.entity.StockItemEntity;
 import com.pharma.entity.User;
 import com.pharma.service.StockService;
@@ -209,6 +210,59 @@ public class StockController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", true));
+        }
+    }
+
+
+    @GetMapping("/paymentStatusAndSupplierFilter")
+    public ResponseEntity<?> getStocksByPaymentStatusAndSupplier(
+            @RequestHeader("Authorization") String token,
+            @RequestParam String paymentStatus,
+            @RequestParam UUID supplierId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+
+        List<StockSummaryDto> stocks = stockService.getStocksByPaymentStatusAndSupplierAndCreatedBy(
+                paymentStatus, supplierId, createdById
+        );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Stocks retrieved successfully",
+                HttpStatus.OK,
+                stocks
+        );
+    }
+
+    @PutMapping("/updateStockItem/{invId}/{itemId}/{batchNo}")
+    public ResponseEntity<?> updateStockItem(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID invId,
+            @PathVariable UUID itemId,
+            @PathVariable String batchNo,
+            @RequestBody StockItemDto updateDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        User currentUser = currentUserOptional.get();
+
+        try {
+            StockItemDto updated = stockService.updateStockItem(
+                    currentUser.getId(), invId, itemId, batchNo, updateDto);
+
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Stock item updated successfully", HttpStatus.OK, updated);
+        } catch (RuntimeException e) {
+            return ApiResponseHelper.errorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 

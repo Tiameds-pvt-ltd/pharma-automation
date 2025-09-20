@@ -4,6 +4,7 @@ import com.pharma.dto.StockDto;
 import com.pharma.dto.SupplierPaymentDto;
 import com.pharma.entity.*;
 import com.pharma.mapper.SupplierPaymentMapper;
+import com.pharma.repository.StockRepository;
 import com.pharma.repository.SupplierPaymentRepo;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.SupplierPaymentService;
@@ -33,6 +34,33 @@ public class SupplierPaymentServiceImpl implements SupplierPaymentService {
     @Autowired
     private SupplierPaymentRepo supplierPaymentRepo;
 
+    @Autowired
+    private StockRepository stockRepository;
+
+//    @Transactional
+//    @Override
+//    public SupplierPaymentDto saveSupplierPayment(SupplierPaymentDto supplierPaymentDto, User user) {
+//        user = userRepository.findById(user.getId())
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        SupplierPaymentEntity supplierPaymentEntity = supplierPaymentMapper.toEntity(supplierPaymentDto);
+//        supplierPaymentEntity.setPaymentId(UUID.randomUUID());
+//        supplierPaymentEntity.setCreatedBy(user.getId());
+//        supplierPaymentEntity.setCreatedDate(LocalDate.now());
+//
+//        if (supplierPaymentEntity.getSupplierPaymentDetailsEntities() != null) {
+//            for (SupplierPaymentDetailsEntity supplierPaymentDetails : supplierPaymentEntity.getSupplierPaymentDetailsEntities()) {
+//                supplierPaymentDetails.setPaymentDetailsId(UUID.randomUUID());
+//                supplierPaymentDetails.setCreatedBy(user.getId());
+//                supplierPaymentDetails.setCreatedDate(LocalDate.now());
+//                supplierPaymentDetails.setSupplierPaymentEntity(supplierPaymentEntity);
+//            }
+//        }
+//
+//        SupplierPaymentEntity savedEntity = supplierPaymentRepo.save(supplierPaymentEntity);
+//        return supplierPaymentMapper.toDto(savedEntity);
+//    }
+
     @Transactional
     @Override
     public SupplierPaymentDto saveSupplierPayment(SupplierPaymentDto supplierPaymentDto, User user) {
@@ -53,9 +81,31 @@ public class SupplierPaymentServiceImpl implements SupplierPaymentService {
             }
         }
 
-        SupplierPaymentEntity savedEntity = supplierPaymentRepo.save(supplierPaymentEntity);
+        // ✅ Step 1: Save SupplierPaymentEntity first
+        SupplierPaymentEntity savedEntity = supplierPaymentRepo.saveAndFlush(supplierPaymentEntity);
+
+        // ✅ Step 2: Now update StockEntity using invId (unique)
+        if (savedEntity.getSupplierPaymentDetailsEntities() != null) {
+            for (SupplierPaymentDetailsEntity supplierPaymentDetails : savedEntity.getSupplierPaymentDetailsEntities()) {
+                if (supplierPaymentDetails.getInvId() != null) {
+                    StockEntity stockEntity = stockRepository.findById(supplierPaymentDetails.getInvId())
+                            .orElseThrow(() -> new RuntimeException("Stock not found with ID: " + supplierPaymentDetails.getInvId()));
+
+                    stockEntity.setPaymentStatus("Paid");
+                    stockEntity.setModifiedBy(user.getId());
+                    stockEntity.setModifiedDate(LocalDate.now());
+
+                    stockRepository.save(stockEntity);
+                }
+            }
+        }
+
+        // ✅ Step 3: Ensure flush
+        stockRepository.flush();
+
         return supplierPaymentMapper.toDto(savedEntity);
     }
+
 
     @Transactional
     @Override

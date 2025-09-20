@@ -23,7 +23,7 @@ public class SupplierPaymentDto {
     private LocalDate paymentDate;
     private String paymentMode;
     private String referenceNo;
-    private BigDecimal totalAmount;
+    private BigDecimal amountPaid;
     private String remark;
     private Long createdBy;
     private LocalDate createdDate;

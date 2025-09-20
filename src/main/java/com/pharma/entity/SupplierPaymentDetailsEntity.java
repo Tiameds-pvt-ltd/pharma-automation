@@ -31,6 +31,9 @@ public class SupplierPaymentDetailsEntity {
     @Column(name = "cleared_amount")
     private BigDecimal clearedAmount;
 
+    @Column(name = "inv_id")
+    private UUID invId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

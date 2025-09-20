@@ -16,6 +16,8 @@ public interface InventoryDetailsRepository extends JpaRepository<InventoryDetai
 
     Optional<InventoryDetailsEntity> findByItemIdAndBatchNo(UUID itemId, String batchNo);
 
+    Optional<InventoryDetailsEntity> findByItemIdAndBatchNoAndModifiedBy(UUID itemId, String batchNo, Long modifiedBy);
+
     List<InventoryDetailsEntity> findAllByCreatedBy(Long createdBy);
 
     @Query("""
@@ -59,6 +61,5 @@ public interface InventoryDetailsRepository extends JpaRepository<InventoryDetai
       AND i.created_by = :createdById
 """, nativeQuery = true)
     List<ExpiredStockView> findNextThreeMonthsStockWithSupplier(@Param("createdById") Long createdById);
-
 
 }

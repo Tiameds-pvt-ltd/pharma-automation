@@ -24,7 +24,7 @@ public class SupplierPaymentMapper {
         supplierPaymentDto.setPaymentDate(supplierPaymentEntity.getPaymentDate());
         supplierPaymentDto.setPaymentMode(supplierPaymentEntity.getPaymentMode());
         supplierPaymentDto.setReferenceNo(supplierPaymentEntity.getReferenceNo());
-        supplierPaymentDto.setTotalAmount(supplierPaymentEntity.getTotalAmount());
+        supplierPaymentDto.setAmountPaid(supplierPaymentEntity.getAmountPaid());
         supplierPaymentDto.setRemark(supplierPaymentEntity.getRemark());
         supplierPaymentDto.setCreatedBy(supplierPaymentEntity.getCreatedBy());
         supplierPaymentDto.setCreatedDate(supplierPaymentEntity.getCreatedDate());
@@ -51,7 +51,7 @@ public class SupplierPaymentMapper {
         supplierPaymentEntity.setPaymentDate(supplierPaymentDto.getPaymentDate());
         supplierPaymentEntity.setPaymentMode(supplierPaymentDto.getPaymentMode());
         supplierPaymentEntity.setReferenceNo(supplierPaymentDto.getReferenceNo());
-        supplierPaymentEntity.setTotalAmount(supplierPaymentDto.getTotalAmount());
+        supplierPaymentEntity.setAmountPaid(supplierPaymentDto.getAmountPaid());
         supplierPaymentEntity.setRemark(supplierPaymentDto.getRemark());
         supplierPaymentEntity.setCreatedBy(supplierPaymentDto.getCreatedBy());
         supplierPaymentEntity.setCreatedDate(supplierPaymentDto.getCreatedDate());
@@ -76,6 +76,7 @@ public class SupplierPaymentMapper {
         supplierPaymentDetailsDto.setPaymentDetailsId(supplierPaymentDetailsEntity.getPaymentDetailsId());
         supplierPaymentDetailsDto.setPurchaseBillNo(supplierPaymentDetailsEntity.getPurchaseBillNo());
         supplierPaymentDetailsDto.setClearedAmount(supplierPaymentDetailsEntity.getClearedAmount());
+        supplierPaymentDetailsDto.setInvId(supplierPaymentDetailsEntity.getInvId());
         supplierPaymentDetailsDto.setCreatedBy(supplierPaymentDetailsEntity.getCreatedBy());
         supplierPaymentDetailsDto.setCreatedDate(supplierPaymentDetailsEntity.getCreatedDate());
         supplierPaymentDetailsDto.setModifiedBy(supplierPaymentDetailsEntity.getModifiedBy());
@@ -94,6 +95,7 @@ public class SupplierPaymentMapper {
         supplierPaymentDetailsEntity.setPaymentDetailsId(supplierPaymentDetailsDto.getPaymentDetailsId());
         supplierPaymentDetailsEntity.setPurchaseBillNo(supplierPaymentDetailsDto.getPurchaseBillNo());
         supplierPaymentDetailsEntity.setClearedAmount(supplierPaymentDetailsDto.getClearedAmount());
+        supplierPaymentDetailsEntity.setInvId(supplierPaymentDetailsDto.getInvId());
         supplierPaymentDetailsEntity.setCreatedBy(supplierPaymentDetailsDto.getCreatedBy());
         supplierPaymentDetailsEntity.setCreatedDate(supplierPaymentDetailsDto.getCreatedDate());
         supplierPaymentDetailsEntity.setModifiedBy(supplierPaymentDetailsDto.getModifiedBy());

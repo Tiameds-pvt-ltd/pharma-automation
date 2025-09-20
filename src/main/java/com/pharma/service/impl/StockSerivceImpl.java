@@ -2,7 +2,9 @@ package com.pharma.service.impl;
 
 import com.pharma.dto.StockDto;
 import com.pharma.dto.StockItemDto;
+import com.pharma.dto.StockSummaryDto;
 import com.pharma.entity.*;
+import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.mapper.StockMapper;
 
 
@@ -244,4 +246,52 @@ public class StockSerivceImpl implements StockService {
         return !results.isEmpty();
     }
 
+    @Transactional
+    @Override
+    public List<StockSummaryDto> getStocksByPaymentStatusAndSupplierAndCreatedBy(String paymentStatus, UUID supplierId, Long createdBy) {
+        return stockRepository.findStockSummariesByPaymentStatusAndSupplierIdAndCreatedBy(paymentStatus, supplierId, createdBy);
+    }
+
+    @Transactional
+    @Override
+    public StockItemDto updateStockItem(Long modifiedById, UUID invId, UUID itemId, String batchNo, StockItemDto updatedItem) {
+
+        // 1. Find stock item by invId, itemId, batchNo, modifiedBy
+        StockItemEntity stockItem = stockItemRepository
+                .findByStockEntity_InvIdAndItemIdAndBatchNo(invId, itemId, batchNo)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Stock item not found with invId: " + invId +
+                                ", itemId: " + itemId +
+                                ", batchNo: " + batchNo +
+                                " for userId: " + modifiedById));
+
+        // 2. Update fields
+        stockItem.setPurchasePricePerUnit(updatedItem.getPurchasePricePerUnit());
+        stockItem.setMrpSalePricePerUnit(updatedItem.getMrpSalePricePerUnit());
+        stockItem.setExpiryDate(updatedItem.getExpiryDate());
+
+        stockItem.setModifiedBy(modifiedById);
+        stockItem.setModifiedDate(LocalDate.now());
+
+        stockItemRepository.save(stockItem);
+
+        // 3. Update corresponding inventory details
+        InventoryDetailsEntity inventory = inventoryDetailsRepository
+                .findByItemIdAndBatchNo(itemId, batchNo)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Inventory details not found with itemId: " + itemId +
+                                ", batchNo: " + batchNo +
+                                " for userId: " + modifiedById));
+
+        inventory.setPurchasePricePerUnit(updatedItem.getPurchasePricePerUnit());
+        inventory.setMrpSalePricePerUnit(updatedItem.getMrpSalePricePerUnit());
+        inventory.setExpiryDate(updatedItem.getExpiryDate());
+
+        inventory.setModifiedBy(modifiedById);
+        inventory.setModifiedDate(LocalDate.now());
+
+        inventoryDetailsRepository.save(inventory);
+
+        return updatedItem;
+    }
 }

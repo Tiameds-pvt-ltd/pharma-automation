@@ -42,8 +42,8 @@ public class SupplierPaymentEntity {
     @Column(name = "reference_no")
     private String referenceNo;
 
-    @Column(name = "total_amount")
-    private BigDecimal totalAmount;
+    @Column(name = "amount_paid")
+    private BigDecimal amountPaid;
 
     @Column(name = "remark")
     private String remark;

@@ -1,8 +1,11 @@
 package com.pharma.repository;
 
 
+import com.pharma.dto.StockDto;
+import com.pharma.dto.StockSummaryDto;
 import com.pharma.entity.PurchaseOrderEntity;
 import com.pharma.entity.StockEntity;
+import com.pharma.entity.StockItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,6 +20,8 @@ public interface StockRepository extends JpaRepository<StockEntity, UUID> {
 
     List<StockEntity> findAllByCreatedBy(Long createdBy);
 
+    List<StockEntity> findByPurchaseBillNo(String purchaseBillNo);
+
     Optional<StockEntity> findByInvIdAndCreatedBy(UUID invId, Long createdBy);
 
     @Query("SELECT p.purchaseBillNo FROM StockEntity p WHERE p.supplierId = :supplierId AND EXTRACT(YEAR FROM p.purchaseDate) = :year AND LOWER(p.purchaseBillNo) = LOWER(:purchaseBillNo)")
@@ -29,5 +34,26 @@ public interface StockRepository extends JpaRepository<StockEntity, UUID> {
 
     @Query("SELECT p FROM StockEntity p WHERE p.grnNo LIKE CONCAT('GRN-', :year, '-%') ORDER BY p.grnNo DESC LIMIT 1")
     Optional<StockEntity> findLatestGrnNo(@Param("year") String year);
+
+
+    @Query("SELECT new com.pharma.dto.StockSummaryDto( " +
+            "s.invId, s.supplierId, s.pharmacyId, s.purchaseBillNo, s.purchaseDate, " +
+            "s.creditPeriod, s.paymentDueDate, s.invoiceAmount, s.totalAmount, " +
+            "s.totalCgst, s.totalSgst, s.totalDiscountPercentage, s.totalDiscountAmount, " +
+            "s.grandTotal, s.paymentStatus, s.goodStatus, s.grnNo, " +
+            "s.createdBy, s.createdDate, s.modifiedBy, s.modifiedDate) " +
+            "FROM StockEntity s " +
+            "WHERE s.paymentStatus = :paymentStatus " +
+            "AND s.supplierId = :supplierId " +
+            "AND s.createdBy = :createdBy")
+    List<StockSummaryDto> findStockSummariesByPaymentStatusAndSupplierIdAndCreatedBy(
+            @Param("paymentStatus") String paymentStatus,
+            @Param("supplierId") UUID supplierId,
+            @Param("createdBy") Long createdBy
+    );
+
+
+
+
 
 }
