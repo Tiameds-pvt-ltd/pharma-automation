@@ -19,7 +19,7 @@ public class SupplierPaymentDto {
 
     private UUID paymentId;
     private UUID supplierId;
-    private Long pharmacyId;
+    private UUID pharmacyId;
     private LocalDate paymentDate;
     private String paymentMode;
     private String referenceNo;

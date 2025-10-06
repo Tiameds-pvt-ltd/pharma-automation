@@ -10,7 +10,6 @@ import org.hibernate.annotations.GenericGenerator;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -94,6 +93,9 @@ public class BillEntity {
 
     @OneToMany(mappedBy = "billEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BillItemEntity> billItemEntities = new ArrayList<>();
+
+    @OneToMany(mappedBy = "billEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BillPaymentEntity> billPaymentEntities = new ArrayList<>();
 
     @PrePersist
     public void generateUUID() {

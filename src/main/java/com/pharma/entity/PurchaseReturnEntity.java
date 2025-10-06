@@ -58,6 +58,9 @@ public class PurchaseReturnEntity {
     @Column(name = "remark")
     private String remark;
 
+    @Column(name = "credit_note")
+    private Boolean creditNote;
+
     @Column(name = "created_by")
     private Long createdBy;
 

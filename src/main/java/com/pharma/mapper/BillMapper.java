@@ -2,8 +2,10 @@ package com.pharma.mapper;
 
 import com.pharma.dto.BillDto;
 import com.pharma.dto.BillItemDto;
+import com.pharma.dto.BillPaymentDto;
 import com.pharma.entity.BillEntity;
 import com.pharma.entity.BillItemEntity;
+import com.pharma.entity.BillPaymentEntity;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -37,6 +39,8 @@ public class BillMapper {
         billDto.setModifiedDate(billEntity.getModifiedDate());
         billDto.setBillItemDtos(billEntity.getBillItemEntities().stream()
                 .map(this::toDto).collect(Collectors.toList()));
+        billDto.setBillPaymentDtos(billEntity.getBillPaymentEntities().stream()
+                .map(this::toDtoPayment).collect(Collectors.toList()));
         return billDto;
     }
 
@@ -61,6 +65,22 @@ public class BillMapper {
         billItemDto.setModifiedDate(billItemEntity.getModifiedDate());
 
         return billItemDto;
+    }
+
+    public BillPaymentDto toDtoPayment(BillPaymentEntity billPaymentEntity) {
+
+        BillPaymentDto billPaymentDto = new BillPaymentDto();
+        billPaymentDto.setBillPaymentId(billPaymentEntity.getBillPaymentId());
+        billPaymentDto.setPharmacyId(billPaymentEntity.getPharmacyId());
+        billPaymentDto.setBillPaymentDate(billPaymentEntity.getBillPaymentDate());
+        billPaymentDto.setBillPaymentMode(billPaymentEntity.getBillPaymentMode());
+        billPaymentDto.setBillPaidAmount(billPaymentEntity.getBillPaidAmount());
+        billPaymentDto.setCreatedBy(billPaymentEntity.getCreatedBy());
+        billPaymentDto.setCreatedDate(billPaymentEntity.getCreatedDate());
+        billPaymentDto.setModifiedBy(billPaymentEntity.getModifiedBy());
+        billPaymentDto.setModifiedDate(billPaymentEntity.getModifiedDate());
+
+        return billPaymentDto;
     }
 
     public BillEntity toEntity(BillDto billDto) {
@@ -90,6 +110,8 @@ public class BillMapper {
 
         billEntity.setBillItemEntities(billDto.getBillItemDtos().stream()
                 .map(this::toEntity).collect(Collectors.toList()));
+        billEntity.setBillPaymentEntities(billDto.getBillPaymentDtos().stream()
+                .map(this::toEntityPayment).collect(Collectors.toList()));
 
         return billEntity;
     }
@@ -115,5 +137,20 @@ public class BillMapper {
         billItemEntity.setModifiedDate(billItemDto.getModifiedDate());
 
         return billItemEntity;
+    }
+
+    public BillPaymentEntity toEntityPayment(BillPaymentDto billPaymentDto) {
+        BillPaymentEntity billPaymentEntity = new BillPaymentEntity();
+        billPaymentEntity.setBillPaymentId(billPaymentDto.getBillPaymentId());
+        billPaymentEntity.setPharmacyId(billPaymentDto.getPharmacyId());
+        billPaymentEntity.setBillPaymentDate(billPaymentDto.getBillPaymentDate());
+        billPaymentEntity.setBillPaymentMode(billPaymentDto.getBillPaymentMode());
+        billPaymentEntity.setBillPaidAmount(billPaymentDto.getBillPaidAmount());
+        billPaymentEntity.setCreatedBy(billPaymentDto.getCreatedBy());
+        billPaymentEntity.setCreatedDate(billPaymentDto.getCreatedDate());
+        billPaymentEntity.setModifiedBy(billPaymentDto.getModifiedBy());
+        billPaymentEntity.setModifiedDate(billPaymentDto.getModifiedDate());
+
+        return billPaymentEntity;
     }
 }

@@ -10,6 +10,8 @@ import java.util.UUID;
 public interface BillService {
     BillDto createBill(BillDto billDto, User user);
 
+    BillDto addBillPayment(BillPaymentDto billPaymentDto, User user);
+
     List<BillDto> getAllBill(Long createdById);
 
     BillDto getBillById(Long createdById, UUID billId);

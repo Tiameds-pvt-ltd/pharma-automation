@@ -31,7 +31,7 @@ public class SupplierPaymentEntity {
     private UUID supplierId;
 
     @Column(name = "pharmacy_id")
-    private Long pharmacyId;
+    private UUID pharmacyId;
 
     @Column(name = "payment_date")
     private LocalDate paymentDate;
@@ -47,6 +47,9 @@ public class SupplierPaymentEntity {
 
     @Column(name = "remark")
     private String remark;
+
+    @Column(name = "credit_note_amount")
+    private Boolean creditNoteAmount;
 
     @Column(name = "created_by")
     private Long createdBy;

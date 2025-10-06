@@ -43,6 +43,31 @@ public class BillController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Bill created successfully", HttpStatus.OK, savedBill);
     }
 
+    @PostMapping("/addPayment")
+    public ResponseEntity<?> addBillPayment(
+            @RequestHeader("Authorization") String token,
+            @RequestBody BillPaymentDto billPaymentDto
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED,
+                    null
+            );
+        }
+
+        BillDto updatedBill = billService.addBillPayment(billPaymentDto, currentUserOptional.get());
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Bill payment added successfully",
+                HttpStatus.OK,
+                updatedBill
+        );
+    }
+
+
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllBills(
             @RequestHeader("Authorization") String token

@@ -80,7 +80,6 @@ public class BillServiceImpl implements BillService {
                     throw new RuntimeException("Inventory not found for item ID: " + item.getItemId());
                 }
 
-                // ----- Subtract from InventoryDetailsEntity -----
                 Optional<InventoryDetailsEntity> detailsOpt = inventoryDetailsRepository
                         .findByItemIdAndBatchNo(item.getItemId(), item.getBatchNo());
 
@@ -103,8 +102,48 @@ public class BillServiceImpl implements BillService {
         }
 
         BillEntity savedBill = billRepository.save(billEntity);
+
+        if ("Paid".equalsIgnoreCase(savedBill.getPaymentStatus()) &&
+                savedBill.getBillPaymentEntities() != null) {
+
+            for (BillPaymentEntity payment : savedBill.getBillPaymentEntities()) {
+                payment.setBillPaymentId(UUID.randomUUID());
+                payment.setCreatedBy(user.getId());
+                payment.setCreatedDate(LocalDate.now());
+                payment.setBillEntity(savedBill);
+            }
+        }
+
         return billMapper.toDto(savedBill);
     }
+
+    @Override
+    @Transactional
+    public BillDto addBillPayment(BillPaymentDto billPaymentDto, User user) {
+        user = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        BillEntity bill = billRepository.findById(billPaymentDto.getBillId())
+                .orElseThrow(() -> new RuntimeException("Bill not found"));
+
+        BillPaymentEntity payment = billMapper.toEntityPayment(billPaymentDto);
+
+        if (payment.getBillPaymentId() == null) {
+            payment.setBillPaymentId(UUID.randomUUID());
+        }
+        payment.setBillPaymentDate(LocalDate.now());
+        payment.setCreatedBy(user.getId());
+        payment.setCreatedDate(LocalDate.now());
+        payment.setBillEntity(bill);
+
+        bill.getBillPaymentEntities().add(payment);
+
+        BillEntity updatedBill = billRepository.save(bill);
+
+        return billMapper.toDto(updatedBill);
+    }
+
+
 
     @Transactional
     @Override

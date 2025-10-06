@@ -1,6 +1,5 @@
 package com.pharma.repository;
 
-import com.pharma.entity.PurchaseOrderEntity;
 import com.pharma.entity.SupplierPaymentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

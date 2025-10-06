@@ -30,6 +30,7 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
     @Autowired
     private InventoryDetailsMapper inventoryDetailsMapper;
 
+    @Transactional
     @Override
     public List<InventoryDetailsDto> getAllInventoryDetails(Long createdById) {
         List<InventoryDetailsEntity> inventoryDetailsEntities = inventoryDetailsRepository.findAllByCreatedBy(createdById);
