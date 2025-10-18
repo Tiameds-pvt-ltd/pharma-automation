@@ -25,6 +25,7 @@ public class SupplierPaymentDto {
     private String referenceNo;
     private BigDecimal amountPaid;
     private String remark;
+    private BigDecimal creditNoteAmount;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

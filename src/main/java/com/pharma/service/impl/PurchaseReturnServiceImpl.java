@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -160,5 +161,12 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         return String.format("RTN-%s-%05d", yearPart, newSequence);
     }
 
+
+    @Transactional
+    @Override
+    public BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy) {
+        return purchaseReturnRepository
+                .sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(supplierId, createdBy);
+    }
 
 }

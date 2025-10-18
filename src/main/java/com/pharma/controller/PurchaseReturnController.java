@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -104,4 +105,27 @@ public class PurchaseReturnController {
             );
         }
     }
+
+
+    @GetMapping("/creditNote/{supplierId}")
+    public ResponseEntity<?> getSumReturnAmountBySupplier(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("supplierId") UUID supplierId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        Long createdById = currentUserOptional.get().getId();
+        BigDecimal sumReturnAmount = purchaseReturnService
+                .getSumReturnAmountBySupplierAndCreatedBy(supplierId, createdById);
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Sum of return amount retrieved successfully",
+                HttpStatus.OK,
+                sumReturnAmount
+        );
+    }
+
 }

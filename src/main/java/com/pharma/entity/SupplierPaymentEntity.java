@@ -49,7 +49,7 @@ public class SupplierPaymentEntity {
     private String remark;
 
     @Column(name = "credit_note_amount")
-    private Boolean creditNoteAmount;
+    private BigDecimal creditNoteAmount;
 
     @Column(name = "created_by")
     private Long createdBy;

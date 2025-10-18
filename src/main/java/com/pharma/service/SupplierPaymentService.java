@@ -1,7 +1,5 @@
 package com.pharma.service;
 
-import com.pharma.dto.PurchaseOrderDto;
-import com.pharma.dto.StockDto;
 import com.pharma.dto.SupplierPaymentDto;
 import com.pharma.entity.User;
 

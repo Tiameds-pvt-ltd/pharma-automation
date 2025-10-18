@@ -59,7 +59,7 @@ public class PurchaseReturnEntity {
     private String remark;
 
     @Column(name = "credit_note")
-    private Boolean creditNote;
+    private Boolean creditNote = false;
 
     @Column(name = "created_by")
     private Long createdBy;

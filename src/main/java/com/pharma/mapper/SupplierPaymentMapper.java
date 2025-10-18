@@ -26,6 +26,7 @@ public class SupplierPaymentMapper {
         supplierPaymentDto.setReferenceNo(supplierPaymentEntity.getReferenceNo());
         supplierPaymentDto.setAmountPaid(supplierPaymentEntity.getAmountPaid());
         supplierPaymentDto.setRemark(supplierPaymentEntity.getRemark());
+        supplierPaymentDto.setCreditNoteAmount(supplierPaymentEntity.getCreditNoteAmount());
         supplierPaymentDto.setCreatedBy(supplierPaymentEntity.getCreatedBy());
         supplierPaymentDto.setCreatedDate(supplierPaymentEntity.getCreatedDate());
         supplierPaymentDto.setModifiedBy(supplierPaymentEntity.getModifiedBy());
@@ -53,6 +54,7 @@ public class SupplierPaymentMapper {
         supplierPaymentEntity.setReferenceNo(supplierPaymentDto.getReferenceNo());
         supplierPaymentEntity.setAmountPaid(supplierPaymentDto.getAmountPaid());
         supplierPaymentEntity.setRemark(supplierPaymentDto.getRemark());
+        supplierPaymentEntity.setCreditNoteAmount(supplierPaymentDto.getCreditNoteAmount());
         supplierPaymentEntity.setCreatedBy(supplierPaymentDto.getCreatedBy());
         supplierPaymentEntity.setCreatedDate(supplierPaymentDto.getCreatedDate());
         supplierPaymentEntity.setModifiedBy(supplierPaymentDto.getModifiedBy());

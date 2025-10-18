@@ -28,6 +28,7 @@ public class PurchaseReturnDto {
     private BigDecimal returnAmount;
     private Long pharmacyId;
     private String remark;
+    private Boolean creditNote;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;
