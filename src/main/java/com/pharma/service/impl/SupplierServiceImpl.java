@@ -88,11 +88,17 @@ public class SupplierServiceImpl implements SupplierService {
         SupplierEntity supplierEntity = supplierEntityOptional.get();
 
         supplierEntity.setSupplierName(updatedSupplier.getSupplierName());
+        supplierEntity.setContactPerson(updatedSupplier.getContactPerson());
         supplierEntity.setSupplierMobile(updatedSupplier.getSupplierMobile());
         supplierEntity.setSupplierEmail(updatedSupplier.getSupplierEmail());
         supplierEntity.setSupplierGstinNo(updatedSupplier.getSupplierGstinNo());
         supplierEntity.setSupplierGstType(updatedSupplier.getSupplierGstType());
+        supplierEntity.setSupplierDlno(updatedSupplier.getSupplierDlno());
         supplierEntity.setSupplierAddress(updatedSupplier.getSupplierAddress());
+        supplierEntity.setSupplierStreet(updatedSupplier.getSupplierStreet());
+        supplierEntity.setSupplierZip(updatedSupplier.getSupplierZip());
+        supplierEntity.setSupplierCity(updatedSupplier.getSupplierCity());
+        supplierEntity.setSupplierState(updatedSupplier.getSupplierState());
         supplierEntity.setSupplierStatus(updatedSupplier.getSupplierStatus());
 
         supplierEntity.setModifiedBy(modifiedById);

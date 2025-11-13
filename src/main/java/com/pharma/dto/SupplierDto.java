@@ -16,11 +16,17 @@ public class SupplierDto {
 
     private UUID supplierId;
     private String supplierName;
+    private String contactPerson;
     private Long supplierMobile;
     private String supplierEmail;
     private String supplierGstinNo;
     private String supplierGstType;
+    private String supplierDlno;
     private String supplierAddress;
+    private String supplierStreet;
+    private String supplierCity;
+    private String supplierZip;
+    private String supplierState;
     private Boolean supplierStatus;
     private Long pharmacyId;
     private Long createdBy;

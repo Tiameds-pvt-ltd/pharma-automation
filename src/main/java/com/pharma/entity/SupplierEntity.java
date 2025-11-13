@@ -27,6 +27,9 @@ public class SupplierEntity {
     @Column(name = "supplier_name")
     private String supplierName;
 
+    @Column(name = "contact_person")
+    private String contactPerson;
+
     @Column(name = "supplier_mobile")
     private Long supplierMobile;
 
@@ -39,8 +42,23 @@ public class SupplierEntity {
     @Column(name = "supplier_gst_type")
     private String supplierGstType;
 
+    @Column(name = "supplier_dlno")
+    private String supplierDlno;
+
     @Column(name = "supplier_address")
     private String supplierAddress;
+
+    @Column(name = "supplier_street")
+    private String supplierStreet;
+
+    @Column(name = "supplier_city")
+    private String supplierCity;
+
+    @Column(name = "supplier_zip")
+    private String supplierZip;
+
+    @Column(name = "supplier_state")
+    private String supplierState;
 
     @Column(name = "supplier_status")
     private Boolean supplierStatus = true;
