@@ -26,6 +26,7 @@ public class BillReturnMapper {
         billReturnDto.setSubTotal(billReturnEntity.getSubTotal());
         billReturnDto.setTotalGst(billReturnEntity.getTotalGst());
         billReturnDto.setGrandTotal(billReturnEntity.getGrandTotal());
+        billReturnDto.setReturnReason(billReturnEntity.getReturnReason());
         billReturnDto.setCreatedBy(billReturnEntity.getCreatedBy());
         billReturnDto.setCreatedDate(billReturnEntity.getCreatedDate());
         billReturnDto.setModifiedBy(billReturnEntity.getModifiedBy());
@@ -71,6 +72,7 @@ public class BillReturnMapper {
         billReturnEntity.setSubTotal(billReturnDto.getSubTotal());
         billReturnEntity.setTotalGst(billReturnDto.getTotalGst());
         billReturnEntity.setGrandTotal(billReturnDto.getGrandTotal());
+        billReturnEntity.setReturnReason(billReturnDto.getReturnReason());
         billReturnEntity.setCreatedBy(billReturnDto.getCreatedBy());
         billReturnEntity.setCreatedDate(billReturnDto.getCreatedDate());
         billReturnEntity.setModifiedBy(billReturnDto.getModifiedBy());

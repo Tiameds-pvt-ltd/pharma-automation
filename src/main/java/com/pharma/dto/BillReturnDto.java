@@ -30,6 +30,7 @@ public class BillReturnDto {
     private BigDecimal subTotal;
     private BigDecimal totalGst;
     private BigDecimal grandTotal;
+    private String returnReason;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

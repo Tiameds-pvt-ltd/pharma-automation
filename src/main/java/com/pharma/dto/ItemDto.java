@@ -20,14 +20,14 @@ public class ItemDto {
     private Long purchaseUnit;
     private String variantName;
     private String unitName;
-    private String manufacturer;
     private BigDecimal purchasePrice;
     private BigDecimal mrpSalePrice;
     private BigDecimal purchasePricePerUnit;
     private BigDecimal mrpSalePricePerUnit;
     private Long gstPercentage;
-    private String genericName;
     private String hsnNo;
+    private String genericName;
+    private String manufacturer;
     private String consumables;
     private Long pharmacyId;
     private Long createdBy;

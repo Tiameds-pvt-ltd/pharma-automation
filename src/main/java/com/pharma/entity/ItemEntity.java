@@ -37,9 +37,6 @@ public class ItemEntity {
     @Column(name = "unit_name")
     private String unitName;
 
-    @Column(name = "manufacturer")
-    private String manufacturer;
-
     @Column(name = "purchase_price")
     private BigDecimal purchasePrice;
 
@@ -55,11 +52,14 @@ public class ItemEntity {
     @Column(name = "gst_percentage")
     private Long gstPercentage;
 
+    @Column(name = "hsn_no")
+    private String hsnNo;
+
     @Column(name = "generic_name")
     private String genericName;
 
-    @Column(name = "hsn_no")
-    private String hsnNo;
+    @Column(name = "manufacturer")
+    private String manufacturer;
 
     @Column(name = "consumables")
     private String consumables;

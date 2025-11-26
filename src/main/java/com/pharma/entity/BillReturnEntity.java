@@ -60,6 +60,9 @@ public class BillReturnEntity {
     @Column(name = "grand_total")
     private BigDecimal grandTotal;
 
+    @Column(name = "return_reason")
+    private String returnReason;
+
     @Column(name = "created_by")
     private Long createdBy;
 

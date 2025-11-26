@@ -41,12 +41,6 @@ public class StockItemEntity {
     @Column(name = "free_item")
     private Long freeItem;
 
-    @Column(name = "discount_percentage")
-    private BigDecimal discountPercentage;
-
-    @Column(name = "discount_amount")
-    private BigDecimal discountAmount;
-
     @Column(name = "purchase_price")
     private BigDecimal purchasePrice;
 
@@ -64,6 +58,12 @@ public class StockItemEntity {
 
     @Column(name = "gst_amount")
     private BigDecimal gstAmount;
+
+    @Column(name = "discount_percentage")
+    private BigDecimal discountPercentage;
+
+    @Column(name = "discount_amount")
+    private BigDecimal discountAmount;
 
     @Column(name = "amount")
     private BigDecimal amount;
