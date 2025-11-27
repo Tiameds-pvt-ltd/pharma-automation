@@ -27,11 +27,8 @@ public class PatientDetailsEntity {
     @Column(name = "patient_id1")
     private String patientId1;
 
-    @Column(name = "first_name")
-    private String firstName;
-
-    @Column(name = "last_name")
-    private String lastName;
+    @Column(name = "patient_name")
+    private String patientName;
 
     @Column(name = "email")
     private String email;

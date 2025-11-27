@@ -86,8 +86,7 @@ public class PatientDetailsServiceImpl implements PatientDetailsService {
 
         PatientDetailsEntity patientDetailsEntity = patientEntityOptional.get();
 
-        patientDetailsEntity.setFirstName(patientDetailsDto.getFirstName());
-        patientDetailsEntity.setLastName(patientDetailsDto.getLastName());
+        patientDetailsEntity.setPatientName(patientDetailsDto.getPatientName());
         patientDetailsEntity.setEmail(patientDetailsDto.getEmail());
         patientDetailsEntity.setPhone(patientDetailsDto.getPhone());
         patientDetailsEntity.setAddress(patientDetailsDto.getAddress());
