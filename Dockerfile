@@ -1,5 +1,8 @@
 # Use an OpenJDK base image
-FROM openjdk:17-jdk-alpine
+# FROM openjdk:17-jdk-alpine
+
+# Use Amazon Corretto (AWS recommended)
+FROM amazoncorretto:17-alpine
 
 # Set the working directory inside the container
 WORKDIR /pharma
