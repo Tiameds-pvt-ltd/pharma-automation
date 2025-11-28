@@ -46,22 +46,6 @@ public class VariantController {
     }
 
 
-//    @GetMapping("/getAll")
-//    public ResponseEntity<?> getAllVariants(@RequestHeader("Authorization") String token) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        User currentUser = currentUserOptional.get();
-//        List<VariantDto> variants = variantService.getAllVariant(currentUser.getId());
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Variants retrieved successfully", HttpStatus.OK, variants);
-//    }
-
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllVariants() {
         List<VariantDto> variants = variantService.getAllVariants();
@@ -119,4 +103,33 @@ public class VariantController {
             );
         }
     }
+
+
+    @PutMapping("/update/{variantId}")
+    public ResponseEntity<?> updateVariant(
+            @RequestHeader("Authorization") String token,
+            @PathVariable("variantId") UUID variantId,
+            @RequestBody VariantDto updateVariantDto
+    ) {
+        // 1️⃣ Authenticate user
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token", HttpStatus.UNAUTHORIZED, null
+            );
+        }
+
+        Long modifiedById = currentUserOptional.get().getId();
+
+        // 2️⃣ Call service method
+        VariantDto updatedVariant = variantService.updateVariant(modifiedById, variantId, updateVariantDto);
+
+        // 3️⃣ Return response
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Variant updated successfully",
+                HttpStatus.OK,
+                updatedVariant
+        );
+    }
+
 }

@@ -62,14 +62,6 @@ public class VariantServiceImpl implements VariantService {
         return variantMapper.toDto(savedEntity);
     }
 
-//    @Override
-//    @Transactional()
-//    public List<VariantDto> getAllVariant(Long createdById) {
-//        List<VariantEntity> variants = variantRepository.findAllByCreatedBy(createdById);
-//        return variants.stream()
-//                .map(variantMapper::toDto)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -103,4 +95,49 @@ public class VariantServiceImpl implements VariantService {
 
         variantRepository.delete(variantEntityOptional.get());
     }
+
+
+    @Override
+    @Transactional
+    public VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant) {
+
+        // 1️⃣ Fetch variant only if created by this user
+        VariantEntity existingVariant = variantRepository
+                .findByVariantIdAndCreatedBy(variantId, modifiedById)
+                .orElseThrow(() ->
+                        new RuntimeException("Variant not found with ID: " + variantId + " for user ID: " + modifiedById)
+                );
+
+        if (updateVariant.getVariantName() != null) {
+            existingVariant.setVariantName(updateVariant.getVariantName());
+        }
+
+        existingVariant.setModifiedBy(modifiedById);
+        existingVariant.setModifiedDate(LocalDate.now());
+
+        existingVariant.getUnitEntities().clear();
+
+        List<UnitEntity> updatedUnits = updateVariant.getUnitDtos().stream()
+                .map(unitDto -> {
+                    UnitEntity unitEntity = new UnitEntity();
+                    unitEntity.setUnitId(unitDto.getUnitId());   // Keep same UUID if editing
+                    unitEntity.setUnitName(unitDto.getUnitName());
+                    unitEntity.setCreatedBy(unitDto.getCreatedBy());
+                    unitEntity.setCreatedDate(unitDto.getCreatedDate());
+                    unitEntity.setModifiedBy(modifiedById);
+                    unitEntity.setModifiedDate(LocalDate.now());
+
+                    unitEntity.setVariantEntity(existingVariant);
+
+                    return unitEntity;
+                })
+                .collect(Collectors.toList());
+
+        existingVariant.getUnitEntities().addAll(updatedUnits);
+
+        VariantEntity savedVariant = variantRepository.save(existingVariant);
+
+        return variantMapper.toDto(savedVariant);
+    }
+
 }

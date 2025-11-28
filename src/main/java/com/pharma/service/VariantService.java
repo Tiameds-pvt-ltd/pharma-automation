@@ -17,8 +17,8 @@ public interface VariantService {
     List<VariantDto> getAllVariants();
 
     VariantDto getVariantById(Long createdById, UUID variantId);
-//
-//    VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant);
-//
+
+    VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant);
+
     void deleteVariant(Long createdById, UUID variantId);
 }
