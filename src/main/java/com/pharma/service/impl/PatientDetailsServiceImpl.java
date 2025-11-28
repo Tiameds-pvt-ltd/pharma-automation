@@ -86,12 +86,11 @@ public class PatientDetailsServiceImpl implements PatientDetailsService {
 
         PatientDetailsEntity patientDetailsEntity = patientEntityOptional.get();
 
-        patientDetailsEntity.setFirstName(patientDetailsDto.getFirstName());
-        patientDetailsEntity.setLastName(patientDetailsDto.getLastName());
+        patientDetailsEntity.setPatientName(patientDetailsDto.getPatientName());
         patientDetailsEntity.setEmail(patientDetailsDto.getEmail());
         patientDetailsEntity.setPhone(patientDetailsDto.getPhone());
-        patientDetailsEntity.setAddress(patientDetailsDto.getAddress());
-        patientDetailsEntity.setCity(patientDetailsDto.getCity());
+        patientDetailsEntity.setPatientAddress(patientDetailsDto.getPatientAddress());
+        patientDetailsEntity.setPatientCity(patientDetailsDto.getPatientCity());
         patientDetailsEntity.setState(patientDetailsDto.getState());
         patientDetailsEntity.setZip(patientDetailsDto.getZip());
         patientDetailsEntity.setBloodGroup(patientDetailsDto.getBloodGroup());
@@ -139,5 +138,19 @@ public class PatientDetailsServiceImpl implements PatientDetailsService {
         }
 
         return String.format("PAT-%s-%05d", yearPart, newSequence);
+    }
+
+    public String getNextMaxPatientId() {
+        String maxId = patientDetailsRepository.findMaxPatientId1();
+
+        if (maxId == null) {
+            return "PAT-" + LocalDate.now().getYear() + "-00001";
+        }
+
+        String year = maxId.substring(4, 8);
+        int number = Integer.parseInt(maxId.substring(9));
+        number++;
+
+        return String.format("PAT-%s-%05d", year, number);
     }
 }

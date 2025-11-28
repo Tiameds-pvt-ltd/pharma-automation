@@ -16,12 +16,11 @@ public class PatientDetailsDto {
 
     private UUID patientId;
     private String patientId1;
-    private String firstName;
-    private String lastName;
+    private String patientName;
     private String email;
     private Long phone;
-    private String address;
-    private String city;
+    private String patientAddress;
+    private String patientCity;
     private String state;
     private String zip;
     private String bloodGroup;

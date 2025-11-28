@@ -62,14 +62,6 @@ public class VariantServiceImpl implements VariantService {
         return variantMapper.toDto(savedEntity);
     }
 
-//    @Override
-//    @Transactional()
-//    public List<VariantDto> getAllVariant(Long createdById) {
-//        List<VariantEntity> variants = variantRepository.findAllByCreatedBy(createdById);
-//        return variants.stream()
-//                .map(variantMapper::toDto)
-//                .collect(Collectors.toList());
-//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -90,6 +82,11 @@ public class VariantServiceImpl implements VariantService {
         }
 
         return variantMapper.toDto(variantEntityOptional.get());
+    }
+
+    @Override
+    public VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant) {
+        return null;
     }
 
     @Override

@@ -25,14 +25,14 @@ public interface BillReturnRepository extends JpaRepository<BillReturnEntity, UU
     @Query("SELECT new com.pharma.dto.BillReturnListDto(" +
             "b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
             "b.grandTotal, b.patientType, b.patientId, " +
-            "CONCAT(p.firstName, ' ', p.lastName), " +
+            "(p.patientName), " +
             "COUNT(i.billReturnItemId)) " +
             "FROM BillReturnEntity b " +
             "LEFT JOIN b.billReturnItemEntities i " +
             "JOIN PatientDetailsEntity p ON b.patientId = p.patientId " +
             "WHERE b.createdBy = :createdBy " +
             "GROUP BY b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
-            "b.grandTotal, b.patientType, b.patientId, p.firstName, p.lastName")
+            "b.grandTotal, b.patientType, b.patientId, p.patientName")
     List<BillReturnListDto> fetchBillReturnListsByCreatedBy(Long createdBy);
 }
 
