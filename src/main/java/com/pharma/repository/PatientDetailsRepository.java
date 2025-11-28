@@ -22,4 +22,6 @@ public interface PatientDetailsRepository extends JpaRepository<PatientDetailsEn
 
     boolean existsByPatientNameAndPhone(String patientName, Long phone);
 
+    @Query("SELECT MAX(p.patientId1) FROM PatientDetailsEntity p")
+    String findMaxPatientId1();
 }

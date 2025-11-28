@@ -36,11 +36,11 @@ public class PatientDetailsEntity {
     @Column(name = "phone")
     private Long phone;
 
-    @Column(name = "address")
-    private String address;
+    @Column(name = "patient_address")
+    private String patientAddress;
 
-    @Column(name = "city")
-    private String city;
+    @Column(name = "patient_city")
+    private String patientCity;
 
     @Column(name = "state")
     private String state;

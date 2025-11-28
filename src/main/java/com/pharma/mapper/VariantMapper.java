@@ -12,28 +12,6 @@ import java.util.stream.Collectors;
 @Component
 public class VariantMapper {
 
-//    public VariantDto mapToDto(VariantEntity variantEntity){
-//        return new VariantDto(
-//                variantEntity.getVariantId(),
-//                variantEntity.getVariantName(),
-//                variantEntity.getCreatedBy(),
-//                variantEntity.getCreatedDate(),
-//                variantEntity.getModifiedBy(),
-//                variantEntity.getModifiedDate()
-//        );
-//    }
-//
-//    public static VariantEntity mapToEntity(VariantDto variantDto){
-//        return new VariantEntity(
-//                variantDto.getVariantId(),
-//                variantDto.getVariantName(),
-//                variantDto.getCreatedBy(),
-//                variantDto.getCreatedDate(),
-//                variantDto.getModifiedBy(),
-//                variantDto.getModifiedDate()
-//        );
-//    }
-
     public VariantDto toDto(VariantEntity variantEntity) {
         if (variantEntity == null) {
             return null;
