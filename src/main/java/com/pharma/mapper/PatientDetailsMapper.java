@@ -11,7 +11,8 @@ public class PatientDetailsMapper {
         return new PatientDetailsDto(
                 patientDetailsEntity.getPatientId(),
                 patientDetailsEntity.getPatientId1(),
-                patientDetailsEntity.getPatientName(),
+                patientDetailsEntity.getFirstName(),
+                patientDetailsEntity.getLastName(),
                 patientDetailsEntity.getEmail(),
                 patientDetailsEntity.getPhone(),
                 patientDetailsEntity.getPatientAddress(),
@@ -33,7 +34,8 @@ public class PatientDetailsMapper {
         return new PatientDetailsEntity(
                 patientDetailsDto.getPatientId(),
                 patientDetailsDto.getPatientId1(),
-                patientDetailsDto.getPatientName(),
+                patientDetailsDto.getFirstName(),
+                patientDetailsDto.getLastName(),
                 patientDetailsDto.getEmail(),
                 patientDetailsDto.getPhone(),
                 patientDetailsDto.getPatientAddress(),

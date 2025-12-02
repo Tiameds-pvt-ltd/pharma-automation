@@ -152,8 +152,8 @@ public class PatientDetailsController {
 
     @PostMapping("/check-duplicate")
     public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestBody PatientDetailsDto request) {
-        boolean exists = patientDetailsRepository.existsByPatientNameAndPhone(
-                request.getPatientName(), request.getPhone()
+        boolean exists = patientDetailsRepository.existsByFirstNameAndPhone(
+                request.getFirstName(), request.getPhone()
         );
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }

@@ -20,7 +20,7 @@ public interface PatientDetailsRepository extends JpaRepository<PatientDetailsEn
     @Query("SELECT p FROM PatientDetailsEntity p WHERE p.patientId1 LIKE CONCAT('PAT-', :year, '-%') ORDER BY p.patientId1 DESC LIMIT 1")
     Optional<PatientDetailsEntity> findLatestPatientForYear(@Param("year") String year);
 
-    boolean existsByPatientNameAndPhone(String patientName, Long phone);
+    boolean existsByFirstNameAndPhone(String firstName, Long phone);
 
     @Query("SELECT MAX(p.patientId1) FROM PatientDetailsEntity p")
     String findMaxPatientId1();
