@@ -52,15 +52,16 @@ public class StockController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllStocks(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        User currentUser = currentUserOptional.get();
-        List<StockDto> stocks = stockService.getAllStocks(currentUser.getId());
+
+        List<StockDto> stocks = stockService.getAllStocks(pharmacyId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Stocks retrieved successfully", HttpStatus.OK, stocks);
@@ -70,15 +71,16 @@ public class StockController {
     @GetMapping("/getById/{invId}")
     public ResponseEntity<?> getStockById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("invId") UUID invId
+            @PathVariable("invId") UUID invId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        StockDto stockDto = stockService.getStockById(createdById, invId);
+
+        StockDto stockDto = stockService.getStockById(pharmacyId, invId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Stock retrieved successfully",
                 HttpStatus.OK,
@@ -90,16 +92,17 @@ public class StockController {
     @DeleteMapping("/delete/{invId}")
     public ResponseEntity<?> deleteStockById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("invId") UUID invId
+            @PathVariable("invId") UUID invId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        try {
-            stockService.deleteStock(createdById, invId);
+
+         try {
+            stockService.deleteStock(pharmacyId, invId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Stock deleted successfully",
                     HttpStatus.OK,
@@ -136,15 +139,16 @@ public class StockController {
 
 
     @GetMapping("/summary")
-    public ResponseEntity<?> getStockSummaryByItem(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getStockSummaryByItem(@RequestHeader("Authorization") String token, @RequestParam Long pharmacyId) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        User currentUser = currentUserOptional.get();
-        List<StockDto> stocks = stockService.getAllStocks(currentUser.getId());
+//        User currentUser = currentUserOptional.get();
+//        List<StockDto> stocks = stockService.getAllStocks(currentUser.getId());
+        List<StockDto> stocks = stockService.getAllStocks(pharmacyId, currentUserOptional.get());
 
         Map<UUID, BigDecimal> amountPerItem = new HashMap<>();
 

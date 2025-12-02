@@ -41,10 +41,20 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(purchaseOrderDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         PurchaseOrderEntity purchaseOrderEntity = purchaseOrderMapper.toEntity(purchaseOrderDto);
         purchaseOrderEntity.setOrderId(UUID.randomUUID());
         purchaseOrderEntity.setCreatedBy(user.getId());
         purchaseOrderEntity.setCreatedDate(LocalDate.now());
+
+        purchaseOrderEntity.setPharmacyId(purchaseOrderDto.getPharmacyId());
 
         String newOrderId1 = generateOrderId1();
         purchaseOrderEntity.setOrderId1(newOrderId1);
@@ -64,8 +74,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     @Transactional
-    public List<PurchaseOrderDto> getAllPurchaseOrders(Long createdById) {
-        List<PurchaseOrderEntity> purchaseOrders = purchaseOrderRepository.findAllByCreatedBy(createdById);
+    public List<PurchaseOrderDto> getAllPurchaseOrders(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<PurchaseOrderEntity> purchaseOrders = purchaseOrderRepository.findAllByPharmacyId(pharmacyId);
         return purchaseOrders.stream()
                 .map(purchaseOrderMapper::toDto)
                 .collect(Collectors.toList());
@@ -73,11 +90,18 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     @Transactional
-    public PurchaseOrderDto getPurchaseOrderById(Long createdById, UUID orderId) {
-        Optional<PurchaseOrderEntity> purchaseOrderEntity = purchaseOrderRepository.findByOrderIdAndCreatedBy(orderId, createdById);
+    public PurchaseOrderDto getPurchaseOrderById(Long pharmacyId, UUID orderId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<PurchaseOrderEntity> purchaseOrderEntity = purchaseOrderRepository.findByOrderIdAndPharmacyId(orderId, pharmacyId);
 
         if (purchaseOrderEntity.isEmpty()) {
-            throw new RuntimeException("Purchase order not found with ID: " + orderId + " for user ID: " + createdById);
+            throw new RuntimeException("Purchase order not found with ID: " + orderId + " for pharmacy ID: " + pharmacyId);
         }
         return purchaseOrderMapper.toDto(purchaseOrderEntity.get());
     }
@@ -85,10 +109,17 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     @Override
     @Transactional
-    public void deletePurchaseOrderById(Long createdById, UUID orderId) {
-        Optional<PurchaseOrderEntity> purchaseOrderEntity = purchaseOrderRepository.findByOrderIdAndCreatedBy(orderId, createdById);
+    public void deletePurchaseOrderById(Long pharmacyId, UUID orderId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<PurchaseOrderEntity> purchaseOrderEntity = purchaseOrderRepository.findByOrderIdAndPharmacyId(orderId, pharmacyId);
         if (purchaseOrderEntity.isEmpty()) {
-            throw new RuntimeException("Purchase order not found with ID: " + orderId + " for user ID: " + createdById);
+            throw new RuntimeException("Purchase order not found with ID: " + orderId + " for pharmacy ID: " + pharmacyId);
         }
         purchaseOrderRepository.delete(purchaseOrderEntity.get());
     }

@@ -13,11 +13,11 @@ public interface StockService {
 
     StockDto saveStock(StockDto stockDto, User user);
 
-    List<StockDto> getAllStocks(Long createdById);
+    List<StockDto> getAllStocks(Long pharmacyId, User user);
 
-    StockDto getStockById(Long createdById, UUID invId);
+    StockDto getStockById(Long pharmacyId, UUID invId, User user);
 
-    void deleteStock(Long createdById, UUID invId);
+    void deleteStock(Long pharmacyId, UUID invId, User user);
 
     void confirmPayment(Long createdById, UUID invId);
 

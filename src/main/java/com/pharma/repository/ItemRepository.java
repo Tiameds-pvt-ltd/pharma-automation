@@ -2,6 +2,7 @@ package com.pharma.repository;
 
 import com.pharma.entity.DoctorEntity;
 import com.pharma.entity.ItemEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +18,9 @@ public interface ItemRepository extends JpaRepository<ItemEntity, UUID> {
     Optional<ItemEntity> findByItemIdAndCreatedBy(UUID itemId, Long createdBy);
 
     boolean existsByItemNameAndManufacturer(String itemName, String manufacturer);
+
+    List<ItemEntity> findAllByPharmacyId(Long pharmacyId);
+
+    Optional<ItemEntity> findByItemIdAndPharmacyId(UUID itemId, Long pharmacyId);
 
 }

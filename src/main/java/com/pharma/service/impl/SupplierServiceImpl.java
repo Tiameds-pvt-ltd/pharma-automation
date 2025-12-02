@@ -47,10 +47,20 @@ public class SupplierServiceImpl implements SupplierService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(supplierDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         SupplierEntity supplierEntity = supplierMapper.mapToEntity(supplierDto);
         supplierEntity.setSupplierId(UUID.randomUUID());
         supplierEntity.setCreatedBy(user.getId());
         supplierEntity.setCreatedDate(LocalDate.now());
+
+        supplierEntity.setPharmacyId(supplierDto.getPharmacyId());
 
         SupplierEntity savedSupplier = supplierRepository.save(supplierEntity);
         return supplierMapper.mapToDto(savedSupplier);
@@ -58,8 +68,15 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     @Transactional
-    public List<SupplierDto> getAllSupplier(Long createdById) {
-        List<SupplierEntity> suppliers = supplierRepository.findAllByCreatedBy(createdById);
+    public List<SupplierDto> getAllSupplier(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<SupplierEntity> suppliers = supplierRepository.findAllByPharmacyId(pharmacyId);
         return suppliers.stream()
                 .map(supplierMapper::mapToDto)
                 .collect(Collectors.toList());
@@ -67,22 +84,39 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     @Transactional
-    public SupplierDto getSupplierById(Long createdById, UUID supplierId) {
-        Optional<SupplierEntity> supplierEntity = supplierRepository.findBySupplierIdAndCreatedBy(supplierId, createdById);
+    public SupplierDto getSupplierById(Long pharmacyId, UUID supplierId, User user) {
+
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<SupplierEntity> supplierEntity = supplierRepository.findBySupplierIdAndPharmacyId(supplierId, pharmacyId);
 
         if (supplierEntity.isEmpty()) {
-            throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId + " for user ID: " + createdById);
+            throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId + " for pharmacy ID: " + pharmacyId);
         }
         return supplierMapper.mapToDto(supplierEntity.get());
     }
 
     @Override
     @Transactional
-    public SupplierDto updateSupplier(Long modifiedById, UUID supplierId, SupplierDto updatedSupplier) {
-        Optional<SupplierEntity> supplierEntityOptional = supplierRepository.findById(supplierId);
+    public SupplierDto updateSupplier(Long pharmacyId, UUID supplierId, SupplierDto updatedSupplier, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<SupplierEntity> supplierEntityOptional =
+                supplierRepository.findBySupplierIdAndPharmacyId(supplierId, pharmacyId);
 
         if (supplierEntityOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId);
+            throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId+
+                    " for pharmacy ID: " + pharmacyId);
         }
 
         SupplierEntity supplierEntity = supplierEntityOptional.get();
@@ -101,7 +135,7 @@ public class SupplierServiceImpl implements SupplierService {
         supplierEntity.setSupplierState(updatedSupplier.getSupplierState());
         supplierEntity.setSupplierStatus(updatedSupplier.getSupplierStatus());
 
-        supplierEntity.setModifiedBy(modifiedById);
+        supplierEntity.setModifiedBy(user.getId());
         supplierEntity.setModifiedDate(LocalDate.now());
 
         SupplierEntity updatedSuppliers = supplierRepository.save(supplierEntity);
@@ -110,14 +144,22 @@ public class SupplierServiceImpl implements SupplierService {
 
     @Override
     @Transactional
-    public void deleteSupplier(Long createdById, UUID supplierId) {
-        Optional<SupplierEntity> supplierEntity = supplierRepository.findBySupplierIdAndCreatedBy(supplierId, createdById);
+    public void deleteSupplier(Long pharmacyId, UUID supplierId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
-        if (supplierEntity.isEmpty()) {
-            throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId + " for user ID: " + createdById);
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
         }
 
-        supplierRepository.delete(supplierEntity.get());
+        Optional<SupplierEntity> supplierEntityOptional =
+                supplierRepository.findBySupplierIdAndPharmacyId(supplierId, pharmacyId);
+
+        if (supplierEntityOptional.isEmpty()) {
+            throw new ResourceNotFoundException("Supplier not found with ID: " + supplierId + " for pharmacy ID: " + pharmacyId);
+        }
+
+        supplierRepository.delete(supplierEntityOptional.get());
     }
 }
 

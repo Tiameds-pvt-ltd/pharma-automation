@@ -6,6 +6,7 @@ import com.pharma.dto.StockSummaryDto;
 import com.pharma.entity.PurchaseOrderEntity;
 import com.pharma.entity.StockEntity;
 import com.pharma.entity.StockItemEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -52,8 +53,9 @@ public interface StockRepository extends JpaRepository<StockEntity, UUID> {
             @Param("createdBy") Long createdBy
     );
 
+    List<StockEntity> findAllByPharmacyId(Long pharmacyId);
 
-
+    Optional<StockEntity> findByInvIdAndPharmacyId(UUID invId, Long pharmacyId);
 
 
 }

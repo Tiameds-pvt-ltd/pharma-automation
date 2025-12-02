@@ -10,13 +10,13 @@ public interface DoctorService {
 
     DoctorDto createDoctor(DoctorDto doctorDto, User user);
 
-    List<DoctorDto> getAllDoctors(Long createdById);
+    List<DoctorDto> getAllDoctors(Long pharmacyId, User user);
 
-    DoctorDto getDoctorById(Long createdById, UUID doctorId);
+    DoctorDto getDoctorById(Long pharmacyId, UUID doctorId, User user);
 
-    DoctorDto updateDoctor(Long modifiedById, UUID doctorId, DoctorDto doctorDto);
+    DoctorDto updateDoctor(Long pharmacyId, UUID doctorId, DoctorDto doctorDto, User user);
 
-    void deleteDoctorById(Long createdById, UUID doctorId);
+    void deleteDoctorById(Long pharmacyId, UUID doctorId, User user);
 
 
 

@@ -51,7 +51,8 @@ public class DoctorController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllDoctors(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
@@ -59,7 +60,7 @@ public class DoctorController {
             return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        List<DoctorDto> doctors = doctorService.getAllDoctors(currentUserOptional.get().getId());
+        List<DoctorDto> doctors = doctorService.getAllDoctors(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage("Doctors retrieved successfully", HttpStatus.OK, doctors);
     }
 
@@ -67,7 +68,8 @@ public class DoctorController {
     @GetMapping("/getById/{doctorId}")
     public ResponseEntity<?> getDoctorById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("doctorId") UUID doctorId
+            @PathVariable("doctorId") UUID doctorId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -75,8 +77,7 @@ public class DoctorController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        DoctorDto doctorDto = doctorService.getDoctorById(createdById, doctorId);
+        DoctorDto doctorDto = doctorService.getDoctorById(pharmacyId, doctorId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Doctor retrieved successfully",
@@ -90,6 +91,7 @@ public class DoctorController {
     public ResponseEntity<?> updateDoctorById(
             @RequestHeader("Authorization") String token,
             @PathVariable("doctorId") UUID doctorId,
+            @RequestParam Long pharmacyId,
             @RequestBody DoctorDto doctorDto
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
@@ -98,10 +100,9 @@ public class DoctorController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long modifiedById = currentUserOptional.get().getId();
 
         try {
-            DoctorDto updatedDoctor = doctorService.updateDoctor(modifiedById, doctorId, doctorDto);
+            DoctorDto updatedDoctor = doctorService.updateDoctor(pharmacyId, doctorId, doctorDto, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Item updated successfully",
                     HttpStatus.OK,
@@ -117,11 +118,11 @@ public class DoctorController {
     }
 
 
-
     @DeleteMapping("/delete/{doctorId}")
     public ResponseEntity<?> deleteDoctorById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("doctorId") UUID doctorId
+            @PathVariable("doctorId") UUID doctorId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -129,9 +130,9 @@ public class DoctorController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
+
         try {
-            doctorService.deleteDoctorById(createdById, doctorId);
+            doctorService.deleteDoctorById(pharmacyId, doctorId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Doctor deleted successfully",
                     HttpStatus.OK,

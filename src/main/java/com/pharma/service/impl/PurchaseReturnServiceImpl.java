@@ -48,10 +48,20 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(purchaseReturnDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         PurchaseReturnEntity purchaseReturnEntity = purchaseReturnMapper.toEntity(purchaseReturnDto);
         purchaseReturnEntity.setReturnId(UUID.randomUUID());
         purchaseReturnEntity.setCreatedBy(user.getId());
         purchaseReturnEntity.setCreatedDate(LocalDate.now());
+
+        purchaseReturnEntity.setPharmacyId(purchaseReturnDto.getPharmacyId());
 
         String newReturnId1 = generateReturnId1();
         purchaseReturnEntity.setReturnId1(newReturnId1);
@@ -111,8 +121,15 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
 
     @Transactional
     @Override
-    public List<PurchaseReturnDto> getAllPurchaseReturn(Long createdById) {
-        List<PurchaseReturnEntity> purchaseReturns = purchaseReturnRepository.findAllByCreatedBy(createdById);
+    public List<PurchaseReturnDto> getAllPurchaseReturn(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<PurchaseReturnEntity> purchaseReturns = purchaseReturnRepository.findAllByPharmacyId(pharmacyId);
         return purchaseReturns.stream()
                 .map(purchaseReturnMapper::toDto)
                 .collect(Collectors.toList());
@@ -120,21 +137,35 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
 
     @Transactional
     @Override
-    public PurchaseReturnDto getPurchaseReturnById(Long createdById, UUID returnId) {
-        Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndCreatedBy(returnId, createdById);
+    public PurchaseReturnDto getPurchaseReturnById(Long pharmacyId, UUID returnId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndPharmacyId(returnId, pharmacyId);
 
         if (purchaseReturnEntity.isEmpty()) {
-            throw new RuntimeException("Purchase return not found with ID: " + returnId + " for user ID: " + createdById);
+            throw new RuntimeException("Purchase return not found with ID: " + returnId + " for pharmacy ID: " + pharmacyId);
         }
         return purchaseReturnMapper.toDto(purchaseReturnEntity.get());
     }
 
     @Transactional
     @Override
-    public void deletePurchaseReturnById(Long createdById, UUID returnId) {
-        Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndCreatedBy(returnId, createdById);
+    public void deletePurchaseReturnById(Long pharmacyId, UUID returnId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndCreatedBy(returnId, pharmacyId);
         if (purchaseReturnEntity.isEmpty()) {
-            throw new RuntimeException("Purchase return not found with ID: " + returnId + " for user ID: " + createdById);
+            throw new RuntimeException("Purchase return not found with ID: " + returnId + " for pharmacy ID: " + pharmacyId);
         }
         purchaseReturnRepository.delete(purchaseReturnEntity.get());
     }

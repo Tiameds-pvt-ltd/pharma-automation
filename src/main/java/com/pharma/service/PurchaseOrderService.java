@@ -10,10 +10,10 @@ public interface PurchaseOrderService {
 
     PurchaseOrderDto savePurchaseOrder(PurchaseOrderDto purchaseOrderDto, User user);
 
-    List<PurchaseOrderDto> getAllPurchaseOrders(Long createdById);
+    List<PurchaseOrderDto> getAllPurchaseOrders(Long pharmacyId, User user);
 
-    PurchaseOrderDto getPurchaseOrderById(Long createdById, UUID orderId);
+    PurchaseOrderDto getPurchaseOrderById(Long pharmacyId, UUID orderId, User user);
 
-    void deletePurchaseOrderById(Long createdById, UUID orderId);
+    void deletePurchaseOrderById(Long pharmacyId, UUID orderId, User user);
 
 }

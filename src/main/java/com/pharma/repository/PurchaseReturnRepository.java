@@ -2,6 +2,7 @@ package com.pharma.repository;
 
 import com.pharma.entity.PurchaseOrderEntity;
 import com.pharma.entity.PurchaseReturnEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -37,5 +38,7 @@ public interface PurchaseReturnRepository extends JpaRepository<PurchaseReturnEn
     @Query("UPDATE PurchaseReturnEntity pr SET pr.creditNote = true WHERE pr.supplierId = :supplierId")
     int markCreditNoteTrueForSupplier(@Param("supplierId") UUID supplierId);
 
+    List<PurchaseReturnEntity> findAllByPharmacyId(Long pharmacyId);
 
+    Optional<PurchaseReturnEntity> findByReturnIdAndPharmacyId(UUID returnId, Long pharmacyId);
 }

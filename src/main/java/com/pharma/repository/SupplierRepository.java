@@ -21,4 +21,9 @@ public interface SupplierRepository extends JpaRepository<SupplierEntity, UUID> 
     boolean existsBySupplierMobile(Long supplierMobile);
     boolean existsBySupplierGstinNo(String supplierGstinNo);
 
+    List<SupplierEntity> findAllByPharmacyId(Long pharmacyId);
+
+    Optional<SupplierEntity> findBySupplierIdAndPharmacyId(UUID supplierId, Long pharmacyId);
+
+
 }

@@ -55,10 +55,20 @@ public class StockSerivceImpl implements StockService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(stockDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         StockEntity stockEntity = stockMapper.toEntity(stockDto);
         stockEntity.setInvId(UUID.randomUUID());
         stockEntity.setCreatedBy(user.getId());
         stockEntity.setCreatedDate(LocalDate.now());
+
+        stockEntity.setPharmacyId(stockDto.getPharmacyId());
 
         if (stockEntity.getGoodStatus() == null || stockEntity.getGoodStatus().isEmpty()) {
             stockEntity.setGoodStatus("Received");
@@ -140,8 +150,15 @@ public class StockSerivceImpl implements StockService {
 
     @Transactional
     @Override
-    public List<StockDto> getAllStocks(Long createdById) {
-        List<StockEntity> stockEntities = stockRepository.findAllByCreatedBy(createdById);
+    public List<StockDto> getAllStocks(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<StockEntity> stockEntities = stockRepository.findAllByPharmacyId(pharmacyId);
         return stockEntities.stream()
                 .map(stockMapper::toDto)
                 .collect(Collectors.toList());
@@ -149,11 +166,18 @@ public class StockSerivceImpl implements StockService {
 
     @Transactional
     @Override
-    public StockDto getStockById(Long createdById, UUID invId) {
-        Optional<StockEntity> stockEntity = stockRepository.findByInvIdAndCreatedBy(invId, createdById);
+    public StockDto getStockById(Long pharmacyId, UUID invId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<StockEntity> stockEntity = stockRepository.findByInvIdAndPharmacyId(invId, pharmacyId);
 
         if (stockEntity.isEmpty()) {
-            throw new RuntimeException("Stock not found with ID: " + invId + " for user ID: " + createdById);
+            throw new RuntimeException("Stock not found with ID: " + invId + " for pharmacy ID: " + pharmacyId);
         }
         return stockMapper.toDto(stockEntity.get());
 
@@ -161,10 +185,17 @@ public class StockSerivceImpl implements StockService {
 
     @Transactional
     @Override
-    public void deleteStock(Long createdById, UUID invId) {
-        Optional<StockEntity> stockEntity = stockRepository.findByInvIdAndCreatedBy(invId, createdById);
+    public void deleteStock(Long pharmacyId, UUID invId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<StockEntity> stockEntity = stockRepository.findByInvIdAndPharmacyId(invId, pharmacyId);
         if (stockEntity.isEmpty()) {
-            throw new RuntimeException("Stock not found with ID: " + invId + " for user ID: " + createdById);
+            throw new RuntimeException("Stock not found with ID: " + invId + " for pharmacy ID: " + pharmacyId);
         }
         stockRepository.delete(stockEntity.get());
 

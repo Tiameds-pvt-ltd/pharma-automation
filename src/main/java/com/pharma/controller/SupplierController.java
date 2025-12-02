@@ -47,7 +47,8 @@ public class SupplierController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSupplier(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
@@ -55,14 +56,15 @@ public class SupplierController {
             return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        List<SupplierDto> suppliers = supplierService.getAllSupplier(currentUserOptional.get().getId());
+        List<SupplierDto> suppliers = supplierService.getAllSupplier(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage("Supplier retrieved successfully", HttpStatus.OK, suppliers);
     }
 
     @GetMapping("/getById/{supplierId}")
     public ResponseEntity<?> getSupplierById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("supplierId") UUID supplierId
+            @PathVariable("supplierId") UUID supplierId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -70,8 +72,8 @@ public class SupplierController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        SupplierDto supplierDto = supplierService.getSupplierById(createdById, supplierId);
+
+        SupplierDto supplierDto = supplierService.getSupplierById(pharmacyId, supplierId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Supplier retrieved successfully",
@@ -85,6 +87,7 @@ public class SupplierController {
     public ResponseEntity<?> updateSupplier(
             @RequestHeader("Authorization") String token,
             @PathVariable("supplierId") UUID supplierId,
+            @RequestParam Long pharmacyId,
             @RequestBody SupplierDto updatedSupplier
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
@@ -93,11 +96,11 @@ public class SupplierController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long modifiedById = currentUserOptional.get().getId();
 
         try {
-            SupplierDto updatedSuppliers = supplierService.updateSupplier(modifiedById, supplierId, updatedSupplier);
-            return ApiResponseHelper.successResponseWithDataAndMessage(
+            SupplierDto updatedSuppliers = supplierService.updateSupplier(
+                    pharmacyId, supplierId, updatedSupplier, currentUserOptional.get()
+            );            return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Supplier updated successfully",
                     HttpStatus.OK,
                     updatedSuppliers
@@ -114,7 +117,9 @@ public class SupplierController {
     @DeleteMapping("/delete/{supplierId}")
     public ResponseEntity<?> deleteSupplier(
             @RequestHeader("Authorization") String token,
-            @PathVariable("supplierId") UUID supplierId
+            @PathVariable("supplierId") UUID supplierId,
+            @RequestParam Long pharmacyId
+
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -122,9 +127,12 @@ public class SupplierController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
         try {
-            supplierService.deleteSupplier(createdById, supplierId);
+            supplierService.deleteSupplier(
+                    pharmacyId,
+                    supplierId,
+                    currentUserOptional.get()
+            );
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Supplier deleted successfully",
                     HttpStatus.OK,

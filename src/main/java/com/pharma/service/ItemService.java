@@ -10,13 +10,13 @@ public interface ItemService {
 
     ItemDto createItem(ItemDto itemDto, User user);
 
-    List<ItemDto> getAllItem(Long createdById);
+    List<ItemDto> getAllItem(Long pharmacyId, User user);
 
-    ItemDto getItemById(Long createdById, UUID itemId);
+    ItemDto getItemById(Long pharmacyId, UUID itemId, User user);
 
-    ItemDto updateItem(Long modifiedById, UUID itemId, ItemDto updatedItem);
+    ItemDto updateItem(Long pharmacyId, UUID itemId, ItemDto updatedItem, User user);
 
-    void  deleteItem(Long createdById, UUID itemId);
+    void  deleteItem(Long pharmacyId, UUID itemId, User user);
 
 
 }
