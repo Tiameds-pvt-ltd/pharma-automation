@@ -14,6 +14,7 @@ import java.util.UUID;
 
 @Repository
 public interface BillReturnRepository extends JpaRepository<BillReturnEntity, UUID> {
+// Changed Code According to multiple pharma
 
     List<BillReturnEntity> findAllByCreatedBy(Long createdBy);
 
@@ -51,6 +52,8 @@ public interface BillReturnRepository extends JpaRepository<BillReturnEntity, UU
     List<BillReturnEntity> findAllByPharmacyId(Long pharmacyId);
 
     Optional<BillReturnEntity> findByBillReturnIdAndPharmacyId(UUID billReturnId, Long pharmacyId);
+
+
 
 }
 
