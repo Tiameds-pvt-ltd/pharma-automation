@@ -52,7 +52,8 @@ public class ItemController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllItems(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
@@ -60,7 +61,7 @@ public class ItemController {
             return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        List<ItemDto> items = itemService.getAllItem(currentUserOptional.get().getId());
+        List<ItemDto> items = itemService.getAllItem(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage("Items retrieved successfully", HttpStatus.OK, items);
     }
 
@@ -68,7 +69,8 @@ public class ItemController {
     @GetMapping("/getById/{itemId}")
     public ResponseEntity<?> getItemById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("itemId") UUID itemId
+            @PathVariable("itemId") UUID itemId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -76,8 +78,7 @@ public class ItemController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        ItemDto itemDto = itemService.getItemById(createdById, itemId);
+        ItemDto itemDto = itemService.getItemById(pharmacyId, itemId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Item retrieved successfully",
@@ -90,6 +91,7 @@ public class ItemController {
     public ResponseEntity<?> updateDoctorById(
             @RequestHeader("Authorization") String token,
             @PathVariable("itemId") UUID itemId,
+            @RequestParam Long pharmacyId,
             @RequestBody ItemDto itemDto
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
@@ -101,7 +103,7 @@ public class ItemController {
         Long modifiedById = currentUserOptional.get().getId();
 
         try {
-            ItemDto updatedItem = itemService.updateItem(modifiedById, itemId, itemDto);
+            ItemDto updatedItem = itemService.updateItem(pharmacyId, itemId, itemDto, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Item updated successfully",
                     HttpStatus.OK,
@@ -121,7 +123,8 @@ public class ItemController {
     @DeleteMapping("/delete/{itemId}")
     public ResponseEntity<?> deleteItem(
             @RequestHeader("Authorization") String token,
-            @PathVariable("itemId") UUID itemId
+            @PathVariable("itemId") UUID itemId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -129,9 +132,8 @@ public class ItemController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
         try {
-            itemService.deleteItem(createdById, itemId);
+            itemService.deleteItem(pharmacyId, itemId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Item deleted successfully",
                     HttpStatus.OK,

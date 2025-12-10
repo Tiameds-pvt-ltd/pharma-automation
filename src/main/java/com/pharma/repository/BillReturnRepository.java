@@ -2,6 +2,7 @@ package com.pharma.repository;
 
 import com.pharma.dto.BillReturnListDto;
 import com.pharma.entity.BillReturnEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,18 +22,35 @@ public interface BillReturnRepository extends JpaRepository<BillReturnEntity, UU
     @Query("SELECT p FROM BillReturnEntity p WHERE p.billReturnId1 LIKE CONCAT('BILLRTN-', :year, '-%') ORDER BY p.billReturnId1 DESC LIMIT 1")
     Optional<BillReturnEntity> findLatestBillReturnForYear(@Param("year") String year);
 
+//    @Query("SELECT new com.pharma.dto.BillReturnListDto(" +
+//            "b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
+//            "b.grandTotal, b.patientType, b.patientId, " +
+//            "CONCAT(p.firstName, ' ', p.lastName)," +
+//            "COUNT(i.billReturnItemId)) " +
+//            "FROM BillReturnEntity b " +
+//            "LEFT JOIN b.billReturnItemEntities i " +
+//            "JOIN PatientDetailsEntity p ON b.patientId = p.patientId " +
+//            "WHERE b.createdBy = :createdBy " +
+//            "GROUP BY b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
+//            "b.grandTotal, b.patientType, b.patientId, p.firstName, p.lastName ")
+//    List<BillReturnListDto> fetchBillReturnListsByCreatedBy(Long createdBy);
 
     @Query("SELECT new com.pharma.dto.BillReturnListDto(" +
             "b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
             "b.grandTotal, b.patientType, b.patientId, " +
-            "CONCAT(p.firstName, ' ', p.lastName)," +
+            "CONCAT(p.firstName, ' ', p.lastName), " +
             "COUNT(i.billReturnItemId)) " +
             "FROM BillReturnEntity b " +
             "LEFT JOIN b.billReturnItemEntities i " +
             "JOIN PatientDetailsEntity p ON b.patientId = p.patientId " +
-            "WHERE b.createdBy = :createdBy " +
+            "WHERE b.pharmacyId = :pharmacyId " +
             "GROUP BY b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
-            "b.grandTotal, b.patientType, b.patientId, p.firstName, p.lastName ")
-    List<BillReturnListDto> fetchBillReturnListsByCreatedBy(Long createdBy);
+            "b.grandTotal, b.patientType, b.patientId, p.firstName, p.lastName")
+    List<BillReturnListDto> fetchBillReturnListsByPharmacyId(@Param("pharmacyId") Long pharmacyId);
+
+    List<BillReturnEntity> findAllByPharmacyId(Long pharmacyId);
+
+    Optional<BillReturnEntity> findByBillReturnIdAndPharmacyId(UUID billReturnId, Long pharmacyId);
+
 }
 

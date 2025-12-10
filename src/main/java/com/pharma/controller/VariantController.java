@@ -47,8 +47,17 @@ public class VariantController {
 
 
     @GetMapping("/getAll")
-    public ResponseEntity<?> getAllVariants() {
-        List<VariantDto> variants = variantService.getAllVariants();
+    public ResponseEntity<?> getAllVariants(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId)
+    {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        }
+
+        List<VariantDto> variants = variantService.getAllVariants(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Variants retrieved successfully", HttpStatus.OK, variants);
     }
@@ -57,7 +66,8 @@ public class VariantController {
     @GetMapping("/getById/{variantId}")
     public ResponseEntity<?> getVariantById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("variantId") UUID variantId
+            @PathVariable("variantId") UUID variantId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -65,8 +75,8 @@ public class VariantController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        VariantDto variantDto = variantService.getVariantById(createdById, variantId);
+
+        VariantDto variantDto = variantService.getVariantById(pharmacyId, variantId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Variant retrieved successfully",
@@ -79,7 +89,8 @@ public class VariantController {
     @DeleteMapping("/delete/{variantId}")
     public ResponseEntity<?> deleteVariantById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("variantId") UUID variantId
+            @PathVariable("variantId") UUID variantId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -87,9 +98,9 @@ public class VariantController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
+
         try {
-            variantService.deleteVariant(createdById, variantId);
+            variantService.deleteVariant(pharmacyId, variantId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Variant deleted successfully",
                     HttpStatus.OK,
@@ -109,9 +120,9 @@ public class VariantController {
     public ResponseEntity<?> updateVariant(
             @RequestHeader("Authorization") String token,
             @PathVariable("variantId") UUID variantId,
+            @RequestParam Long pharmacyId,
             @RequestBody VariantDto updateVariantDto
     ) {
-        // 1️⃣ Authenticate user
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
@@ -119,12 +130,8 @@ public class VariantController {
             );
         }
 
-        Long modifiedById = currentUserOptional.get().getId();
+        VariantDto updatedVariant = variantService.updateVariant(pharmacyId, variantId, updateVariantDto, currentUserOptional.get());
 
-        // 2️⃣ Call service method
-        VariantDto updatedVariant = variantService.updateVariant(modifiedById, variantId, updateVariantDto);
-
-        // 3️⃣ Return response
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Variant updated successfully",
                 HttpStatus.OK,

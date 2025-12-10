@@ -11,11 +11,14 @@ public interface BillReturnService {
 
     BillReturnDto createBillReturn(BillReturnDto billReturnDto, User user);
 
-    List<BillReturnDto> getAllBillReturn(Long createdById);
+    List<BillReturnDto> getAllBillReturn(Long pharmacyId, User user);
 
-    BillReturnDto getBillReturnById(Long createdById, UUID billReturnId);
+    BillReturnDto getBillReturnById(Long pharmacyId, UUID billReturnId, User user);
 
-    void deleteBillReturn(Long createdById, UUID billReturnId);
+    void deleteBillReturn(Long pharmacyId, UUID billReturnId, User user);
 
-    List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById);
+//    List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById);
+
+    List<BillReturnListDto> getBillReturnListsByPharmacy(Long pharmacyId, User user);
+
 }

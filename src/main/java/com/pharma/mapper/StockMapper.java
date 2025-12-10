@@ -84,7 +84,7 @@ public class StockMapper {
         return stockEntity;
     }
 
-    private StockItemDto toDto(StockItemEntity stockItemEntity) {
+    public StockItemDto toDto(StockItemEntity stockItemEntity) {
         if (stockItemEntity == null) {
             return null;
         }
@@ -105,6 +105,7 @@ public class StockMapper {
         stockItemDto.setGstPercentage(stockItemEntity.getGstPercentage());
         stockItemDto.setGstAmount(stockItemEntity.getGstAmount());
         stockItemDto.setAmount(stockItemEntity.getAmount());
+        stockItemDto.setPharmacyId(stockItemEntity.getPharmacyId());
         stockItemDto.setCreatedBy(stockItemEntity.getCreatedBy());
         stockItemDto.setCreatedDate(stockItemEntity.getCreatedDate());
         stockItemDto.setModifiedBy(stockItemEntity.getModifiedBy());
@@ -133,6 +134,7 @@ public class StockMapper {
         stockItemEntity.setGstPercentage(stockItemDto.getGstPercentage());
         stockItemEntity.setGstAmount(stockItemDto.getGstAmount());
         stockItemEntity.setAmount(stockItemDto.getAmount());
+        stockItemEntity.setPharmacyId(stockItemDto.getPharmacyId());
         stockItemEntity.setCreatedBy(stockItemDto.getCreatedBy());
         stockItemEntity.setCreatedDate(stockItemDto.getCreatedDate());
         stockItemEntity.setModifiedBy(stockItemDto.getModifiedBy());

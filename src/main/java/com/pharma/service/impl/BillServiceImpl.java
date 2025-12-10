@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -47,10 +48,20 @@ public class BillServiceImpl implements BillService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(billDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         BillEntity billEntity = billMapper.toEntity(billDto);
         billEntity.setBillId(UUID.randomUUID());
         billEntity.setCreatedBy(user.getId());
         billEntity.setCreatedDate(LocalDate.now());
+
+        billEntity.setPharmacyId(billDto.getPharmacyId());
 
         String newBillId1 = generateBillId1();
         billEntity.setBillId1(newBillId1);
@@ -123,6 +134,14 @@ public class BillServiceImpl implements BillService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(billPaymentDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         BillEntity bill = billRepository.findById(billPaymentDto.getBillId())
                 .orElseThrow(() -> new RuntimeException("Bill not found"));
 
@@ -136,6 +155,8 @@ public class BillServiceImpl implements BillService {
         payment.setCreatedDate(LocalDate.now());
         payment.setBillEntity(bill);
 
+        payment.setPharmacyId(billPaymentDto.getPharmacyId());
+
         bill.getBillPaymentEntities().add(payment);
 
         BillEntity updatedBill = billRepository.save(bill);
@@ -144,11 +165,17 @@ public class BillServiceImpl implements BillService {
     }
 
 
-
     @Transactional
     @Override
-    public List<BillDto> getAllBill(Long createdById) {
-        List<BillEntity> billEntities = billRepository.findAllByCreatedBy(createdById);
+    public List<BillDto> getAllBill(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<BillEntity> billEntities = billRepository.findAllByPharmacyId(pharmacyId);
         return billEntities.stream()
                 .map(billMapper::toDto)
                 .collect(Collectors.toList());
@@ -156,21 +183,35 @@ public class BillServiceImpl implements BillService {
 
     @Transactional
     @Override
-    public BillDto getBillById(Long createdById, UUID billId) {
-        Optional<BillEntity> billEntity = billRepository.findByBillIdAndCreatedBy(billId, createdById);
+    public BillDto getBillById(Long pharmacyId, UUID billId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<BillEntity> billEntity = billRepository.findByBillIdAndPharmacyId(billId, pharmacyId);
 
         if (billEntity.isEmpty()) {
-            throw new RuntimeException("Bill not found with ID: " + billId + " for user ID: " + createdById);
+            throw new RuntimeException("Bill not found with ID: " + billId + " for pharmacy ID: " + pharmacyId);
         }
         return billMapper.toDto(billEntity.get());
     }
 
     @Transactional
     @Override
-    public void deleteBill(Long createdById, UUID billId) {
-        Optional<BillEntity> billEntity = billRepository.findByBillIdAndCreatedBy(billId, createdById);
+    public void deleteBill(Long pharmacyId, UUID billId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<BillEntity> billEntity = billRepository.findByBillIdAndPharmacyId(billId, pharmacyId);
         if (billEntity.isEmpty()) {
-            throw new RuntimeException("Bill not found with ID: " + billId + " for user ID: " + createdById);
+            throw new RuntimeException("Bill not found with ID: " + billId + " for pharmacy ID: " + pharmacyId);
         }
         billRepository.delete(billEntity.get());
     }
@@ -198,10 +239,36 @@ public class BillServiceImpl implements BillService {
         return String.format("BILL-%s-%05d", yearPart, newSequence);
     }
 
+//    @Transactional
+//    @Override
+//    public PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo) {
+//        Object result = billRepository.getPackageQuantityRaw(itemId, batchNo);
+//        if (result == null) {
+//            return new PackageQuantityDto(0L);
+//        }
+//
+//        Long quantity;
+//        if (result instanceof Number) {
+//            quantity = ((Number) result).longValue();
+//        } else {
+//            quantity = Long.parseLong(result.toString());
+//        }
+//
+//        return new PackageQuantityDto( quantity);
+//    }
+
     @Transactional
     @Override
-    public PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo) {
-        Object result = billRepository.getPackageQuantityRaw(itemId, batchNo);
+    public PackageQuantityDto getPackageQuantityDifference(UUID itemId, String batchNo, Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Object result = billRepository.getPackageQuantityRaw(itemId, batchNo, pharmacyId);
+
         if (result == null) {
             return new PackageQuantityDto(0L);
         }
@@ -213,31 +280,79 @@ public class BillServiceImpl implements BillService {
             quantity = Long.parseLong(result.toString());
         }
 
-        return new PackageQuantityDto( quantity);
+        return new PackageQuantityDto(quantity);
     }
+
+
+//    @Transactional
+//    @Override
+//    public BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate) {
+//        return billRepository.getBillingSummaryByDateAndCreatedBy(selectedDate, createdBy);
+//    }
 
     @Transactional
     @Override
-    public BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate) {
-        return billRepository.getBillingSummaryByDateAndCreatedBy(selectedDate, createdBy);
-    }
+    public BillingSummaryDto getSummaryByDate(Long pharmacyId, LocalDate selectedDate, User user) {
 
-    @Transactional
-    @Override
-    public PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate) {
-        return billRepository.getPaymentSummaryByDateAndCreatedBy(selectedDate, createdBy);
-    }
+        // Validate that the user belongs to this pharmacy
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
-    @Transactional
-    @Override
-    public List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth) {
-        if (inputDate != null) {
-            return billRepository.getBillingGstSummaryByDate(createdBy, inputDate);
-        } else if (inputMonth != null && !inputMonth.isBlank()) {
-            return billRepository.getBillingGstSummaryByMonth(createdBy, inputMonth);
-        } else {
-            return List.of(); // or throw an exception
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
         }
+        return billRepository.getBillingSummaryByDateAndPharmacy(selectedDate, pharmacyId);
+    }
+
+//    @Transactional
+//    @Override
+//    public PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate) {
+//        return billRepository.getPaymentSummaryByDateAndCreatedBy(selectedDate, createdBy);
+//    }
+
+    @Transactional
+    @Override
+    public PaymentSummaryDto getPaymentSummaryByDate(Long pharmacyId, LocalDate selectedDate, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        return billRepository.getPaymentSummaryByDateAndPharmacy(selectedDate, pharmacyId);
+    }
+
+
+//    @Transactional
+//    @Override
+//    public List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth) {
+//        if (inputDate != null) {
+//            return billRepository.getBillingGstSummaryByDate(createdBy, inputDate);
+//        } else if (inputMonth != null && !inputMonth.isBlank()) {
+//            return billRepository.getBillingGstSummaryByMonth(createdBy, inputMonth);
+//        } else {
+//            return List.of(); // or throw an exception
+//        }
+//    }
+
+    @Transactional
+    @Override
+    public List<BillingGstSummaryDto> getBillingGstSummary(Long pharmacyId, LocalDate inputDate, String inputMonth, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        if (inputDate != null) {
+            return billRepository.getBillingGstSummaryByDate(pharmacyId, inputDate);
+        } else if (inputMonth != null && !inputMonth.isBlank()) {
+            return billRepository.getBillingGstSummaryByMonth(pharmacyId, inputMonth);
+        }
+
+        return List.of();
     }
 
 

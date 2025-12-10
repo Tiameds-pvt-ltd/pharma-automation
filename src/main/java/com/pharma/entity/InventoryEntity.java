@@ -30,6 +30,9 @@ public class InventoryEntity {
     @Column(name = "package_quantity")
     private Long packageQuantity;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

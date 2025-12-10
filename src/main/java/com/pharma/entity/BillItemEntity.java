@@ -58,6 +58,9 @@ public class BillItemEntity {
     @Column(name = "net_total")
     private BigDecimal netTotal;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

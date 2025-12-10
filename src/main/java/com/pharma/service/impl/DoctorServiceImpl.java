@@ -41,10 +41,20 @@ public class DoctorServiceImpl implements DoctorService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(doctorDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         DoctorEntity doctorEntity = doctorMapper.mapToEntity(doctorDto);
         doctorEntity.setDoctorId(UUID.randomUUID());
         doctorEntity.setCreatedBy(user.getId());
         doctorEntity.setCreatedDate(LocalDate.now());
+
+        doctorEntity.setPharmacyId(doctorDto.getPharmacyId());
 
         DoctorEntity savedDoctor = doctorRepository.save(doctorEntity);
         return doctorMapper.mapToDto(savedDoctor);
@@ -52,8 +62,15 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     @Override
-    public List<DoctorDto> getAllDoctors(Long createdById) {
-        List<DoctorEntity> doctors = doctorRepository.findAllByCreatedBy(createdById);
+    public List<DoctorDto> getAllDoctors(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<DoctorEntity> doctors = doctorRepository.findAllByPharmacyId(pharmacyId);
         return doctors.stream()
                 .map(doctorMapper::mapToDto)
                 .collect(Collectors.toList());
@@ -61,11 +78,18 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     @Override
-    public DoctorDto getDoctorById(Long createdById, UUID doctorId) {
-        Optional<DoctorEntity> doctorEntity = doctorRepository.findByDoctorIdAndCreatedBy(doctorId, createdById);
+    public DoctorDto getDoctorById(Long pharmacyId, UUID doctorId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<DoctorEntity> doctorEntity = doctorRepository.findByDoctorIdAndPharmacyId(doctorId, pharmacyId);
 
         if (doctorEntity.isEmpty()) {
-            throw new ResourceNotFoundException("Doctor not found with ID: " + doctorId + " for user ID: " + createdById);
+            throw new ResourceNotFoundException("Doctor not found with ID: " + doctorId + " for pharmacy ID: " + pharmacyId);
         }
         return doctorMapper.mapToDto(doctorEntity.get());
     }
@@ -74,11 +98,18 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     @Override
-    public DoctorDto updateDoctor(Long modifiedById, UUID doctorId, DoctorDto doctorDto) {
-        Optional<DoctorEntity> doctorEntityOptional = doctorRepository.findById(doctorId);
+    public DoctorDto updateDoctor(Long pharmacyId, UUID doctorId, DoctorDto doctorDto, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<DoctorEntity> doctorEntityOptional = doctorRepository.findByDoctorIdAndPharmacyId(doctorId, pharmacyId);
 
         if (doctorEntityOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Doctor not found with ID: " + doctorId);
+            throw new ResourceNotFoundException("Doctor not found with ID: " + doctorId + " for pharmacy ID: " + pharmacyId);
         }
 
         DoctorEntity doctorEntity = doctorEntityOptional.get();
@@ -86,10 +117,12 @@ public class DoctorServiceImpl implements DoctorService {
         doctorEntity.setDoctorName(doctorDto.getDoctorName());
         doctorEntity.setDoctorSpeciality(doctorDto.getDoctorSpeciality());
         doctorEntity.setDoctorQualification(doctorDto.getDoctorQualification());
+        doctorEntity.setDoctorMobile(doctorDto.getDoctorMobile());
         doctorEntity.setDoctorEmail(doctorDto.getDoctorEmail());
         doctorEntity.setDoctorVenue(doctorDto.getDoctorVenue());
+        doctorEntity.setDoctorLicenseNumber(doctorDto.getDoctorLicenseNumber());
 
-        doctorEntity.setModifiedBy(modifiedById);
+        doctorEntity.setModifiedBy(user.getId());
         doctorEntity.setModifiedDate(LocalDate.now());
 
         DoctorEntity updatedDoctor = doctorRepository.save(doctorEntity);
@@ -99,11 +132,18 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     @Override
-    public void deleteDoctorById(Long createdById, UUID doctorId) {
-        Optional<DoctorEntity> doctorEntity = doctorRepository.findByDoctorIdAndCreatedBy(doctorId, createdById);
+    public void deleteDoctorById(Long pharmacyId, UUID doctorId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<DoctorEntity> doctorEntity = doctorRepository.findByDoctorIdAndPharmacyId(doctorId, pharmacyId);
 
         if (doctorEntity.isEmpty()) {
-            throw new ResourceNotFoundException("Doctor not found with ID: " + doctorId + " for user ID: " + createdById);
+            throw new ResourceNotFoundException("Doctor not found with ID: " + doctorId + " for pharmacy ID: " + pharmacyId);
         }
 
         doctorRepository.delete(doctorEntity.get());

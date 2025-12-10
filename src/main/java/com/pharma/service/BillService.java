@@ -12,11 +12,11 @@ public interface BillService {
 
     BillDto addBillPayment(BillPaymentDto billPaymentDto, User user);
 
-    List<BillDto> getAllBill(Long createdById);
+    List<BillDto> getAllBill(Long pharmacyId, User user);
 
-    BillDto getBillById(Long createdById, UUID billId);
+    BillDto getBillById(Long pharmacyId, UUID billId, User user);
 
-    void deleteBill(Long createdById, UUID billId);
+    void deleteBill(Long pharmacyId, UUID billId, User user);
 
     interface InventoryDetailsService {
 
@@ -24,13 +24,22 @@ public interface BillService {
 
     }
 
-    PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo);
+    PackageQuantityDto getPackageQuantityDifference(UUID itemId, String batchNo, Long pharmacyId, User user);
 
-    BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate);
+    BillingSummaryDto getSummaryByDate(Long pharmacyId, LocalDate selectedDate, User user);
 
-    PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate);
+    PaymentSummaryDto getPaymentSummaryByDate(Long pharmacyId, LocalDate selectedDate, User user);
 
-    List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth);
+    List<BillingGstSummaryDto> getBillingGstSummary(Long pharmacyId, LocalDate inputDate, String inputMonth, User user);
+
+//    PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo);
+
+//    BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate);
+
+//    PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate);
+
+//    List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth);
+
 
 
 }

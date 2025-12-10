@@ -1,6 +1,7 @@
 package com.pharma.repository;
 
 import com.pharma.entity.PurchaseOrderEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -18,5 +19,7 @@ public interface PurchaseOrderRepository extends JpaRepository<PurchaseOrderEnti
     @Query("SELECT p FROM PurchaseOrderEntity p WHERE p.orderId1 LIKE CONCAT('ORD-', :year, '-%') ORDER BY p.orderId1 DESC LIMIT 1")
     Optional<PurchaseOrderEntity> findLatestOrderForYear(@Param("year") String year);
 
+    List<PurchaseOrderEntity> findAllByPharmacyId(Long pharmacyId);
 
+    Optional<PurchaseOrderEntity> findByOrderIdAndPharmacyId(UUID orderId, Long pharmacyId);
 }

@@ -70,15 +70,16 @@ public class BillController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllBills(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        User currentUser = currentUserOptional.get();
-        List<BillDto> billDtos = billService.getAllBill(currentUser.getId());
+
+        List<BillDto> billDtos = billService.getAllBill(pharmacyId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Bill retrieved successfully", HttpStatus.OK, billDtos);
@@ -87,15 +88,16 @@ public class BillController {
     @GetMapping("/getById/{billId}")
     public ResponseEntity<?> getBillById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("billId") UUID billId
+            @PathVariable("billId") UUID billId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        BillDto billDto = billService.getBillById(createdById, billId);
+
+        BillDto billDto = billService.getBillById(pharmacyId, billId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase order retrieved successfully",
                 HttpStatus.OK,
@@ -107,16 +109,17 @@ public class BillController {
     @DeleteMapping("/delete/{billId}")
     public ResponseEntity<?> deleteBill(
             @RequestHeader("Authorization") String token,
-            @PathVariable("billId") UUID billId
+            @PathVariable("billId") UUID billId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
+
         try {
-            billService.deleteBill(createdById, billId);
+            billService.deleteBill(pharmacyId, billId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Bill deleted successfully",
                     HttpStatus.OK,
@@ -132,28 +135,77 @@ public class BillController {
 
     }
 
+//    @GetMapping("/getPackageQuantity")
+//    public PackageQuantityDto getPackageQuantityDifference(
+//            @RequestParam String itemId,
+//            @RequestParam String batchNo
+//    ) {
+//        return billService.getPackageQuantityDifference(itemId, batchNo);
+//    }
+
     @GetMapping("/getPackageQuantity")
-    public PackageQuantityDto getPackageQuantityDifference(
-            @RequestParam String itemId,
-            @RequestParam String batchNo
+    public ResponseEntity<?> getPackageQuantityDifference(
+            @RequestHeader("Authorization") String token,
+            @RequestParam UUID itemId,
+            @RequestParam String batchNo,
+            @RequestParam Long pharmacyId
     ) {
-        return billService.getPackageQuantityDifference(itemId, batchNo);
+        Optional<User> userOptional = userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+        }
+
+        User user = userOptional.get();
+
+        PackageQuantityDto response =
+                billService.getPackageQuantityDifference(itemId, batchNo, pharmacyId, user);
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Quantity retrieved successfully",
+                HttpStatus.OK,
+                response
+        );
     }
 
+//    @GetMapping("/billingSummary")
+//    public ResponseEntity<?> getSummaryByDate(
+//            @RequestHeader("Authorization") String token,
+//            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        Long createdById = currentUserOptional.get().getId();
+//        BillingSummaryDto summaryDto = billService.getSummaryByDate(createdById, date);
+//
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Billing summary retrieved successfully",
+//                HttpStatus.OK,
+//                summaryDto
+//        );
+//    }
 
     @GetMapping("/billingSummary")
     public ResponseEntity<?> getSummaryByDate(
             @RequestHeader("Authorization") String token,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        BillingSummaryDto summaryDto = billService.getSummaryByDate(createdById, date);
+        User user = currentUserOptional.get();
+
+        BillingSummaryDto summaryDto =
+                billService.getSummaryByDate(pharmacyId, date, user);
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Billing summary retrieved successfully",
@@ -162,19 +214,43 @@ public class BillController {
         );
     }
 
+//    @GetMapping("/paymentSummary")
+//    public ResponseEntity<?> getPaymentSummaryByDate(
+//            @RequestHeader("Authorization") String token,
+//            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        Long createdById = currentUserOptional.get().getId();
+//        PaymentSummaryDto summaryDto = billService.getPaymentSummaryByDate(createdById, date);
+//
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Payment summary retrieved successfully",
+//                HttpStatus.OK,
+//                summaryDto
+//        );
+//    }
+
     @GetMapping("/paymentSummary")
     public ResponseEntity<?> getPaymentSummaryByDate(
             @RequestHeader("Authorization") String token,
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
         if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        PaymentSummaryDto summaryDto = billService.getPaymentSummaryByDate(createdById, date);
+        User user = currentUserOptional.get();
+
+        PaymentSummaryDto summaryDto =
+                billService.getPaymentSummaryByDate(pharmacyId, date, user);
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Payment summary retrieved successfully",
@@ -189,26 +265,57 @@ public class BillController {
             @RequestHeader("Authorization") String token,
             @RequestParam(value = "date", required = false)
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-            @RequestParam(value = "month", required = false) String month
+            @RequestParam(value = "month", required = false) String month,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
         if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
         }
 
         if (date == null && (month == null || month.isBlank())) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Date or Month is required", HttpStatus.BAD_REQUEST, null);
+            return ApiResponseHelper.errorResponse("Either date or month is required", HttpStatus.BAD_REQUEST);
         }
 
-        Long createdById = currentUserOptional.get().getId();
+        User user = currentUserOptional.get();
 
-        List<BillingGstSummaryDto> summary = billService.getBillingGstSummary(createdById, date, month);
+        List<BillingGstSummaryDto> summary =
+                billService.getBillingGstSummary(pharmacyId, date, month, user);
+
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Billing GST summary retrieved successfully",
                 HttpStatus.OK,
                 summary
         );
     }
+
+
+//    @GetMapping("/billGstSummary")
+//    public ResponseEntity<?> getBillingGstSummary(
+//            @RequestHeader("Authorization") String token,
+//            @RequestParam(value = "date", required = false)
+//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+//            @RequestParam(value = "month", required = false) String month
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        if (date == null && (month == null || month.isBlank())) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Date or Month is required", HttpStatus.BAD_REQUEST, null);
+//        }
+//
+//        Long createdById = currentUserOptional.get().getId();
+//
+//        List<BillingGstSummaryDto> summary = billService.getBillingGstSummary(createdById, date, month);
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Billing GST summary retrieved successfully",
+//                HttpStatus.OK,
+//                summary
+//        );
+//    }
 }

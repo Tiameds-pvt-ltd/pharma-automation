@@ -10,7 +10,7 @@ public interface SupplierPaymentService {
 
     SupplierPaymentDto saveSupplierPayment(SupplierPaymentDto supplierPaymentDto, User user);
 
-    List<SupplierPaymentDto> getAllSupplierPayment(Long createdById);
+    List<SupplierPaymentDto> getAllSupplierPayment(Long pharmacyId, User user);
 
-    SupplierPaymentDto getSupplierPaymentById(Long createdById, UUID paymentId);
+    SupplierPaymentDto getSupplierPaymentById(Long pharmacyId, UUID paymentId, User user);
 }

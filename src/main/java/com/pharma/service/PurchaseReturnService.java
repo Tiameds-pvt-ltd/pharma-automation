@@ -11,12 +11,14 @@ public interface PurchaseReturnService {
 
     PurchaseReturnDto savePurchaseReturn(PurchaseReturnDto purchaseReturnDto, User user);
 
-    List<PurchaseReturnDto> getAllPurchaseReturn(Long createdById);
+    List<PurchaseReturnDto> getAllPurchaseReturn(Long pharmacyId, User user);
 
-    PurchaseReturnDto getPurchaseReturnById(Long createdById, UUID returnId);
+    PurchaseReturnDto getPurchaseReturnById(Long pharmacyId, UUID returnId, User user);
 
-    void deletePurchaseReturnById(Long createdById, UUID returnId);
+    void deletePurchaseReturnById(Long pharmacyId, UUID returnId, User user);
 
-    BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy);
+    BigDecimal getSumReturnAmountBySupplier(UUID supplierId, Long pharmacyId, User user);
+
+//    BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy);
 
 }

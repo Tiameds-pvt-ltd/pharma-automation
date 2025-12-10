@@ -28,6 +28,7 @@ public class BillItemDto {
     private BigDecimal gstAmount;
     private BigDecimal grossTotal;
     private BigDecimal netTotal;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

@@ -43,15 +43,16 @@ public class PurchaseReturnController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllPurchaseReturn(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        User currentUser = currentUserOptional.get();
-        List<PurchaseReturnDto> purchaseReturns = purchaseReturnService.getAllPurchaseReturn(currentUser.getId());
+
+         List<PurchaseReturnDto> purchaseReturns = purchaseReturnService.getAllPurchaseReturn(pharmacyId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase return retrieved successfully", HttpStatus.OK, purchaseReturns);
@@ -62,15 +63,16 @@ public class PurchaseReturnController {
     @GetMapping("/getById/{returnId}")
     public ResponseEntity<?> getPurchaseReturnById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("returnId") UUID returnId
+            @PathVariable("returnId") UUID returnId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        PurchaseReturnDto purchaseReturnDto = purchaseReturnService.getPurchaseReturnById(createdById, returnId);
+
+        PurchaseReturnDto purchaseReturnDto = purchaseReturnService.getPurchaseReturnById(pharmacyId, returnId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase return retrieved successfully",
                 HttpStatus.OK,
@@ -82,16 +84,17 @@ public class PurchaseReturnController {
     @DeleteMapping("/delete/{returnId}")
     public ResponseEntity<?> deletePurchaseReturnById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("returnId") UUID returnId
+            @PathVariable("returnId") UUID returnId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        try {
-            purchaseReturnService.deletePurchaseReturnById(createdById, returnId);
+
+         try {
+            purchaseReturnService.deletePurchaseReturnById(pharmacyId, returnId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Purchase return deleted successfully",
                     HttpStatus.OK,
@@ -106,11 +109,11 @@ public class PurchaseReturnController {
         }
     }
 
-
     @GetMapping("/creditNote/{supplierId}")
     public ResponseEntity<?> getSumReturnAmountBySupplier(
             @RequestHeader("Authorization") String token,
-            @PathVariable("supplierId") UUID supplierId
+            @PathVariable UUID supplierId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -118,14 +121,37 @@ public class PurchaseReturnController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        BigDecimal sumReturnAmount = purchaseReturnService
-                .getSumReturnAmountBySupplierAndCreatedBy(supplierId, createdById);
+        User user = currentUserOptional.get();
+
+        BigDecimal sumReturnAmount =
+                purchaseReturnService.getSumReturnAmountBySupplier(supplierId, pharmacyId, user);
+
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Sum of return amount retrieved successfully",
                 HttpStatus.OK,
                 sumReturnAmount
         );
     }
+
+//    @GetMapping("/creditNote/{supplierId}")
+//    public ResponseEntity<?> getSumReturnAmountBySupplier(
+//            @RequestHeader("Authorization") String token,
+//            @PathVariable("supplierId") UUID supplierId
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        Long createdById = currentUserOptional.get().getId();
+//        BigDecimal sumReturnAmount = purchaseReturnService
+//                .getSumReturnAmountBySupplierAndCreatedBy(supplierId, createdById);
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Sum of return amount retrieved successfully",
+//                HttpStatus.OK,
+//                sumReturnAmount
+//        );
+//    }
 
 }

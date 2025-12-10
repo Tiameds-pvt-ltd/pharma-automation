@@ -57,6 +57,9 @@ public class InventoryDetailsEntity {
     @Column(name = "gst_amount")
     private BigDecimal gstAmount;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

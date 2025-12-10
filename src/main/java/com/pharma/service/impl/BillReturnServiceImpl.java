@@ -47,10 +47,20 @@ public class BillReturnServiceImpl implements BillReturnService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(billReturnDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         BillReturnEntity billReturnEntity = billReturnMapper.toEntity(billReturnDto);
         billReturnEntity.setBillReturnId(UUID.randomUUID());
         billReturnEntity.setCreatedBy(user.getId());
         billReturnEntity.setCreatedDate(LocalDate.now());
+
+        billReturnEntity.setPharmacyId(billReturnDto.getPharmacyId());
 
         String newBillReturnId1 = generateBillReturnId1();
         billReturnEntity.setBillReturnId1(newBillReturnId1);
@@ -102,8 +112,15 @@ public class BillReturnServiceImpl implements BillReturnService {
 
     @Transactional
     @Override
-    public List<BillReturnDto> getAllBillReturn(Long createdById) {
-        List<BillReturnEntity> billReturnEntities = billReturnRepository.findAllByCreatedBy(createdById);
+    public List<BillReturnDto> getAllBillReturn(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<BillReturnEntity> billReturnEntities = billReturnRepository.findAllByPharmacyId(pharmacyId);
         return billReturnEntities.stream()
                 .map(billReturnMapper::toDto)
                 .collect(Collectors.toList());
@@ -111,29 +128,58 @@ public class BillReturnServiceImpl implements BillReturnService {
 
     @Transactional
     @Override
-    public BillReturnDto getBillReturnById(Long createdById, UUID billReturnId) {
-        Optional<BillReturnEntity> billReturnEntity = billReturnRepository.findByBillReturnIdAndCreatedBy(billReturnId, createdById);
+    public BillReturnDto getBillReturnById(Long pharmacyId, UUID billReturnId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<BillReturnEntity> billReturnEntity = billReturnRepository.findByBillReturnIdAndPharmacyId(billReturnId, pharmacyId);
 
         if (billReturnEntity.isEmpty()) {
-            throw new RuntimeException("Bill Return not found with ID: " + billReturnId + " for user ID: " + createdById);
+            throw new RuntimeException("Bill Return not found with ID: " + billReturnId + " for pharmacy ID: " + pharmacyId);
         }
         return billReturnMapper.toDto(billReturnEntity.get());
     }
 
     @Transactional
     @Override
-    public void deleteBillReturn(Long createdById, UUID billReturnId) {
-        Optional<BillReturnEntity> billReturnEntity = billReturnRepository.findByBillReturnIdAndCreatedBy(billReturnId, createdById);
+    public void deleteBillReturn(Long pharmacyId, UUID billReturnId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<BillReturnEntity> billReturnEntity = billReturnRepository.findByBillReturnIdAndPharmacyId(billReturnId, pharmacyId);
         if (billReturnEntity.isEmpty()) {
-            throw new RuntimeException("Bill Return not found with ID: " + billReturnEntity + " for user ID: " + createdById);
+            throw new RuntimeException("Bill Return not found with ID: " + billReturnEntity + " for pharmacy ID: " + pharmacyId);
         }
         billReturnRepository.delete(billReturnEntity.get());
     }
 
+//    @Transactional
+//    @Override
+//    public List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById) {
+//        return billReturnRepository.fetchBillReturnListsByCreatedBy(createdById);
+//    }
+
+    @Transactional
     @Override
-    public List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById) {
-        return billReturnRepository.fetchBillReturnListsByCreatedBy(createdById);
+    public List<BillReturnListDto> getBillReturnListsByPharmacy(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        return billReturnRepository.fetchBillReturnListsByPharmacyId(pharmacyId);
     }
+
 
     private String generateBillReturnId1() {
         String yearPart = String.valueOf(LocalDate.now().getYear());

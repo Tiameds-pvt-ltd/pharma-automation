@@ -59,6 +59,7 @@ public class BillMapper {
         billItemDto.setGstAmount(billItemEntity.getGstAmount());
         billItemDto.setGrossTotal(billItemEntity.getGrossTotal());
         billItemDto.setNetTotal(billItemEntity.getNetTotal());
+        billItemDto.setPharmacyId(billItemEntity.getPharmacyId());
         billItemDto.setCreatedBy(billItemEntity.getCreatedBy());
         billItemDto.setCreatedDate(billItemEntity.getCreatedDate());
         billItemDto.setModifiedBy(billItemEntity.getModifiedBy());
@@ -131,6 +132,7 @@ public class BillMapper {
         billItemEntity.setGstAmount(billItemDto.getGstAmount());
         billItemEntity.setGrossTotal(billItemDto.getGrossTotal());
         billItemEntity.setNetTotal(billItemDto.getNetTotal());
+        billItemEntity.setPharmacyId(billItemDto.getPharmacyId());
         billItemEntity.setCreatedBy(billItemDto.getCreatedBy());
         billItemEntity.setCreatedDate(billItemDto.getCreatedDate());
         billItemEntity.setModifiedBy(billItemDto.getModifiedBy());

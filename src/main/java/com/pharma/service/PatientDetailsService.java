@@ -1,6 +1,5 @@
 package com.pharma.service;
 
-import com.pharma.dto.DoctorDto;
 import com.pharma.dto.PatientDetailsDto;
 import com.pharma.entity.User;
 
@@ -11,13 +10,13 @@ public interface PatientDetailsService {
 
     PatientDetailsDto createPatient(PatientDetailsDto patientDetailsDto, User user);
 
-    List<PatientDetailsDto> getAllPatient(Long createdById);
+    List<PatientDetailsDto> getAllPatient(Long pharmacyId, User user);
 
-    PatientDetailsDto getPatientById(Long createdById, UUID patientId);
+    PatientDetailsDto getPatientById(Long pharmacyId, UUID patientId, User user);
 
-    PatientDetailsDto updatePatient(Long modifiedById, UUID patientId, PatientDetailsDto patientDetailsDto);
+    PatientDetailsDto updatePatient(Long pharmacyId, UUID patientId, PatientDetailsDto patientDetailsDto, User user);
 
-    void deletePatientById(Long createdById, UUID patientId);
+    void deletePatientById(Long pharmacyId, UUID patientId, User user);
 
 
 }

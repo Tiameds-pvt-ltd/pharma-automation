@@ -46,10 +46,20 @@ public class SupplierPaymentServiceImpl implements SupplierPaymentService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(supplierPaymentDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         SupplierPaymentEntity supplierPaymentEntity = supplierPaymentMapper.toEntity(supplierPaymentDto);
         supplierPaymentEntity.setPaymentId(UUID.randomUUID());
         supplierPaymentEntity.setCreatedBy(user.getId());
         supplierPaymentEntity.setCreatedDate(LocalDate.now());
+
+        supplierPaymentEntity.setPharmacyId(supplierPaymentDto.getPharmacyId());
 
         if (supplierPaymentEntity.getSupplierPaymentDetailsEntities() != null) {
             for (SupplierPaymentDetailsEntity supplierPaymentDetails : supplierPaymentEntity.getSupplierPaymentDetailsEntities()) {
@@ -85,19 +95,33 @@ public class SupplierPaymentServiceImpl implements SupplierPaymentService {
 
     @Transactional
     @Override
-    public List<SupplierPaymentDto> getAllSupplierPayment(Long createdById) {
-        List<SupplierPaymentEntity> supplierPaymentEntities = supplierPaymentRepo.findAllByCreatedBy(createdById);
+    public List<SupplierPaymentDto> getAllSupplierPayment(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<SupplierPaymentEntity> supplierPaymentEntities = supplierPaymentRepo.findAllByPharmacyId(pharmacyId);
         return supplierPaymentEntities.stream()
                 .map(supplierPaymentMapper::toDto)
                 .collect(Collectors.toList());    }
 
     @Transactional
     @Override
-    public SupplierPaymentDto getSupplierPaymentById(Long createdById, UUID paymentId) {
-        Optional<SupplierPaymentEntity> supplierPaymentEntity = supplierPaymentRepo.findByPaymentIdAndCreatedBy(paymentId, createdById);
+    public SupplierPaymentDto getSupplierPaymentById(Long pharmacyId, UUID paymentId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<SupplierPaymentEntity> supplierPaymentEntity = supplierPaymentRepo.findByPaymentIdAndPharmacyId(paymentId, pharmacyId);
 
         if (supplierPaymentEntity.isEmpty()) {
-            throw new RuntimeException("Supplier Payment not found with ID: " + paymentId + " for user ID: " + createdById);
+            throw new RuntimeException("Supplier Payment not found with ID: " + paymentId + " for pharmacy ID: " + pharmacyId);
         }
         return supplierPaymentMapper.toDto(supplierPaymentEntity.get());
     }

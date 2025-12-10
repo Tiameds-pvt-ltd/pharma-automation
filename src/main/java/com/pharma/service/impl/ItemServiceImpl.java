@@ -45,10 +45,20 @@ public class ItemServiceImpl implements ItemService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(itemDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         ItemEntity itemEntity = itemMapper.mapToItemEntity(itemDto);
         itemEntity.setItemId(UUID.randomUUID());
         itemEntity.setCreatedBy(user.getId());
         itemEntity.setCreatedDate(LocalDate.now());
+
+        itemEntity.setPharmacyId(itemDto.getPharmacyId());
 
         ItemEntity savedItem = itemRepository.save(itemEntity);
         return itemMapper.mapToItemDto(savedItem);
@@ -56,8 +66,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public List<ItemDto> getAllItem(Long createdById) {
-        List<ItemEntity> items = itemRepository.findAllByCreatedBy(createdById);
+    public List<ItemDto> getAllItem(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<ItemEntity> items = itemRepository.findAllByPharmacyId(pharmacyId);
         return items.stream()
                 .map(itemMapper::mapToItemDto)
                 .collect(Collectors.toList());
@@ -65,22 +82,37 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public ItemDto getItemById(Long createdById, UUID itemId) {
-        Optional<ItemEntity> itemEntity = itemRepository.findByItemIdAndCreatedBy(itemId, createdById);
+    public ItemDto getItemById(Long pharmacyId, UUID itemId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<ItemEntity> itemEntity = itemRepository.findByItemIdAndPharmacyId(itemId, pharmacyId);
 
         if (itemEntity.isEmpty()) {
-            throw new ResourceNotFoundException("Item not found with ID: " + itemId + " for user ID: " + createdById);
+            throw new ResourceNotFoundException("Item not found with ID: " + itemId + " for pharmacy ID: " + pharmacyId);
         }
         return itemMapper.mapToItemDto(itemEntity.get());
     }
 
     @Transactional
     @Override
-    public ItemDto updateItem(Long modifiedById, UUID itemId, ItemDto updatedItem) {
-        Optional<ItemEntity> itemEntityOptional = itemRepository.findById(itemId);
+    public ItemDto updateItem(Long pharmacyId, UUID itemId, ItemDto updatedItem, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<ItemEntity> itemEntityOptional = itemRepository.findByItemIdAndPharmacyId(itemId, pharmacyId);
 
         if (itemEntityOptional.isEmpty()) {
-            throw new ResourceNotFoundException("Item not found with ID: " + itemId);
+            throw new ResourceNotFoundException("Item not found with ID: " + itemId +
+                    " for pharmacy ID: " + pharmacyId);
         }
 
         ItemEntity itemEntity = itemEntityOptional.get();
@@ -99,7 +131,7 @@ public class ItemServiceImpl implements ItemService {
         itemEntity.setHsnNo(updatedItem.getHsnNo());
         itemEntity.setConsumables(updatedItem.getConsumables());
 
-        itemEntity.setModifiedBy(modifiedById);
+        itemEntity.setModifiedBy(user.getId());
         itemEntity.setModifiedDate(LocalDate.now());
 
         ItemEntity updatedItems = itemRepository.save(itemEntity);
@@ -108,11 +140,18 @@ public class ItemServiceImpl implements ItemService {
 
     @Transactional
     @Override
-    public void deleteItem(Long createdById, UUID itemId) {
-        Optional<ItemEntity> itemEntity = itemRepository.findByItemIdAndCreatedBy(itemId, createdById);
+    public void deleteItem(Long pharmacyId, UUID itemId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<ItemEntity> itemEntity = itemRepository.findByItemIdAndPharmacyId(itemId, pharmacyId);
 
         if (itemEntity.isEmpty()) {
-            throw new ResourceNotFoundException("Item not found with ID: " + itemId + " for user ID: " + createdById);
+            throw new ResourceNotFoundException("Item not found with ID: " + itemId + " for pharmacy ID: " + pharmacyId);
         }
 
         itemRepository.delete(itemEntity.get());

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -47,11 +48,20 @@ public class PharmacyServiceImpl implements PharmacyService {
     @Transactional
     @Override
     public List<PharmacyDto> getPharmaciesCreatedByUser(User user) {
-//        List<Pharmacy> pharmacies = pharmacyRepository.findAllByCreatedBy(user.getId());
-        List<Pharmacy> pharmacies = pharmacyRepository.findAllByCreatedBy(user);
+        List<Pharmacy> pharmacies = new ArrayList<>(user.getPharmacies());
         return pharmacies.stream()
                 .map(pharmacyMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+
+//    @Transactional
+//    @Override
+//    public List<PharmacyDto> getPharmaciesCreatedByUser(User user) {
+//        List<Pharmacy> pharmacies = pharmacyRepository.findAllByCreatedBy(user);
+//        return pharmacies.stream()
+//                .map(pharmacyMapper::toDto)
+//                .collect(Collectors.toList());
+//    }
 
 }

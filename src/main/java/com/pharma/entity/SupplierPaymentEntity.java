@@ -31,7 +31,7 @@ public class SupplierPaymentEntity {
     private UUID supplierId;
 
     @Column(name = "pharmacy_id")
-    private UUID pharmacyId;
+    private Long pharmacyId;
 
     @Column(name = "payment_date")
     private LocalDate paymentDate;

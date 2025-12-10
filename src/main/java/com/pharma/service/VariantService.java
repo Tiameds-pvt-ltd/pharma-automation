@@ -12,13 +12,11 @@ public interface VariantService {
 
     VariantDto createVariant(VariantDto variantDto, User user);
 
-//    List<VariantDto> getAllVariant(Long createdById);
+    List<VariantDto> getAllVariants(Long pharmacyId, User user);
 
-    List<VariantDto> getAllVariants();
+    VariantDto getVariantById(Long pharmacyId, UUID variantId, User user);
 
-    VariantDto getVariantById(Long createdById, UUID variantId);
+    VariantDto updateVariant(Long pharmacyId, UUID variantId, VariantDto updateVariant, User user);
 
-    VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant);
-
-    void deleteVariant(Long createdById, UUID variantId);
+    void deleteVariant(Long pharmacyId, UUID variantId, User user);
 }

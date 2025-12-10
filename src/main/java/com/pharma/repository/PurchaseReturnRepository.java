@@ -2,6 +2,7 @@ package com.pharma.repository;
 
 import com.pharma.entity.PurchaseOrderEntity;
 import com.pharma.entity.PurchaseReturnEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,19 +24,28 @@ public interface PurchaseReturnRepository extends JpaRepository<PurchaseReturnEn
     @Query("SELECT p FROM PurchaseReturnEntity p WHERE p.returnId1 LIKE CONCAT('RTN-', :year, '-%') ORDER BY p.returnId1 DESC LIMIT 1")
     Optional<PurchaseReturnEntity> findLatestReturnForYear(@Param("year") String year);
 
+//    @Query("SELECT COALESCE(SUM(p.returnAmount), 0) FROM PurchaseReturnEntity p " +
+//            "WHERE p.creditNote = FALSE " +
+//            "AND p.supplierId = :supplierId " +
+//            "AND p.createdBy = :createdBy")
+//    BigDecimal sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(
+//            @Param("supplierId") UUID supplierId,
+//            @Param("createdBy") Long createdBy);
+
     @Query("SELECT COALESCE(SUM(p.returnAmount), 0) FROM PurchaseReturnEntity p " +
             "WHERE p.creditNote = FALSE " +
             "AND p.supplierId = :supplierId " +
-            "AND p.createdBy = :createdBy")
-    BigDecimal sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(
+            "AND p.pharmacyId = :pharmacyId")
+    BigDecimal sumReturnAmountBySupplierIdAndPharmacyId(
             @Param("supplierId") UUID supplierId,
-            @Param("createdBy") Long createdBy);
-
+            @Param("pharmacyId") Long pharmacyId);
 
 
     @Modifying
     @Query("UPDATE PurchaseReturnEntity pr SET pr.creditNote = true WHERE pr.supplierId = :supplierId")
     int markCreditNoteTrueForSupplier(@Param("supplierId") UUID supplierId);
 
+    List<PurchaseReturnEntity> findAllByPharmacyId(Long pharmacyId);
 
+    Optional<PurchaseReturnEntity> findByReturnIdAndPharmacyId(UUID returnId, Long pharmacyId);
 }

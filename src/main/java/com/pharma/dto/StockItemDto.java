@@ -31,6 +31,7 @@ public class StockItemDto {
     private Long gstPercentage;
     private BigDecimal gstAmount;
     private BigDecimal amount;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

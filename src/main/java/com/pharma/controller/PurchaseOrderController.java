@@ -41,15 +41,16 @@ public class PurchaseOrderController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllPurchaseOrders(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        User currentUser = currentUserOptional.get();
-        List<PurchaseOrderDto> purchaseOrders = purchaseOrderService.getAllPurchaseOrders(currentUser.getId());
+
+        List<PurchaseOrderDto> purchaseOrders = purchaseOrderService.getAllPurchaseOrders(pharmacyId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase orders retrieved successfully", HttpStatus.OK, purchaseOrders);
@@ -59,15 +60,16 @@ public class PurchaseOrderController {
     @GetMapping("/getById/{orderId}")
     public ResponseEntity<?> getPurchaseOrderById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("orderId") UUID orderId
+            @PathVariable("orderId") UUID orderId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        PurchaseOrderDto purchaseOrderDto = purchaseOrderService.getPurchaseOrderById(createdById, orderId);
+
+        PurchaseOrderDto purchaseOrderDto = purchaseOrderService.getPurchaseOrderById(pharmacyId, orderId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase order retrieved successfully",
                 HttpStatus.OK,
@@ -79,7 +81,8 @@ public class PurchaseOrderController {
     @DeleteMapping("/delete/{orderId}")
     public ResponseEntity<?> deletePurchaseOrderById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("orderId") UUID orderId
+            @PathVariable("orderId") UUID orderId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -88,7 +91,7 @@ public class PurchaseOrderController {
         }
         Long createdById = currentUserOptional.get().getId();
         try {
-            purchaseOrderService.deletePurchaseOrderById(createdById, orderId);
+            purchaseOrderService.deletePurchaseOrderById(pharmacyId, orderId,currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Purchase order deleted successfully",
                     HttpStatus.OK,

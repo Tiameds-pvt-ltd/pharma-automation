@@ -22,6 +22,7 @@ public class DoctorDto {
     private String doctorEmail;
     private String doctorVenue;
     private String doctorLicenseNumber;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

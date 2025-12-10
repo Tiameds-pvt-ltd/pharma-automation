@@ -1,7 +1,5 @@
 package com.pharma.repository;
 
-
-import com.pharma.entity.DoctorEntity;
 import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -20,5 +18,10 @@ public interface SupplierRepository extends JpaRepository<SupplierEntity, UUID> 
     boolean existsBySupplierName(String supplierName);
     boolean existsBySupplierMobile(Long supplierMobile);
     boolean existsBySupplierGstinNo(String supplierGstinNo);
+
+    List<SupplierEntity> findAllByPharmacyId(Long pharmacyId);
+
+    Optional<SupplierEntity> findBySupplierIdAndPharmacyId(UUID supplierId, Long pharmacyId);
+
 
 }
