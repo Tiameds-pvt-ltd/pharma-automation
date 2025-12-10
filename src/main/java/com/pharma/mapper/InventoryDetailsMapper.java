@@ -31,6 +31,7 @@ public class InventoryDetailsMapper {
         inventoryDetailsDto.setMrpSalePricePerUnit(inventoryDetailsEntity.getMrpSalePricePerUnit());
         inventoryDetailsDto.setGstPercentage(inventoryDetailsEntity.getGstPercentage());
         inventoryDetailsDto.setGstAmount(inventoryDetailsEntity.getGstAmount());
+        inventoryDetailsDto.setPharmacyId(inventoryDetailsEntity.getPharmacyId());
 
         inventoryDetailsDto.setCreatedBy(inventoryDetailsEntity.getCreatedBy());
         inventoryDetailsDto.setCreatedDate(inventoryDetailsEntity.getCreatedDate());
@@ -64,6 +65,7 @@ public class InventoryDetailsMapper {
         inventoryDetailsEntity.setMrpSalePricePerUnit(inventoryDetailsDto.getMrpSalePricePerUnit());
         inventoryDetailsEntity.setGstPercentage(inventoryDetailsDto.getGstPercentage());
         inventoryDetailsEntity.setGstAmount(inventoryDetailsDto.getGstAmount());
+        inventoryDetailsEntity.setPharmacyId(inventoryDetailsDto.getPharmacyId());
 
         inventoryDetailsEntity.setCreatedBy(inventoryDetailsDto.getCreatedBy());
         inventoryDetailsEntity.setCreatedDate(inventoryDetailsDto.getCreatedDate());
@@ -74,7 +76,7 @@ public class InventoryDetailsMapper {
         List<StockEditEntity> stockEditEntities = inventoryDetailsDto.getStockEditDtos().stream()
                 .map(this::toEntity)
                 .collect(Collectors.toList());
-        stockEditEntities.forEach(stockEdit -> stockEdit.setInventoryDetailsEntity(inventoryDetailsEntity)); // Maintain bi-directional mapping
+        stockEditEntities.forEach(stockEdit -> stockEdit.setInventoryDetailsEntity(inventoryDetailsEntity));
         inventoryDetailsEntity.setStockEditEntities(stockEditEntities);
 
         return inventoryDetailsEntity;

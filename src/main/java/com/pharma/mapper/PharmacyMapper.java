@@ -29,7 +29,7 @@ public class PharmacyMapper {
         pharmacyDto.setPharmaCountry(pharmacy.getPharmaCountry());
         pharmacyDto.setPharmaPhone(pharmacy.getPharmaPhone());
         pharmacyDto.setPharmaEmail(pharmacy.getPharmaEmail());
-//        pharmacyDto.setCreatedBy(pharmacy.getCreatedBy());
+        pharmacyDto.setCreatedBy(pharmacy.getCreatedBy().getId());
         pharmacyDto.setCreatedDate(pharmacy.getCreatedDate());
         pharmacyDto.setModifiedBy(pharmacy.getModifiedBy());
         pharmacyDto.setModifiedDate(pharmacy.getModifiedDate());
@@ -59,7 +59,7 @@ public class PharmacyMapper {
         pharmacy.setPharmaCountry(pharmacyDto.getPharmaCountry());
         pharmacy.setPharmaPhone(pharmacyDto.getPharmaPhone());
         pharmacy.setPharmaEmail(pharmacyDto.getPharmaEmail());
-//        pharmacy.setCreatedBy(pharmacyDto.getCreatedBy());
+        pharmacy.setCreatedBy(createdBy);
         pharmacy.setCreatedDate(pharmacyDto.getCreatedDate());
         pharmacy.setModifiedBy(pharmacyDto.getModifiedBy());
         pharmacy.setModifiedDate(pharmacyDto.getModifiedDate());

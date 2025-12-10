@@ -24,14 +24,21 @@ public interface PurchaseReturnRepository extends JpaRepository<PurchaseReturnEn
     @Query("SELECT p FROM PurchaseReturnEntity p WHERE p.returnId1 LIKE CONCAT('RTN-', :year, '-%') ORDER BY p.returnId1 DESC LIMIT 1")
     Optional<PurchaseReturnEntity> findLatestReturnForYear(@Param("year") String year);
 
+//    @Query("SELECT COALESCE(SUM(p.returnAmount), 0) FROM PurchaseReturnEntity p " +
+//            "WHERE p.creditNote = FALSE " +
+//            "AND p.supplierId = :supplierId " +
+//            "AND p.createdBy = :createdBy")
+//    BigDecimal sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(
+//            @Param("supplierId") UUID supplierId,
+//            @Param("createdBy") Long createdBy);
+
     @Query("SELECT COALESCE(SUM(p.returnAmount), 0) FROM PurchaseReturnEntity p " +
             "WHERE p.creditNote = FALSE " +
             "AND p.supplierId = :supplierId " +
-            "AND p.createdBy = :createdBy")
-    BigDecimal sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(
+            "AND p.pharmacyId = :pharmacyId")
+    BigDecimal sumReturnAmountBySupplierIdAndPharmacyId(
             @Param("supplierId") UUID supplierId,
-            @Param("createdBy") Long createdBy);
-
+            @Param("pharmacyId") Long pharmacyId);
 
 
     @Modifying

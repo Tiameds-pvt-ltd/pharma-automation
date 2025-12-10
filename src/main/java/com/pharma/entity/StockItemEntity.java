@@ -68,6 +68,9 @@ public class StockItemEntity {
     @Column(name = "amount")
     private BigDecimal amount;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

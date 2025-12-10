@@ -109,11 +109,11 @@ public class PurchaseReturnController {
         }
     }
 
-
     @GetMapping("/creditNote/{supplierId}")
     public ResponseEntity<?> getSumReturnAmountBySupplier(
             @RequestHeader("Authorization") String token,
-            @PathVariable("supplierId") UUID supplierId
+            @PathVariable UUID supplierId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -121,14 +121,37 @@ public class PurchaseReturnController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        BigDecimal sumReturnAmount = purchaseReturnService
-                .getSumReturnAmountBySupplierAndCreatedBy(supplierId, createdById);
+        User user = currentUserOptional.get();
+
+        BigDecimal sumReturnAmount =
+                purchaseReturnService.getSumReturnAmountBySupplier(supplierId, pharmacyId, user);
+
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Sum of return amount retrieved successfully",
                 HttpStatus.OK,
                 sumReturnAmount
         );
     }
+
+//    @GetMapping("/creditNote/{supplierId}")
+//    public ResponseEntity<?> getSumReturnAmountBySupplier(
+//            @RequestHeader("Authorization") String token,
+//            @PathVariable("supplierId") UUID supplierId
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        Long createdById = currentUserOptional.get().getId();
+//        BigDecimal sumReturnAmount = purchaseReturnService
+//                .getSumReturnAmountBySupplierAndCreatedBy(supplierId, createdById);
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Sum of return amount retrieved successfully",
+//                HttpStatus.OK,
+//                sumReturnAmount
+//        );
+//    }
 
 }

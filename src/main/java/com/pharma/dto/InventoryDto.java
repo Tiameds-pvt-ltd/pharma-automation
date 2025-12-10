@@ -17,6 +17,7 @@ public class InventoryDto {
     private UUID invItemId;
     private UUID itemId;
     private Long packageQuantity;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

@@ -13,13 +13,36 @@ import java.util.UUID;
 @Repository
 public interface StockItemRepository extends JpaRepository<StockItemEntity, UUID> {
 
-    List<StockItemEntity> findByItemIdAndCreatedBy(UUID itemId, Long createdBy);
+    List<StockItemEntity> findByItemIdAndPharmacyId(UUID itemId, Long pharmacyId);
 
-    @Query("SELECT s FROM StockItemEntity s WHERE s.stockEntity.supplierId = :supplierId")
-    List<StockItemEntity> findItemsBySupplierId(@Param("supplierId") UUID supplierId);
+    @Query("SELECT s FROM StockItemEntity s " +
+            "WHERE s.stockEntity.supplierId = :supplierId " +
+            "AND s.pharmacyId = :pharmacyId")
+    List<StockItemEntity> findItemsBySupplierIdAndPharmacyId(
+            @Param("supplierId") UUID supplierId,
+            @Param("pharmacyId") Long pharmacyId
+    );
 
-//    Optional<StockItemEntity> findByStockEntity_InvIdAndItemIdAndBatchNoAndModifiedBy(UUID invId, UUID itemId, String batchNo, Long modifiedBy);
 
-    Optional<StockItemEntity> findByStockEntity_InvIdAndItemIdAndBatchNo(UUID invId, UUID itemId, String batchNo);
+    @Query("SELECT s FROM StockItemEntity s " +
+            "WHERE s.stockEntity.invId = :invId " +
+            "AND s.itemId = :itemId " +
+            "AND s.batchNo = :batchNo " +
+            "AND s.pharmacyId = :pharmacyId")
+    Optional<StockItemEntity> findByInvIdItemIdBatchNoAndPharmacyId(
+            @Param("invId") UUID invId,
+            @Param("itemId") UUID itemId,
+            @Param("batchNo") String batchNo,
+            @Param("pharmacyId") Long pharmacyId);
+
+
+
+//    List<StockItemEntity> findByItemIdAndCreatedBy(UUID itemId, Long createdBy);
+
+//    @Query("SELECT s FROM StockItemEntity s WHERE s.stockEntity.supplierId = :supplierId")
+
+//    List<StockItemEntity> findItemsBySupplierId(@Param("supplierId") UUID supplierId);
+
+//Optional<StockItemEntity> findByStockEntity_InvIdAndItemIdAndBatchNo(UUID invId, UUID itemId, String batchNo);
 
 }

@@ -73,6 +73,66 @@ public class PharmaMemberController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Pharmacy fetched successfully", HttpStatus.OK, pharmacyDtos);
     }
 
+    @Transactional
+    @GetMapping("/get-user-pharma-by-id")
+    public ResponseEntity<?> getUserPharmaById(
+            @RequestHeader("Authorization") String token,
+            @RequestParam("pharmacyId") Long pharmacyId
+    ) {
+
+        // Authenticate User
+        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Fetch Pharmacy
+        Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId).orElse(null);
+        if (pharmacy == null) {
+            return ApiResponseHelper.errorResponse("Pharmacy not found", HttpStatus.NOT_FOUND);
+        }
+
+        // Check if user belongs to this pharmacy
+        boolean isMember = pharmacy.getMembers()
+                .stream()
+                .anyMatch(member -> member.getId().equals(currentUser.getId()));
+
+        if (!isMember) {
+            return ApiResponseHelper.errorResponse(
+                    "User does not have access to this pharmacy",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        // Convert to DTO
+        PharmacyDto dto = new PharmacyDto(
+                pharmacy.getPharmacyId(),
+                pharmacy.getName(),
+                pharmacy.getAddress(),
+                pharmacy.getCity(),
+                pharmacy.getState(),
+                pharmacy.getDescription(),
+                pharmacy.getIsActive(),
+                pharmacy.getGstNo(),
+                pharmacy.getLicenseNo(),
+                pharmacy.getPharmaLogo(),
+                pharmacy.getPharmaZip(),
+                pharmacy.getPharmaCountry(),
+                pharmacy.getPharmaPhone(),
+                pharmacy.getPharmaEmail(),
+                pharmacy.getCreatedBy() != null ? pharmacy.getCreatedBy().getId() : null,
+                pharmacy.getCreatedDate(),
+                pharmacy.getModifiedBy(),
+                pharmacy.getModifiedDate()
+        );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Pharmacy fetched successfully",
+                HttpStatus.OK,
+                dto
+        );
+    }
+
 
     @PostMapping("/add-member/{pharmacyId}/member/{userId}")
     public ResponseEntity<?> addMemberToPharmacy(

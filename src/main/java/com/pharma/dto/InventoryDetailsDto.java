@@ -28,6 +28,7 @@ public class InventoryDetailsDto {
     private BigDecimal mrpSalePricePerUnit;
     private Long gstPercentage;
     private BigDecimal gstAmount;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

@@ -29,4 +29,7 @@ public interface PharmacyRepository extends JpaRepository<Pharmacy, Long> {
     Set<Pharmacy> findPharmacyByUserId(@Param("userId") Long userId);
 
 
+    @Query("SELECT p FROM Pharmacy p JOIN p.members m WHERE p.pharmacyId = :pharmacyId AND m.id = :userId")
+    Optional<Pharmacy> findPharmacyForUser(@Param("pharmacyId") Long pharmacyId, @Param("userId") Long userId);
+
 }

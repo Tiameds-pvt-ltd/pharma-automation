@@ -192,12 +192,27 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         return String.format("RTN-%s-%05d", yearPart, newSequence);
     }
 
-
     @Transactional
     @Override
-    public BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy) {
+    public BigDecimal getSumReturnAmountBySupplier(UUID supplierId, Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
         return purchaseReturnRepository
-                .sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(supplierId, createdBy);
+                .sumReturnAmountBySupplierIdAndPharmacyId(supplierId, pharmacyId);
     }
+
+
+
+//    @Transactional
+//    @Override
+//    public BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy) {
+//        return purchaseReturnRepository
+//                .sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(supplierId, createdBy);
+//    }
 
 }

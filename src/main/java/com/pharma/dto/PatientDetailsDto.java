@@ -16,7 +16,8 @@ public class PatientDetailsDto {
 
     private UUID patientId;
     private String patientId1;
-    private String patientName;
+    private String firstName;
+    private String lastName;
     private String email;
     private Long phone;
     private String patientAddress;

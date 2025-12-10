@@ -44,10 +44,20 @@ public class VariantServiceImpl implements VariantService {
         user = userRepository.findById(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = user.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(variantDto.getPharmacyId()));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
         VariantEntity variantEntity = variantMapper.toEntity(variantDto);
         variantEntity.setVariantId(UUID.randomUUID());
         variantEntity.setCreatedBy(user.getId());
         variantEntity.setCreatedDate(LocalDate.now());
+
+        variantEntity.setPharmacyId(variantDto.getPharmacyId());
 
         if (variantEntity.getUnitEntities() != null) {
             for (UnitEntity unit : variantEntity.getUnitEntities()) {
@@ -65,8 +75,15 @@ public class VariantServiceImpl implements VariantService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<VariantDto> getAllVariants() {
-        List<VariantEntity> entities = variantRepository.findAll();
+    public List<VariantDto> getAllVariants(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<VariantEntity> entities = variantRepository.findAllByPharmacyId(pharmacyId);
         return entities.stream()
                 .map(variantMapper::toDto)
                 .toList();
@@ -74,11 +91,18 @@ public class VariantServiceImpl implements VariantService {
 
     @Override
     @Transactional
-    public VariantDto getVariantById(Long createdById, UUID variantId) {
-        Optional<VariantEntity> variantEntityOptional = variantRepository.findByVariantIdAndCreatedBy(variantId, createdById);
+    public VariantDto getVariantById(Long pharmacyId, UUID variantId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<VariantEntity> variantEntityOptional = variantRepository.findByVariantIdAndPharmacyId(variantId, pharmacyId);
 
         if (variantEntityOptional.isEmpty()) {
-            throw new RuntimeException("Variant not found with ID: " + variantId + " for user ID: " + createdById);
+            throw new RuntimeException("Variant not found with ID: " + variantId + " for pharmacy ID: " + pharmacyId);
         }
 
         return variantMapper.toDto(variantEntityOptional.get());
@@ -86,11 +110,18 @@ public class VariantServiceImpl implements VariantService {
 
     @Override
     @Transactional
-    public void deleteVariant(Long createdById, UUID variantId) {
-        Optional<VariantEntity> variantEntityOptional = variantRepository.findByVariantIdAndCreatedBy(variantId, createdById);
+    public void deleteVariant(Long pharmacyId, UUID variantId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        Optional<VariantEntity> variantEntityOptional = variantRepository.findByVariantIdAndPharmacyId(variantId, pharmacyId);
 
         if (variantEntityOptional.isEmpty()) {
-            throw new RuntimeException("Variant not found with ID: " + variantId + " for user ID: " + createdById);
+            throw new RuntimeException("Variant not found with ID: " + variantId + " for pharmacy ID: " + pharmacyId);
         }
 
         variantRepository.delete(variantEntityOptional.get());
@@ -99,20 +130,24 @@ public class VariantServiceImpl implements VariantService {
 
     @Override
     @Transactional
-    public VariantDto updateVariant(Long modifiedById, UUID variantId, VariantDto updateVariant) {
+    public VariantDto updateVariant(Long pharmacyId, UUID variantId, VariantDto updateVariant, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
-        // 1️⃣ Fetch variant only if created by this user
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
         VariantEntity existingVariant = variantRepository
-                .findByVariantIdAndCreatedBy(variantId, modifiedById)
+                .findByVariantIdAndPharmacyId(variantId, pharmacyId)
                 .orElseThrow(() ->
-                        new RuntimeException("Variant not found with ID: " + variantId + " for user ID: " + modifiedById)
-                );
+                        new RuntimeException("Variant not found with ID: " + variantId + " for pharmacy ID: " + pharmacyId));
 
         if (updateVariant.getVariantName() != null) {
             existingVariant.setVariantName(updateVariant.getVariantName());
         }
 
-        existingVariant.setModifiedBy(modifiedById);
+        existingVariant.setModifiedBy(user.getId());
         existingVariant.setModifiedDate(LocalDate.now());
 
         existingVariant.getUnitEntities().clear();
@@ -120,11 +155,11 @@ public class VariantServiceImpl implements VariantService {
         List<UnitEntity> updatedUnits = updateVariant.getUnitDtos().stream()
                 .map(unitDto -> {
                     UnitEntity unitEntity = new UnitEntity();
-                    unitEntity.setUnitId(unitDto.getUnitId());   // Keep same UUID if editing
+                    unitEntity.setUnitId(unitDto.getUnitId());
                     unitEntity.setUnitName(unitDto.getUnitName());
                     unitEntity.setCreatedBy(unitDto.getCreatedBy());
                     unitEntity.setCreatedDate(unitDto.getCreatedDate());
-                    unitEntity.setModifiedBy(modifiedById);
+                    unitEntity.setModifiedBy(user.getId());
                     unitEntity.setModifiedDate(LocalDate.now());
 
                     unitEntity.setVariantEntity(existingVariant);

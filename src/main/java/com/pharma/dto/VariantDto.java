@@ -18,6 +18,7 @@ public class VariantDto {
 
     private UUID variantId;
     private String variantName;
+    private Long pharmacyId;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

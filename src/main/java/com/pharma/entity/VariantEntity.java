@@ -29,6 +29,9 @@ public class VariantEntity {
     @Column(name = "variant_name")
     private String variantName;
 
+    @Column(name = "pharmacy_id")
+    private Long pharmacyId;
+
     @Column(name = "created_by")
     private Long createdBy;
 

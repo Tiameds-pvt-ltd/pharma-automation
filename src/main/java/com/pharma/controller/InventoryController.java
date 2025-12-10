@@ -31,7 +31,8 @@ public class InventoryController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllInventory(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
@@ -39,21 +40,44 @@ public class InventoryController {
             return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        List<InventoryDto> inventoryDtos = inventoryService.getAllInventory(currentUserOptional.get().getId());
+        List<InventoryDto> inventoryDtos = inventoryService.getAllInventory(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory retrieved successfully", HttpStatus.OK, inventoryDtos);
     }
 
+//    @GetMapping("/expiredStock")
+//    public ResponseEntity<?> getExpiredStock(
+//            @RequestHeader("Authorization") String token
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//        Long createdById = currentUserOptional.get().getId();
+//        List<StockItemDto> expiredStock = inventoryService.getExpiredStock(createdById);
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Expired stock retrieved successfully",
+//                HttpStatus.OK,
+//                expiredStock
+//        );
+//    }
+
     @GetMapping("/expiredStock")
     public ResponseEntity<?> getExpiredStock(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
         if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
         }
-        Long createdById = currentUserOptional.get().getId();
-        List<StockItemDto> expiredStock = inventoryService.getExpiredStock(createdById);
+
+        User user = currentUserOptional.get();
+
+        List<StockItemDto> expiredStock =
+                inventoryService.getExpiredStock(pharmacyId, user);
+
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Expired stock retrieved successfully",
                 HttpStatus.OK,
@@ -61,18 +85,42 @@ public class InventoryController {
         );
     }
 
+
+//    @GetMapping("/expiredStockWithSupplier")
+//    public ResponseEntity<?> getExpiredStockWithSupplier(
+//            @RequestHeader("Authorization") String token
+//    ) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        Long createdById = currentUserOptional.get().getId();
+//        List<ExpiredStockDto> expiredStock = inventoryService.getExpiredStockWithSupplier(createdById);
+//
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Expired stock with supplier retrieved successfully",
+//                HttpStatus.OK,
+//                expiredStock
+//        );
+//    }
+
     @GetMapping("/expiredStockWithSupplier")
     public ResponseEntity<?> getExpiredStockWithSupplier(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
         if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        List<ExpiredStockDto> expiredStock = inventoryService.getExpiredStockWithSupplier(createdById);
+        User user = currentUserOptional.get();
+
+        List<ExpiredStockDto> expiredStock =
+                inventoryService.getExpiredStockWithSupplier(pharmacyId, user);
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Expired stock with supplier retrieved successfully",
@@ -80,6 +128,5 @@ public class InventoryController {
                 expiredStock
         );
     }
-
 
 }

@@ -1,5 +1,6 @@
 package com.pharma.repository;
 
+import com.pharma.entity.SupplierEntity;
 import com.pharma.entity.VariantEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,7 @@ public interface VariantRepository extends JpaRepository<VariantEntity, UUID> {
 
     Optional<VariantEntity> findByVariantIdAndCreatedBy(UUID variantId, Long createdBy);
 
+    List<VariantEntity> findAllByPharmacyId(Long pharmacyId);
+
+    Optional<VariantEntity> findByVariantIdAndPharmacyId(UUID variantId, Long pharmacyId);
 }

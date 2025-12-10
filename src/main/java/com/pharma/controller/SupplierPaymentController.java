@@ -51,15 +51,16 @@ public class SupplierPaymentController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSupplierPayment(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        User currentUser = currentUserOptional.get();
-        List<SupplierPaymentDto> supplierPaymentDtos = supplierPaymentService.getAllSupplierPayment(currentUser.getId());
+
+        List<SupplierPaymentDto> supplierPaymentDtos = supplierPaymentService.getAllSupplierPayment(pharmacyId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Supplier Payment retrieved successfully", HttpStatus.OK, supplierPaymentDtos);
@@ -68,15 +69,16 @@ public class SupplierPaymentController {
     @GetMapping("/getById/{paymentId}")
     public ResponseEntity<?> getPurchaseOrderById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("paymentId") UUID paymentId
+            @PathVariable("paymentId") UUID paymentId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        SupplierPaymentDto supplierPaymentDto = supplierPaymentService.getSupplierPaymentById(createdById, paymentId);
+
+        SupplierPaymentDto supplierPaymentDto = supplierPaymentService.getSupplierPaymentById(pharmacyId, paymentId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Supplier Payment retrieved successfully",
                 HttpStatus.OK,

@@ -1,6 +1,7 @@
 package com.pharma.repository;
 
 import com.pharma.entity.PatientDetailsEntity;
+import com.pharma.entity.SupplierEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -20,8 +21,12 @@ public interface PatientDetailsRepository extends JpaRepository<PatientDetailsEn
     @Query("SELECT p FROM PatientDetailsEntity p WHERE p.patientId1 LIKE CONCAT('PAT-', :year, '-%') ORDER BY p.patientId1 DESC LIMIT 1")
     Optional<PatientDetailsEntity> findLatestPatientForYear(@Param("year") String year);
 
-    boolean existsByPatientNameAndPhone(String patientName, Long phone);
+    boolean existsByFirstNameAndPhone(String firstName, Long phone);
 
     @Query("SELECT MAX(p.patientId1) FROM PatientDetailsEntity p")
     String findMaxPatientId1();
+
+    List<PatientDetailsEntity> findAllByPharmacyId(Long pharmacyId);
+
+    Optional<PatientDetailsEntity> findByPatientIdAndPharmacyId(UUID patientId, Long pharmacyId);
 }

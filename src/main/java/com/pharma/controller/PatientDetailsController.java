@@ -57,7 +57,8 @@ public class PatientDetailsController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllDoctors(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
@@ -65,7 +66,7 @@ public class PatientDetailsController {
             return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        List<PatientDetailsDto> patients = patientDetailsService.getAllPatient(currentUserOptional.get().getId());
+        List<PatientDetailsDto> patients = patientDetailsService.getAllPatient(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage("Patients retrieved successfully", HttpStatus.OK, patients);
     }
 
@@ -73,7 +74,8 @@ public class PatientDetailsController {
     @GetMapping("/getById/{patientId}")
     public ResponseEntity<?> getDoctorById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("patientId") UUID patientId
+            @PathVariable("patientId") UUID patientId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -81,8 +83,7 @@ public class PatientDetailsController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long createdById = currentUserOptional.get().getId();
-        PatientDetailsDto patientDetailsDto = patientDetailsService.getPatientById(createdById, patientId);
+        PatientDetailsDto patientDetailsDto = patientDetailsService.getPatientById(pharmacyId, patientId, currentUserOptional.get());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Patient retrieved successfully",
@@ -96,6 +97,7 @@ public class PatientDetailsController {
     public ResponseEntity<?> updatePatientById(
             @RequestHeader("Authorization") String token,
             @PathVariable("patientId") UUID patientId,
+            @RequestParam Long pharmacyId,
             @RequestBody PatientDetailsDto patientDetailsDto
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
@@ -104,10 +106,8 @@ public class PatientDetailsController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-        Long modifiedById = currentUserOptional.get().getId();
-
         try {
-            PatientDetailsDto updatePatient = patientDetailsService.updatePatient(modifiedById, patientId, patientDetailsDto);
+            PatientDetailsDto updatePatient = patientDetailsService.updatePatient(pharmacyId, patientId, patientDetailsDto, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Patient updated successfully",
                     HttpStatus.OK,
@@ -125,7 +125,8 @@ public class PatientDetailsController {
     @DeleteMapping("/delete/{patientId}")
     public ResponseEntity<?> deletePatientById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("patientId") UUID patientId
+            @PathVariable("patientId") UUID patientId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
@@ -135,7 +136,7 @@ public class PatientDetailsController {
 
         Long createdById = currentUserOptional.get().getId();
         try {
-            patientDetailsService.deletePatientById(createdById, patientId);
+            patientDetailsService.deletePatientById(pharmacyId, patientId, currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Patient deleted successfully",
                     HttpStatus.OK,
@@ -152,8 +153,8 @@ public class PatientDetailsController {
 
     @PostMapping("/check-duplicate")
     public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestBody PatientDetailsDto request) {
-        boolean exists = patientDetailsRepository.existsByPatientNameAndPhone(
-                request.getPatientName(), request.getPhone()
+        boolean exists = patientDetailsRepository.existsByFirstNameAndPhone(
+                request.getFirstName(), request.getPhone()
         );
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }

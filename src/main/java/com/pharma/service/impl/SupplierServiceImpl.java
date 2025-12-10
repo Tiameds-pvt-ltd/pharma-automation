@@ -85,7 +85,6 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public SupplierDto getSupplierById(Long pharmacyId, UUID supplierId, User user) {
-
         boolean isMember = user.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
@@ -130,8 +129,8 @@ public class SupplierServiceImpl implements SupplierService {
         supplierEntity.setSupplierDlno(updatedSupplier.getSupplierDlno());
         supplierEntity.setSupplierAddress(updatedSupplier.getSupplierAddress());
         supplierEntity.setSupplierStreet(updatedSupplier.getSupplierStreet());
-        supplierEntity.setSupplierZip(updatedSupplier.getSupplierZip());
         supplierEntity.setSupplierCity(updatedSupplier.getSupplierCity());
+        supplierEntity.setSupplierZip(updatedSupplier.getSupplierZip());
         supplierEntity.setSupplierState(updatedSupplier.getSupplierState());
         supplierEntity.setSupplierStatus(updatedSupplier.getSupplierStatus());
 

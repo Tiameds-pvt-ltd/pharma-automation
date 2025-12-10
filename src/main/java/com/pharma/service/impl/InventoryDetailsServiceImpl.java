@@ -1,9 +1,6 @@
 package com.pharma.service.impl;
 
-import com.pharma.dto.ExpiredStockDto;
-import com.pharma.dto.ExpiredStockView;
-import com.pharma.dto.InventoryDetailsDto;
-import com.pharma.dto.StockEditDto;
+import com.pharma.dto.*;
 import com.pharma.entity.InventoryDetailsEntity;
 import com.pharma.entity.StockEditEntity;
 import com.pharma.entity.User;
@@ -32,24 +29,57 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
 
     @Transactional
     @Override
-    public List<InventoryDetailsDto> getAllInventoryDetails(Long createdById) {
-        List<InventoryDetailsEntity> inventoryDetailsEntities = inventoryDetailsRepository.findAllByCreatedBy(createdById);
+    public List<InventoryDetailsDto> getAllInventoryDetails(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<InventoryDetailsEntity> inventoryDetailsEntities = inventoryDetailsRepository.findAllByPharmacyId(pharmacyId);
         return inventoryDetailsEntities.stream()
                 .map(inventoryDetailsMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    @Transactional
-    @Override
-    public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long createdById) {
-        return inventoryDetailsRepository.findCurrentYearStockWithSupplier(createdById);
-    }
+//    @Transactional
+//    @Override
+//    public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long createdById) {
+//        return inventoryDetailsRepository.findCurrentYearStockWithSupplier(createdById);
+//    }
 
     @Transactional
     @Override
-    public List<ExpiredStockView> getNextThreeMonthsStockWithSupplier(Long createdById) {
-        return inventoryDetailsRepository.findNextThreeMonthsStockWithSupplier(createdById);
+    public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        return inventoryDetailsRepository.findCurrentYearStockWithSupplier(pharmacyId);
     }
+
+//    @Transactional
+//    @Override
+//    public List<ExpiredStockView> getNextThreeMonthsStockWithSupplier(Long createdById) {
+//        return inventoryDetailsRepository.findNextThreeMonthsStockWithSupplier(createdById);
+//    }
+
+    @Transactional
+    @Override
+    public List<ExpiredStockView> getNextThreeMonthsStockWithSupplier(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+        return inventoryDetailsRepository.findNextThreeMonthsStockWithSupplier(pharmacyId);
+    }
+
 
     @Transactional
     @Override
@@ -96,5 +126,18 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
         InventoryDetailsEntity savedEntity = inventoryDetailsRepository.save(inventoryEntity);
 
         return inventoryDetailsMapper.toDto(savedEntity);
+    }
+
+
+    @Transactional
+    @Override
+    public List<InventoryView> getInventory(Long pharmacyId, User user) {
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+        return inventoryDetailsRepository.getInventoryDetailsByPharmacy(pharmacyId);
     }
 }

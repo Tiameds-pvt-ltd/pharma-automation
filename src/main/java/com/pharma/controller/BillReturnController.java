@@ -46,16 +46,16 @@ public class BillReturnController {
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllBillReturns(
-            @RequestHeader("Authorization") String token
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        User currentUser = currentUserOptional.get();
-        List<BillReturnDto> billReturnDtos = billReturnService.getAllBillReturn(currentUser.getId());
 
+        List<BillReturnDto> billReturnDtos = billReturnService.getAllBillReturn(pharmacyId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Bill Return retrieved successfully", HttpStatus.OK, billReturnDtos);
     }
@@ -64,15 +64,16 @@ public class BillReturnController {
     @GetMapping("/getById/{billReturnId}")
     public ResponseEntity<?> getBillById(
             @RequestHeader("Authorization") String token,
-            @PathVariable("billReturnId") UUID billReturnId
+            @PathVariable("billReturnId") UUID billReturnId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
-        BillReturnDto billReturnDto = billReturnService.getBillReturnById(createdById, billReturnId);
+
+        BillReturnDto billReturnDto = billReturnService.getBillReturnById(pharmacyId, billReturnId, currentUserOptional.get());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Bill Return retrieved successfully",
                 HttpStatus.OK,
@@ -83,16 +84,17 @@ public class BillReturnController {
     @DeleteMapping("/delete/{billReturnId}")
     public ResponseEntity<?> deleteBillReturn(
             @RequestHeader("Authorization") String token,
-            @PathVariable("billReturnId") UUID billReturnId
+            @PathVariable("billReturnId") UUID billReturnId,
+            @RequestParam Long pharmacyId
     ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
         if (currentUserOptional.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
-        Long createdById = currentUserOptional.get().getId();
+
         try {
-            billReturnService.deleteBillReturn(createdById, billReturnId);
+            billReturnService.deleteBillReturn(pharmacyId, billReturnId,currentUserOptional.get());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Bill Return deleted successfully",
                     HttpStatus.OK,
@@ -108,8 +110,27 @@ public class BillReturnController {
 
     }
 
+//    @GetMapping("/list")
+//    public ResponseEntity<?> getBillReturnLists(@RequestHeader("Authorization") String token) {
+//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+//
+//        if (currentUserOptional.isEmpty()) {
+//            return ApiResponseHelper.successResponseWithDataAndMessage(
+//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+//        }
+//
+//        User currentUser = currentUserOptional.get();
+//        List<BillReturnListDto> returnList = billReturnService.getBillReturnListsByCreatedBy(currentUser.getId());
+//
+//        return ApiResponseHelper.successResponseWithDataAndMessage(
+//                "Bill Return list retrieved successfully", HttpStatus.OK, returnList);
+//    }
+
     @GetMapping("/list")
-    public ResponseEntity<?> getBillReturnLists(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<?> getBillReturnLists(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId
+    ) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
         if (currentUserOptional.isEmpty()) {
@@ -118,10 +139,15 @@ public class BillReturnController {
         }
 
         User currentUser = currentUserOptional.get();
-        List<BillReturnListDto> returnList = billReturnService.getBillReturnListsByCreatedBy(currentUser.getId());
+        List<BillReturnListDto> returnList =
+                billReturnService.getBillReturnListsByPharmacy(pharmacyId, currentUser);
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
-                "Bill Return list retrieved successfully", HttpStatus.OK, returnList);
+                "Bill Return list retrieved successfully",
+                HttpStatus.OK,
+                returnList
+        );
     }
+
 
 }

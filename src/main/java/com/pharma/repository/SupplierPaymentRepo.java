@@ -1,5 +1,6 @@
 package com.pharma.repository;
 
+import com.pharma.entity.SupplierEntity;
 import com.pharma.entity.SupplierPaymentEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,4 +16,6 @@ public interface SupplierPaymentRepo extends JpaRepository <SupplierPaymentEntit
 
     Optional<SupplierPaymentEntity> findByPaymentIdAndCreatedBy(UUID paymentId, Long createdBy);
 
+    List<SupplierPaymentEntity> findAllByPharmacyId(Long pharmacyId);
+    Optional<SupplierPaymentEntity> findByPaymentIdAndPharmacyId(UUID paymentId, Long pharmacyId);
 }

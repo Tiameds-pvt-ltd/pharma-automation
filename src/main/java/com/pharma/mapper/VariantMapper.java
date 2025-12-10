@@ -20,6 +20,7 @@ public class VariantMapper {
         VariantDto variantDto = new VariantDto();
         variantDto.setVariantId(variantEntity.getVariantId());
         variantDto.setVariantName(variantEntity.getVariantName());
+        variantDto.setPharmacyId(variantEntity.getPharmacyId());
         variantDto.setCreatedBy(variantEntity.getCreatedBy());
         variantDto.setCreatedDate(variantEntity.getCreatedDate());
         variantDto.setModifiedBy(variantEntity.getModifiedBy());
@@ -41,6 +42,7 @@ public class VariantMapper {
         VariantEntity variantEntity = new VariantEntity();
         variantEntity.setVariantId(variantDto.getVariantId());
         variantEntity.setVariantName(variantDto.getVariantName());
+        variantEntity.setPharmacyId(variantDto.getPharmacyId());
         variantEntity.setCreatedBy(variantDto.getCreatedBy());
         variantEntity.setCreatedDate(variantDto.getCreatedDate());
         variantEntity.setModifiedBy(variantDto.getModifiedBy());
