@@ -134,6 +134,7 @@ public class PharmaMemberController {
     }
 
 
+    @Transactional
     @PostMapping("/add-member/{pharmacyId}/member/{userId}")
     public ResponseEntity<?> addMemberToPharmacy(
             @PathVariable Long pharmacyId,

@@ -25,7 +25,7 @@ public class UserPharmacyService {
         return pharmacyRepository.existsByName(name);
     }
 
-
+    @Transactional
     public User getUserById(Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
