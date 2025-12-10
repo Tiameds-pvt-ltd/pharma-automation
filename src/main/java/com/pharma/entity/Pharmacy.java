@@ -1,6 +1,7 @@
 package com.pharma.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -86,6 +87,7 @@ public class Pharmacy {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @JsonManagedReference(value = "pharmacy-members")
+    @JsonIgnore
     private Set<User> members = new HashSet<>();
 
 

@@ -123,6 +123,7 @@ public class User {
     @ManyToMany(mappedBy = "members",
             fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JsonBackReference(value = "pharmacy-members")
+    @JsonIgnore
     private Set<Pharmacy> pharmacies = new HashSet<>();
 
 
