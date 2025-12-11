@@ -30,6 +30,16 @@ public interface UserRepository extends JpaRepository<User, Long> {
         WHERE u.id = :id
     """)
     Optional<User> findByIdWithPharmacies(@Param("id") Long id);
+
+    @Query("""
+    SELECT DISTINCT u 
+    FROM User u 
+    LEFT JOIN FETCH u.roles 
+    LEFT JOIN FETCH u.modules
+    WHERE u.username = :username
+""")
+    Optional<User> findUserForLogin(@Param("username") String username);
+
 }
 
 

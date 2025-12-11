@@ -8,6 +8,7 @@ import com.pharma.repository.auth.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -161,6 +162,13 @@ public class UserService {
         return userRepository.findByIdWithPharmacies(id)
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findUserForLogin(String username) {
+        return userRepository.findUserForLogin(username);
+    }
+
+
 }
 
 
