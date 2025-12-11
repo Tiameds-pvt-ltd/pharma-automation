@@ -251,28 +251,14 @@ public class BillServiceImpl implements BillService {
         return String.format("BILL-%s-%05d", yearPart, newSequence);
     }
 
-//    @Transactional
-//    @Override
-//    public PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo) {
-//        Object result = billRepository.getPackageQuantityRaw(itemId, batchNo);
-//        if (result == null) {
-//            return new PackageQuantityDto(0L);
-//        }
-//
-//        Long quantity;
-//        if (result instanceof Number) {
-//            quantity = ((Number) result).longValue();
-//        } else {
-//            quantity = Long.parseLong(result.toString());
-//        }
-//
-//        return new PackageQuantityDto( quantity);
-//    }
 
     @Transactional
     @Override
     public PackageQuantityDto getPackageQuantityDifference(UUID itemId, String batchNo, Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -295,19 +281,13 @@ public class BillServiceImpl implements BillService {
         return new PackageQuantityDto(quantity);
     }
 
-
-//    @Transactional
-//    @Override
-//    public BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate) {
-//        return billRepository.getBillingSummaryByDateAndCreatedBy(selectedDate, createdBy);
-//    }
-
     @Transactional
     @Override
     public BillingSummaryDto getSummaryByDate(Long pharmacyId, LocalDate selectedDate, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // Validate that the user belongs to this pharmacy
-        boolean isMember = user.getPharmacies().stream()
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -316,16 +296,14 @@ public class BillServiceImpl implements BillService {
         return billRepository.getBillingSummaryByDateAndPharmacy(selectedDate, pharmacyId);
     }
 
-//    @Transactional
-//    @Override
-//    public PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate) {
-//        return billRepository.getPaymentSummaryByDateAndCreatedBy(selectedDate, createdBy);
-//    }
 
     @Transactional
     @Override
     public PaymentSummaryDto getPaymentSummaryByDate(Long pharmacyId, LocalDate selectedDate, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -335,23 +313,13 @@ public class BillServiceImpl implements BillService {
         return billRepository.getPaymentSummaryByDateAndPharmacy(selectedDate, pharmacyId);
     }
 
-
-//    @Transactional
-//    @Override
-//    public List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth) {
-//        if (inputDate != null) {
-//            return billRepository.getBillingGstSummaryByDate(createdBy, inputDate);
-//        } else if (inputMonth != null && !inputMonth.isBlank()) {
-//            return billRepository.getBillingGstSummaryByMonth(createdBy, inputMonth);
-//        } else {
-//            return List.of(); // or throw an exception
-//        }
-//    }
-
     @Transactional
     @Override
     public List<BillingGstSummaryDto> getBillingGstSummary(Long pharmacyId, LocalDate inputDate, String inputMonth, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -366,6 +334,5 @@ public class BillServiceImpl implements BillService {
 
         return List.of();
     }
-
 
 }
