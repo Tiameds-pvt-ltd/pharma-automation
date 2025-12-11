@@ -41,10 +41,10 @@ public class VariantServiceImpl implements VariantService {
     @Transactional
     @Override
     public VariantDto createVariant(VariantDto variantDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(variantDto.getPharmacyId()));
 
@@ -76,7 +76,10 @@ public class VariantServiceImpl implements VariantService {
     @Override
     @Transactional(readOnly = true)
     public List<VariantDto> getAllVariants(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -92,7 +95,10 @@ public class VariantServiceImpl implements VariantService {
     @Override
     @Transactional
     public VariantDto getVariantById(Long pharmacyId, UUID variantId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -111,7 +117,10 @@ public class VariantServiceImpl implements VariantService {
     @Override
     @Transactional
     public void deleteVariant(Long pharmacyId, UUID variantId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -131,7 +140,10 @@ public class VariantServiceImpl implements VariantService {
     @Override
     @Transactional
     public VariantDto updateVariant(Long pharmacyId, UUID variantId, VariantDto updateVariant, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {

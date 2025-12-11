@@ -6,6 +6,7 @@ import com.pharma.entity.StockEditEntity;
 import com.pharma.entity.User;
 import com.pharma.mapper.InventoryDetailsMapper;
 import com.pharma.repository.InventoryDetailsRepository;
+import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.InventoryDetailsService;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -27,10 +28,16 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
     @Autowired
     private InventoryDetailsMapper inventoryDetailsMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
     @Override
     public List<InventoryDetailsDto> getAllInventoryDetails(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -43,16 +50,13 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-//    @Override
-//    public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long createdById) {
-//        return inventoryDetailsRepository.findCurrentYearStockWithSupplier(createdById);
-//    }
-
     @Transactional
     @Override
     public List<ExpiredStockDto> getCurrentYearStockWithSupplier(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -62,16 +66,13 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
         return inventoryDetailsRepository.findCurrentYearStockWithSupplier(pharmacyId);
     }
 
-//    @Transactional
-//    @Override
-//    public List<ExpiredStockView> getNextThreeMonthsStockWithSupplier(Long createdById) {
-//        return inventoryDetailsRepository.findNextThreeMonthsStockWithSupplier(createdById);
-//    }
-
     @Transactional
     @Override
     public List<ExpiredStockView> getNextThreeMonthsStockWithSupplier(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -84,17 +85,14 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
     @Transactional
     @Override
     public InventoryDetailsDto saveInventoryDetails(InventoryDetailsDto inventoryDetailsDto, User user) {
-        // Always fetch existing inventory
         InventoryDetailsEntity inventoryEntity = inventoryDetailsRepository.findById(inventoryDetailsDto.getInvDetailsId())
                 .orElseThrow(() -> new RuntimeException("Inventory not found"));
 
         inventoryEntity.setModifiedBy(user.getId());
         inventoryEntity.setModifiedDate(LocalDate.now());
 
-        // Process adjustments from StockEditDtos
         if (inventoryDetailsDto.getStockEditDtos() != null) {
             for (StockEditDto stockEditDto : inventoryDetailsDto.getStockEditDtos()) {
-                // Create a new StockEditEntity for each adjustment
                 StockEditEntity stockEditEntity = new StockEditEntity();
                 stockEditEntity.setStockEditId(UUID.randomUUID());
                 stockEditEntity.setStockEditedDate(LocalDate.now());
@@ -106,7 +104,6 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
                 stockEditEntity.setModifiedDate(LocalDate.now());
                 stockEditEntity.setInventoryDetailsEntity(inventoryEntity);
 
-                // Update inventory quantity
                 Long currentQty = (inventoryEntity.getPackageQuantity() == null ? 0 : inventoryEntity.getPackageQuantity());
                 if ("ADD_STOCK".equalsIgnoreCase(stockEditDto.getAdjustmentType())) {
                     inventoryEntity.setPackageQuantity(currentQty + stockEditDto.getUpdatedStockQuantity());
@@ -117,12 +114,10 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
                     inventoryEntity.setPackageQuantity(currentQty - stockEditDto.getUpdatedStockQuantity());
                 }
 
-                // Always add a new row in pharma_stock_edit
                 inventoryEntity.getStockEditEntities().add(stockEditEntity);
             }
         }
 
-        // Save parent (cascades children)
         InventoryDetailsEntity savedEntity = inventoryDetailsRepository.save(inventoryEntity);
 
         return inventoryDetailsMapper.toDto(savedEntity);
@@ -132,7 +127,10 @@ public class InventoryDetailsServiceImpl implements InventoryDetailsService {
     @Transactional
     @Override
     public List<InventoryView> getInventory(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {

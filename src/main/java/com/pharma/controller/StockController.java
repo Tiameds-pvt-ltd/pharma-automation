@@ -370,6 +370,7 @@ public class StockController {
 
         try {
             StockItemDto updated = stockService.updateStockItem(
+                    currentUser,
                     currentUser.getId(),
                     pharmacyId,
                     invId,

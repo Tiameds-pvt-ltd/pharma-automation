@@ -38,10 +38,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Transactional
     @Override
     public PurchaseOrderDto savePurchaseOrder(PurchaseOrderDto purchaseOrderDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(purchaseOrderDto.getPharmacyId()));
 
@@ -75,7 +75,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public List<PurchaseOrderDto> getAllPurchaseOrders(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -91,7 +94,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public PurchaseOrderDto getPurchaseOrderById(Long pharmacyId, UUID orderId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -110,7 +116,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Override
     @Transactional
     public void deletePurchaseOrderById(Long pharmacyId, UUID orderId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -125,6 +134,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
 
+    @Transactional
     private String generateOrderId1() {
         String yearPart = String.valueOf(LocalDate.now().getYear());
 

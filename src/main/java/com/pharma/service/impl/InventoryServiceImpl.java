@@ -7,6 +7,7 @@ import com.pharma.entity.InventoryEntity;
 import com.pharma.entity.User;
 import com.pharma.mapper.InventoryMapper;
 import com.pharma.repository.InventoryRepository;
+import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.InventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,16 @@ public class InventoryServiceImpl implements InventoryService {
     @Autowired
     private InventoryMapper inventoryMapper;
 
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
     @Override
     public List<InventoryDto> getAllInventory(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -43,25 +50,13 @@ public class InventoryServiceImpl implements InventoryService {
                 .collect(Collectors.toList());
     }
 
-//    @Transactional
-//    @Override
-//    public List<StockItemDto> getExpiredStock(Long createdById) {
-//        List<Object[]> results = inventoryRepository.getExpiredStock(createdById);
-//
-//        return results.stream()
-//                .map(obj -> {
-//                    StockItemDto dto = new StockItemDto();
-//                    dto.setItemId((UUID) obj[0]);
-//                    dto.setPackageQuantity(((Number) obj[1]).longValue());
-//                    return dto;
-//                })
-//                .collect(Collectors.toList());
-//    }
-
     @Transactional
     @Override
     public List<StockItemDto> getExpiredStock(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -81,16 +76,13 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
 
-//    @Transactional
-//    @Override
-//    public List<ExpiredStockDto> getExpiredStockWithSupplier(Long createdById) {
-//        return inventoryRepository.findExpiredStockWithSupplier(createdById);
-//    }
-
     @Transactional
     @Override
     public List<ExpiredStockDto> getExpiredStockWithSupplier(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {

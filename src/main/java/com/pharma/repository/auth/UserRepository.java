@@ -40,6 +40,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
 """)
     Optional<User> findUserForLogin(@Param("username") String username);
 
+    @Query("""
+    SELECT u FROM User u
+    LEFT JOIN FETCH u.pharmacies
+    WHERE u.id = :id
+""")
+    Optional<User> findByIdFetchPharmacies(@Param("id") Long id);
+
+
 }
 
 

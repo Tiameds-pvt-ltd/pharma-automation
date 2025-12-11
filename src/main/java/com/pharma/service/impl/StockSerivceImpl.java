@@ -52,10 +52,10 @@ public class StockSerivceImpl implements StockService {
     @Transactional
     @Override
     public StockDto saveStock(StockDto stockDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(stockDto.getPharmacyId()));
 
@@ -157,7 +157,10 @@ public class StockSerivceImpl implements StockService {
     @Transactional
     @Override
     public List<StockDto> getAllStocks(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -173,7 +176,10 @@ public class StockSerivceImpl implements StockService {
     @Transactional
     @Override
     public StockDto getStockById(Long pharmacyId, UUID invId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -192,7 +198,10 @@ public class StockSerivceImpl implements StockService {
     @Transactional
     @Override
     public void deleteStock(Long pharmacyId, UUID invId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -210,7 +219,10 @@ public class StockSerivceImpl implements StockService {
     @Transactional
     @Override
     public List<StockItemDto> getStockByItemId(Long pharmacyId, UUID itemId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -245,7 +257,7 @@ public class StockSerivceImpl implements StockService {
     }
 
 
-
+    @Transactional
     private String generateGrnNo() {
         String yearPart = String.valueOf(LocalDate.now().getYear());
 
@@ -268,15 +280,13 @@ public class StockSerivceImpl implements StockService {
         return String.format("GRN-%s-%05d", yearPart, newSequence);
     }
 
-//    public List<StockItemEntity> getItemsBySupplierId(UUID supplierId) {
-//        return stockItemRepository.findItemsBySupplierId(supplierId);
-//    }
-
     @Override
     @Transactional
     public List<StockItemDto> getItemsBySupplierId(Long pharmacyId, UUID supplierId, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies().stream()
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -295,7 +305,10 @@ public class StockSerivceImpl implements StockService {
     @Transactional
     @Override
     public void confirmPayment(Long pharmacyId, UUID invId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -312,16 +325,13 @@ public class StockSerivceImpl implements StockService {
         stockRepository.save(stockEntity);
     }
 
-
-//    @Override
-//    public boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo) {
-//        List<String> results = stockRepository.findBillNoBySupplierIdAndYear(supplierId, year, purchaseBillNo);
-//        return !results.isEmpty();
-//    }
-
+    @Transactional
     @Override
     public boolean isBillNoExists(UUID supplierId, Long pharmacyId, int year, String purchaseBillNo, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -335,17 +345,13 @@ public class StockSerivceImpl implements StockService {
         return !results.isEmpty();
     }
 
-
-//    @Transactional
-//    @Override
-//    public List<StockSummaryDto> getStocksByPaymentStatusAndSupplierAndCreatedBy(String paymentStatus, UUID supplierId, Long createdBy) {
-//        return stockRepository.findStockSummariesByPaymentStatusAndSupplierIdAndCreatedBy(paymentStatus, supplierId, createdBy);
-//    }
-
     @Transactional
     @Override
     public List<StockSummaryDto> getStocksByPaymentStatusAndSupplierAndPharmacy(String paymentStatus, UUID supplierId, Long pharmacyId, User user){
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -356,64 +362,13 @@ public class StockSerivceImpl implements StockService {
         );
     }
 
-//    @Transactional
-//    @Override
-//    public StockItemDto updateStockItem(Long modifiedById, UUID invId, UUID itemId, String batchNo, StockItemDto updatedItem) {
-//
-//        // 1. Find stock item by invId, itemId, batchNo, modifiedBy
-//        StockItemEntity stockItem = stockItemRepository
-//                .findByStockEntity_InvIdAndItemIdAndBatchNo(invId, itemId, batchNo)
-//                .orElseThrow(() -> new ResourceNotFoundException(
-//                        "Stock item not found with invId: " + invId +
-//                                ", itemId: " + itemId +
-//                                ", batchNo: " + batchNo +
-//                                " for userId: " + modifiedById));
-//
-//        // 2. Update fields
-//        stockItem.setPurchasePricePerUnit(updatedItem.getPurchasePricePerUnit());
-//        stockItem.setMrpSalePricePerUnit(updatedItem.getMrpSalePricePerUnit());
-//        stockItem.setExpiryDate(updatedItem.getExpiryDate());
-//
-//        stockItem.setModifiedBy(modifiedById);
-//        stockItem.setModifiedDate(LocalDate.now());
-//
-//        stockItemRepository.save(stockItem);
-//
-//        // 3. Update corresponding inventory details
-//        InventoryDetailsEntity inventory = inventoryDetailsRepository
-//                .findByItemIdAndBatchNo(itemId, batchNo)
-//                .orElseThrow(() -> new ResourceNotFoundException(
-//                        "Inventory details not found with itemId: " + itemId +
-//                                ", batchNo: " + batchNo +
-//                                " for userId: " + modifiedById));
-//
-//        inventory.setPurchasePricePerUnit(updatedItem.getPurchasePricePerUnit());
-//        inventory.setMrpSalePricePerUnit(updatedItem.getMrpSalePricePerUnit());
-//        inventory.setExpiryDate(updatedItem.getExpiryDate());
-//
-//        inventory.setModifiedBy(modifiedById);
-//        inventory.setModifiedDate(LocalDate.now());
-//
-//        inventoryDetailsRepository.save(inventory);
-//
-//        return updatedItem;
-//    }
-
-
     @Transactional
     @Override
-    public StockItemDto updateStockItem(Long modifiedById,
-                                        Long pharmacyId,
-                                        UUID invId,
-                                        UUID itemId,
-                                        String batchNo,
-                                        StockItemDto updatedItem) {
-
-        // 1. Check user belongs to pharmacy
-        User user = userRepository.findById(modifiedById)
+    public StockItemDto updateStockItem(User user, Long modifiedById, Long pharmacyId, UUID invId, UUID itemId, String batchNo, StockItemDto updatedItem) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies().stream()
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {

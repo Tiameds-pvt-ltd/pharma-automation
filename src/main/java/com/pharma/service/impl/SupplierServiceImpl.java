@@ -44,10 +44,10 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public SupplierDto createSupplier(SupplierDto supplierDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(supplierDto.getPharmacyId()));
 
@@ -69,7 +69,10 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public List<SupplierDto> getAllSupplier(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -85,7 +88,10 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public SupplierDto getSupplierById(Long pharmacyId, UUID supplierId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -103,7 +109,10 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public SupplierDto updateSupplier(Long pharmacyId, UUID supplierId, SupplierDto updatedSupplier, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -144,7 +153,10 @@ public class SupplierServiceImpl implements SupplierService {
     @Override
     @Transactional
     public void deleteSupplier(Long pharmacyId, UUID supplierId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {

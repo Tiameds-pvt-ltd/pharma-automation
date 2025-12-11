@@ -45,10 +45,10 @@ public class BillServiceImpl implements BillService {
     @Transactional
     @Override
     public BillDto createBill(BillDto billDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(billDto.getPharmacyId()));
 
@@ -131,10 +131,10 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional
     public BillDto addBillPayment(BillPaymentDto billPaymentDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(billPaymentDto.getPharmacyId()));
 
@@ -168,7 +168,11 @@ public class BillServiceImpl implements BillService {
     @Transactional
     @Override
     public List<BillDto> getAllBill(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -184,7 +188,11 @@ public class BillServiceImpl implements BillService {
     @Transactional
     @Override
     public BillDto getBillById(Long pharmacyId, UUID billId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -202,9 +210,12 @@ public class BillServiceImpl implements BillService {
     @Transactional
     @Override
     public void deleteBill(Long pharmacyId, UUID billId, User user) {
-        boolean isMember = user.getPharmacies().stream()
-                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
         if (!isMember) {
             throw new RuntimeException("User does not belong to the selected pharmacy");
         }
@@ -217,6 +228,7 @@ public class BillServiceImpl implements BillService {
     }
 
 
+    @Transactional
     private String generateBillId1() {
         String yearPart = String.valueOf(LocalDate.now().getYear());
 

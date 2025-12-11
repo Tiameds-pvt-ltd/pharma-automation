@@ -45,10 +45,10 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     @Override
     @Transactional
     public PurchaseReturnDto savePurchaseReturn(PurchaseReturnDto purchaseReturnDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(purchaseReturnDto.getPharmacyId()));
 
@@ -117,12 +117,13 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
         return purchaseReturnMapper.toDto(savedEntity);
     }
 
-
-
     @Transactional
     @Override
     public List<PurchaseReturnDto> getAllPurchaseReturn(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -138,7 +139,10 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     @Transactional
     @Override
     public PurchaseReturnDto getPurchaseReturnById(Long pharmacyId, UUID returnId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -156,20 +160,24 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     @Transactional
     @Override
     public void deletePurchaseReturnById(Long pharmacyId, UUID returnId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
             throw new RuntimeException("User does not belong to the selected pharmacy");
         }
 
-        Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndCreatedBy(returnId, pharmacyId);
+        Optional<PurchaseReturnEntity> purchaseReturnEntity = purchaseReturnRepository.findByReturnIdAndPharmacyId(returnId, pharmacyId);
         if (purchaseReturnEntity.isEmpty()) {
             throw new RuntimeException("Purchase return not found with ID: " + returnId + " for pharmacy ID: " + pharmacyId);
         }
         purchaseReturnRepository.delete(purchaseReturnEntity.get());
     }
 
+    @Transactional
     private String generateReturnId1() {
         String yearPart = String.valueOf(LocalDate.now().getYear());
 
@@ -195,7 +203,10 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     @Transactional
     @Override
     public BigDecimal getSumReturnAmountBySupplier(UUID supplierId, Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -206,13 +217,5 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
                 .sumReturnAmountBySupplierIdAndPharmacyId(supplierId, pharmacyId);
     }
 
-
-
-//    @Transactional
-//    @Override
-//    public BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy) {
-//        return purchaseReturnRepository
-//                .sumReturnAmountBySupplierIdAndCreditNoteAndCreatedBy(supplierId, createdBy);
-//    }
 
 }

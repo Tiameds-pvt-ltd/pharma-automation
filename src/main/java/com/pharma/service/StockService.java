@@ -39,6 +39,7 @@ public interface StockService {
     List<StockSummaryDto> getStocksByPaymentStatusAndSupplierAndPharmacy(String paymentStatus, UUID supplierId, Long pharmacyId, User user);
 
     StockItemDto updateStockItem(
+            User user,
             Long modifiedById,
             Long pharmacyId,
             UUID invId,

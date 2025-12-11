@@ -44,10 +44,10 @@ public class BillReturnServiceImpl implements BillReturnService {
     @Transactional
     @Override
     public BillReturnDto createBillReturn(BillReturnDto billReturnDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(billReturnDto.getPharmacyId()));
 
@@ -113,7 +113,10 @@ public class BillReturnServiceImpl implements BillReturnService {
     @Transactional
     @Override
     public List<BillReturnDto> getAllBillReturn(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -129,7 +132,10 @@ public class BillReturnServiceImpl implements BillReturnService {
     @Transactional
     @Override
     public BillReturnDto getBillReturnById(Long pharmacyId, UUID billReturnId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -147,7 +153,10 @@ public class BillReturnServiceImpl implements BillReturnService {
     @Transactional
     @Override
     public void deleteBillReturn(Long pharmacyId, UUID billReturnId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -156,21 +165,18 @@ public class BillReturnServiceImpl implements BillReturnService {
 
         Optional<BillReturnEntity> billReturnEntity = billReturnRepository.findByBillReturnIdAndPharmacyId(billReturnId, pharmacyId);
         if (billReturnEntity.isEmpty()) {
-            throw new RuntimeException("Bill Return not found with ID: " + billReturnEntity + " for pharmacy ID: " + pharmacyId);
+            throw new RuntimeException("Bill Return not found with ID: " + billReturnId + " for pharmacy ID: " + pharmacyId);
         }
         billReturnRepository.delete(billReturnEntity.get());
     }
 
-//    @Transactional
-//    @Override
-//    public List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById) {
-//        return billReturnRepository.fetchBillReturnListsByCreatedBy(createdById);
-//    }
-
     @Transactional
     @Override
     public List<BillReturnListDto> getBillReturnListsByPharmacy(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -180,7 +186,7 @@ public class BillReturnServiceImpl implements BillReturnService {
         return billReturnRepository.fetchBillReturnListsByPharmacyId(pharmacyId);
     }
 
-
+    @Transactional
     private String generateBillReturnId1() {
         String yearPart = String.valueOf(LocalDate.now().getYear());
 

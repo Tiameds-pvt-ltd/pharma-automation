@@ -38,10 +38,10 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Transactional
     public DoctorDto createDoctor(DoctorDto doctorDto, User user) {
-        user = userRepository.findById(user.getId())
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        boolean isMember = user.getPharmacies()
+        boolean isMember = persistentUser.getPharmacies()
                 .stream()
                 .anyMatch(p -> p.getPharmacyId().equals(doctorDto.getPharmacyId()));
 
@@ -63,7 +63,10 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     @Override
     public List<DoctorDto> getAllDoctors(Long pharmacyId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -79,7 +82,10 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     @Override
     public DoctorDto getDoctorById(Long pharmacyId, UUID doctorId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -99,7 +105,10 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     @Override
     public DoctorDto updateDoctor(Long pharmacyId, UUID doctorId, DoctorDto doctorDto, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
@@ -133,7 +142,10 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     @Override
     public void deleteDoctorById(Long pharmacyId, UUID doctorId, User user) {
-        boolean isMember = user.getPharmacies().stream()
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
                 .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
 
         if (!isMember) {
