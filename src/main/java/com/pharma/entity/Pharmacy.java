@@ -87,7 +87,6 @@ public class Pharmacy {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @JsonManagedReference(value = "pharmacy-members")
-    @JsonIgnore
     private Set<User> members = new HashSet<>();
 
 

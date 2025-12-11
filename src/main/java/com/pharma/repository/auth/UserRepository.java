@@ -25,7 +25,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
     @NotNull
     Optional<User> findById(@NotNull Long id);
 
-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.pharmacies WHERE u.id = :id")
+    @Query("SELECT DISTINCT u FROM User u LEFT JOIN FETCH u.pharmacies WHERE u.id = :id")
     Optional<User> findByIdWithPharmacies(@Param("id") Long id);
 
 

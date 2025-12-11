@@ -22,9 +22,14 @@ public class UserPharmaService {
         this.pharmacyRepository =pharmacyRepository;
     }
 
+//    public User getUserById(Long userId) {
+//        return userRepository.findById(userId).orElse(null);
+//    }
+
     public User getUserById(Long userId) {
-        return userRepository.findById(userId).orElse(null);
+        return userRepository.findByIdWithPharmacies(userId).orElse(null);
     }
+
 
     public boolean existsPharmaByName(String name) {
         return pharmacyRepository.existsByName(name);

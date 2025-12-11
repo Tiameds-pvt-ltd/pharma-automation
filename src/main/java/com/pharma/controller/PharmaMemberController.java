@@ -164,9 +164,14 @@ public class PharmaMemberController {
             return ApiResponseHelper.errorResponse("User to be added not found", HttpStatus.NOT_FOUND);
 
         //check creater of the pharmacy
-        if (!pharmacy.getCreatedBy().equals(currentUser)) {
+//        if (!pharmacy.getCreatedBy().equals(currentUser)) {
+//            return ApiResponseHelper.errorResponse("You are not authorized to get members of this pharmacy", HttpStatus.UNAUTHORIZED);
+//        }
+
+        if (pharmacy.getCreatedBy() == null || !pharmacy.getCreatedBy().getId().equals(currentUser.getId())) {
             return ApiResponseHelper.errorResponse("You are not authorized to get members of this pharmacy", HttpStatus.UNAUTHORIZED);
         }
+
         // Add the user to the pharmacy's members
         if (pharmacy.getMembers().contains(userToAdd)) {
             return ApiResponseHelper.errorResponse("User is already a member of this pharmacy", HttpStatus.CONFLICT);
