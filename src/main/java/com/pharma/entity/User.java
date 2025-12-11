@@ -92,11 +92,6 @@ public class User {
     @JoinColumn(name = "created_by", referencedColumnName = "user_id")
     private User createdBy;
 
-
-    public String getFullName() {
-        return firstName + " " + lastName;
-    }
-
     //   To connect between user and Stock purchase
     @JsonIgnore
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.LAZY)
@@ -105,6 +100,15 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "inv_id"))
     @JsonManagedReference
     private Set<StockEntity> stockEntities = new HashSet<>();
+
+    @ManyToMany(mappedBy = "members",
+            fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JsonBackReference(value = "pharmacy-members")
+    private Set<Pharmacy> pharmacies = new HashSet<>();
+
+    public String getFullName() {
+        return firstName + " " + lastName;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -118,13 +122,6 @@ public class User {
     public int hashCode() {
         return getClass().hashCode();
     }
-
-
-    @ManyToMany(mappedBy = "members",
-            fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
-    @JsonBackReference(value = "pharmacy-members")
-    private Set<Pharmacy> pharmacies = new HashSet<>();
-
 
 }
 
