@@ -63,7 +63,7 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
 
         purchaseReturnEntity.setPharmacyId(purchaseReturnDto.getPharmacyId());
 
-        String newReturnId1 = generateReturnId1();
+        String newReturnId1 = generateReturnId1(purchaseReturnDto.getPharmacyId());
         purchaseReturnEntity.setReturnId1(newReturnId1);
 
         if (purchaseReturnEntity.getPurchaseReturnItemEntities() != null) {
@@ -178,27 +178,40 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
     }
 
     @Transactional
-    private String generateReturnId1() {
-        String yearPart = String.valueOf(LocalDate.now().getYear());
+    private String generateReturnId1(Long pharmacyId) {
 
-        Optional<PurchaseReturnEntity> latestReturnOpt = purchaseReturnRepository.findLatestReturnForYear(yearPart);
+        // YY = last 2 digits of year
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
 
-        int newSequence = 1;
+        Optional<PurchaseReturnEntity> latestReturnOpt =
+                purchaseReturnRepository.findLatestReturnForYearAndPharmacy(
+                        pharmacyId, yearPart
+                );
+
+        int nextSequence = 1;
+
         if (latestReturnOpt.isPresent()) {
             String lastReturnId1 = latestReturnOpt.get().getReturnId1();
+            // Example: RTN-25-09 or RTN-25-123
             String[] parts = lastReturnId1.split("-");
 
-            try {
-                if (parts.length == 3) {
-                    newSequence = Integer.parseInt(parts[2]) + 1;
+            if (parts.length == 3) {
+                try {
+                    nextSequence = Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {
+                    nextSequence = 1;
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Error parsing order sequence: " + lastReturnId1);
             }
         }
 
-        return String.format("RTN-%s-%05d", yearPart, newSequence);
+        // Pad only for 1–9
+        String sequencePart = (nextSequence < 10)
+                ? "0" + nextSequence
+                : String.valueOf(nextSequence);
+
+        return "RTN-" + yearPart + "-" + sequencePart;
     }
+
 
     @Transactional
     @Override

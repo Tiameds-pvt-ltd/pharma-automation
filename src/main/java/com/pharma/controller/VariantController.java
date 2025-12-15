@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,7 +31,7 @@ public class VariantController {
     @Autowired
     private UserAuthService userAuthService;
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createVariant(
             @RequestHeader("Authorization") String token,
@@ -45,7 +46,7 @@ public class VariantController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Variant created successfully", HttpStatus.OK, createdVariant);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllVariants(
             @RequestHeader("Authorization") String token,
@@ -62,7 +63,7 @@ public class VariantController {
                 "Variants retrieved successfully", HttpStatus.OK, variants);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{variantId}")
     public ResponseEntity<?> getVariantById(
             @RequestHeader("Authorization") String token,
@@ -85,7 +86,7 @@ public class VariantController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @DeleteMapping("/delete/{variantId}")
     public ResponseEntity<?> deleteVariantById(
             @RequestHeader("Authorization") String token,
@@ -115,7 +116,7 @@ public class VariantController {
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PutMapping("/update/{variantId}")
     public ResponseEntity<?> updateVariant(
             @RequestHeader("Authorization") String token,

@@ -63,7 +63,7 @@ public class BillServiceImpl implements BillService {
 
         billEntity.setPharmacyId(billDto.getPharmacyId());
 
-        String newBillId1 = generateBillId1();
+        String newBillId1 = generateBillId1(billDto.getPharmacyId());
         billEntity.setBillId1(newBillId1);
 
         if (billEntity.getBillItemEntities() != null) {
@@ -226,30 +226,41 @@ public class BillServiceImpl implements BillService {
         }
         billRepository.delete(billEntity.get());
     }
-
-
     @Transactional
-    private String generateBillId1() {
-        String yearPart = String.valueOf(LocalDate.now().getYear());
+    private String generateBillId1(Long pharmacyId) {
 
-        Optional<BillEntity> latestBillOpt = billRepository.findLatestBillForYear(yearPart);
+        // YY = last 2 digits of year
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
 
-        int newSequence = 1;
+        Optional<BillEntity> latestBillOpt =
+                billRepository.findLatestBillForYearAndPharmacy(
+                        pharmacyId, yearPart
+                );
+
+        int nextSequence = 1;
+
         if (latestBillOpt.isPresent()) {
             String lastBillId1 = latestBillOpt.get().getBillId1();
+            // Example: BILL-25-09 or BILL-25-123
             String[] parts = lastBillId1.split("-");
 
-            try {
-                if (parts.length == 3) {
-                    newSequence = Integer.parseInt(parts[2]) + 1;
+            if (parts.length == 3) {
+                try {
+                    nextSequence = Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {
+                    nextSequence = 1;
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Error parsing Bill sequence: " + lastBillId1);
             }
         }
 
-        return String.format("BILL-%s-%05d", yearPart, newSequence);
+        // Pad only for 1–9
+        String sequencePart = (nextSequence < 10)
+                ? "0" + nextSequence
+                : String.valueOf(nextSequence);
+
+        return "BILL-" + yearPart + "-" + sequencePart;
     }
+
 
 
     @Transactional

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class InventoryDetailsController {
     @Autowired
     private UserAuthService userAuthService;
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllInventory(
             @RequestHeader("Authorization") String token,
@@ -42,6 +43,7 @@ public class InventoryDetailsController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory retrieved successfully", HttpStatus.OK, inventoryDetailsDtos);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/currentYearStockWithSupplier")
     public ResponseEntity<?> getCurrentYearStockWithSupplier(
             @RequestHeader("Authorization") String token,
@@ -65,51 +67,7 @@ public class InventoryDetailsController {
         );
     }
 
-
-//    @GetMapping("/currentYearStockWithSupplier")
-//    public ResponseEntity<?> getCurrentYearStockWithSupplier(
-//            @RequestHeader("Authorization") String token
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//        List<ExpiredStockDto> stockList =
-//                inventoryDetailsService.getCurrentYearStockWithSupplier(createdById);
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Current year stock with supplier retrieved successfully",
-//                HttpStatus.OK,
-//                stockList
-//        );
-//    }
-
-
-//    @GetMapping("/nextThreeMonthsStockWithSupplier")
-//    public ResponseEntity<?> getNextThreeMonthsStockWithSupplier(
-//            @RequestHeader("Authorization") String token
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null
-//            );
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//        List<ExpiredStockView> stockList =
-//                inventoryDetailsService.getNextThreeMonthsStockWithSupplier(createdById);
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Next 3 months stock with supplier retrieved successfully",
-//                HttpStatus.OK,
-//                stockList
-//        );
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/nextThreeMonthsStockWithSupplier")
     public ResponseEntity<?> getNextThreeMonthsStockWithSupplier(
             @RequestHeader("Authorization") String token,
@@ -133,7 +91,7 @@ public class InventoryDetailsController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<?> savePurchaseOrder(
             @RequestHeader("Authorization") String token,
@@ -148,7 +106,7 @@ public class InventoryDetailsController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory Details created successfully", HttpStatus.OK, savedInventoryDetails);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/stockReport")
     public ResponseEntity<?> getInventory(
             @RequestHeader("Authorization") String token,

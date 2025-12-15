@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +36,7 @@ public class ItemController {
     @Autowired
     private ItemRepository itemRepository;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createItem(
             @RequestHeader("Authorization") String token,
@@ -50,6 +52,7 @@ public class ItemController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Item created successfully", HttpStatus.OK, savedItem);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllItems(
             @RequestHeader("Authorization") String token,
@@ -66,6 +69,7 @@ public class ItemController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{itemId}")
     public ResponseEntity<?> getItemById(
             @RequestHeader("Authorization") String token,
@@ -87,6 +91,7 @@ public class ItemController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{itemId}")
     public ResponseEntity<?> updateDoctorById(
             @RequestHeader("Authorization") String token,
@@ -120,6 +125,7 @@ public class ItemController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{itemId}")
     public ResponseEntity<?> deleteItem(
             @RequestHeader("Authorization") String token,
@@ -148,13 +154,41 @@ public class ItemController {
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/check-duplicate")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicateItem(@RequestBody ItemDto request) {
-        boolean exists = itemRepository.existsByItemNameAndManufacturer(
-                request.getItemName(), request.getManufacturer()
-        );
+    public ResponseEntity<?> checkDuplicateItem(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId,
+            @RequestBody ItemDto request
+    ) {
+        Optional<User> userOptional = userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", true));
+        }
+
+        User user = userOptional.get();
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of(
+                            "error", true,
+                            "message", "User does not belong to this pharmacy"
+                    ));
+        }
+
+        boolean exists = itemRepository
+                .existsByItemNameAndManufacturerAndPharmacyId(
+                        request.getItemName(),
+                        request.getManufacturer(),
+                        pharmacyId
+                );
+
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }
+
 
 }

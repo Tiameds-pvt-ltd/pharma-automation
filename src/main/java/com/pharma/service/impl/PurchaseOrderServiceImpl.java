@@ -56,7 +56,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         purchaseOrderEntity.setPharmacyId(purchaseOrderDto.getPharmacyId());
 
-        String newOrderId1 = generateOrderId1();
+        String newOrderId1 = generateOrderId1(purchaseOrderDto.getPharmacyId());
         purchaseOrderEntity.setOrderId1(newOrderId1);
 
         if (purchaseOrderEntity.getPurchaseOrderItemEntities() != null) {
@@ -133,27 +133,63 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         purchaseOrderRepository.delete(purchaseOrderEntity.get());
     }
 
-
     @Transactional
-    private String generateOrderId1() {
-        String yearPart = String.valueOf(LocalDate.now().getYear());
+    public String generateOrderId1(Long pharmacyId) {
 
-        Optional<PurchaseOrderEntity> latestOrderOpt = purchaseOrderRepository.findLatestOrderForYear(yearPart);
+        // YY = last 2 digits of year
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
 
-        int newSequence = 1;
+        Optional<PurchaseOrderEntity> latestOrderOpt =
+                purchaseOrderRepository.findLatestOrderForYearAndPharmacy(
+                        pharmacyId, yearPart
+                );
+
+        int nextSequence = 1;
+
         if (latestOrderOpt.isPresent()) {
-            String lastOrderId1 = latestOrderOpt.get().getOrderId1();
-            String[] parts = lastOrderId1.split("-");
+            String lastOrderId = latestOrderOpt.get().getOrderId1();
+            // Example: ORD-25-09 or ORD-25-123
+            String[] parts = lastOrderId.split("-");
 
-            try {
-                if (parts.length == 3) {
-                    newSequence = Integer.parseInt(parts[2]) + 1;
+            if (parts.length == 3) {
+                try {
+                    nextSequence = Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {
+                    nextSequence = 1;
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Error parsing order sequence: " + lastOrderId1);
             }
         }
 
-        return String.format("ORD-%s-%05d", yearPart, newSequence);
+        // ✅ Pad only if single digit
+        String sequencePart = (nextSequence < 10)
+                ? "0" + nextSequence
+                : String.valueOf(nextSequence);
+
+        return "ORD-" + yearPart + "-" + sequencePart;
     }
+
+
+
+//    @Transactional
+//    private String generateOrderId1() {
+//        String yearPart = String.valueOf(LocalDate.now().getYear());
+//
+//        Optional<PurchaseOrderEntity> latestOrderOpt = purchaseOrderRepository.findLatestOrderForYear(yearPart);
+//
+//        int newSequence = 1;
+//        if (latestOrderOpt.isPresent()) {
+//            String lastOrderId1 = latestOrderOpt.get().getOrderId1();
+//            String[] parts = lastOrderId1.split("-");
+//
+//            try {
+//                if (parts.length == 3) {
+//                    newSequence = Integer.parseInt(parts[2]) + 1;
+//                }
+//            } catch (NumberFormatException e) {
+//                System.err.println("Error parsing order sequence: " + lastOrderId1);
+//            }
+//        }
+//
+//        return String.format("ORD-%s-%05d", yearPart, newSequence);
+//    }
 }

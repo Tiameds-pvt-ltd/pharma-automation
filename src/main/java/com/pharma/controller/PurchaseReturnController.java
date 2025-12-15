@@ -9,6 +9,7 @@ import com.pharma.utils.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ public class PurchaseReturnController {
     @Autowired
     private UserAuthService userAuthService;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> savePurchaseReturn(
             @RequestHeader("Authorization") String token,
@@ -40,7 +42,7 @@ public class PurchaseReturnController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Purchase return created successfully", HttpStatus.OK, savedReturn);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllPurchaseReturn(
             @RequestHeader("Authorization") String token,
@@ -59,7 +61,7 @@ public class PurchaseReturnController {
     }
 
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{returnId}")
     public ResponseEntity<?> getPurchaseReturnById(
             @RequestHeader("Authorization") String token,
@@ -80,7 +82,7 @@ public class PurchaseReturnController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{returnId}")
     public ResponseEntity<?> deletePurchaseReturnById(
             @RequestHeader("Authorization") String token,
@@ -109,6 +111,7 @@ public class PurchaseReturnController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/creditNote/{supplierId}")
     public ResponseEntity<?> getSumReturnAmountBySupplier(
             @RequestHeader("Authorization") String token,
@@ -133,25 +136,5 @@ public class PurchaseReturnController {
         );
     }
 
-//    @GetMapping("/creditNote/{supplierId}")
-//    public ResponseEntity<?> getSumReturnAmountBySupplier(
-//            @RequestHeader("Authorization") String token,
-//            @PathVariable("supplierId") UUID supplierId
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//        BigDecimal sumReturnAmount = purchaseReturnService
-//                .getSumReturnAmountBySupplierAndCreatedBy(supplierId, createdById);
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Sum of return amount retrieved successfully",
-//                HttpStatus.OK,
-//                sumReturnAmount
-//        );
-//    }
 
 }

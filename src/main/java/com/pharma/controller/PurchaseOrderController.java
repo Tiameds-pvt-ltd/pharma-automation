@@ -8,6 +8,7 @@ import com.pharma.utils.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,6 +25,7 @@ public class PurchaseOrderController {
     @Autowired
     private UserAuthService userAuthService;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> savePurchaseOrder(
             @RequestHeader("Authorization") String token,
@@ -39,6 +41,7 @@ public class PurchaseOrderController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllPurchaseOrders(
             @RequestHeader("Authorization") String token,
@@ -57,6 +60,7 @@ public class PurchaseOrderController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{orderId}")
     public ResponseEntity<?> getPurchaseOrderById(
             @RequestHeader("Authorization") String token,
@@ -78,6 +82,7 @@ public class PurchaseOrderController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{orderId}")
     public ResponseEntity<?> deletePurchaseOrderById(
             @RequestHeader("Authorization") String token,

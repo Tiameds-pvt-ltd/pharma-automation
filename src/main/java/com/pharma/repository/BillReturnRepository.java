@@ -14,27 +14,10 @@ import java.util.UUID;
 
 @Repository
 public interface BillReturnRepository extends JpaRepository<BillReturnEntity, UUID> {
-// Changed Code According to multiple pharma
-
     List<BillReturnEntity> findAllByCreatedBy(Long createdBy);
 
     Optional<BillReturnEntity> findByBillReturnIdAndCreatedBy(UUID billReturnId, Long createdBy);
 
-    @Query("SELECT p FROM BillReturnEntity p WHERE p.billReturnId1 LIKE CONCAT('BILLRTN-', :year, '-%') ORDER BY p.billReturnId1 DESC LIMIT 1")
-    Optional<BillReturnEntity> findLatestBillReturnForYear(@Param("year") String year);
-
-//    @Query("SELECT new com.pharma.dto.BillReturnListDto(" +
-//            "b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
-//            "b.grandTotal, b.patientType, b.patientId, " +
-//            "CONCAT(p.firstName, ' ', p.lastName)," +
-//            "COUNT(i.billReturnItemId)) " +
-//            "FROM BillReturnEntity b " +
-//            "LEFT JOIN b.billReturnItemEntities i " +
-//            "JOIN PatientDetailsEntity p ON b.patientId = p.patientId " +
-//            "WHERE b.createdBy = :createdBy " +
-//            "GROUP BY b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
-//            "b.grandTotal, b.patientType, b.patientId, p.firstName, p.lastName ")
-//    List<BillReturnListDto> fetchBillReturnListsByCreatedBy(Long createdBy);
 
     @Query("SELECT new com.pharma.dto.BillReturnListDto(" +
             "b.billReturnId, b.billReturnId1, b.billId1, b.billReturnDateTime, " +
@@ -53,7 +36,18 @@ public interface BillReturnRepository extends JpaRepository<BillReturnEntity, UU
 
     Optional<BillReturnEntity> findByBillReturnIdAndPharmacyId(UUID billReturnId, Long pharmacyId);
 
-
+    @Query(value = """
+    SELECT *
+    FROM pharma_billing_return
+    WHERE pharmacy_id = :pharmacyId
+      AND bill_return_id1 LIKE CONCAT('BILLRTN-', :year, '-%')
+    ORDER BY CAST(SPLIT_PART(bill_return_id1, '-', 3) AS INTEGER) DESC
+    LIMIT 1
+""", nativeQuery = true)
+    Optional<BillReturnEntity> findLatestBillReturnForYearAndPharmacy(
+            @Param("pharmacyId") Long pharmacyId,
+            @Param("year") String year
+    );
 
 }
 

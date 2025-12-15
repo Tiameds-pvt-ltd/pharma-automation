@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class InventoryController {
     @Autowired
     private UserAuthService userAuthService;
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllInventory(
             @RequestHeader("Authorization") String token,
@@ -44,24 +45,7 @@ public class InventoryController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory retrieved successfully", HttpStatus.OK, inventoryDtos);
     }
 
-//    @GetMapping("/expiredStock")
-//    public ResponseEntity<?> getExpiredStock(
-//            @RequestHeader("Authorization") String token
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//        Long createdById = currentUserOptional.get().getId();
-//        List<StockItemDto> expiredStock = inventoryService.getExpiredStock(createdById);
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Expired stock retrieved successfully",
-//                HttpStatus.OK,
-//                expiredStock
-//        );
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/expiredStock")
     public ResponseEntity<?> getExpiredStock(
             @RequestHeader("Authorization") String token,
@@ -85,27 +69,7 @@ public class InventoryController {
         );
     }
 
-
-//    @GetMapping("/expiredStockWithSupplier")
-//    public ResponseEntity<?> getExpiredStockWithSupplier(
-//            @RequestHeader("Authorization") String token
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//        List<ExpiredStockDto> expiredStock = inventoryService.getExpiredStockWithSupplier(createdById);
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Expired stock with supplier retrieved successfully",
-//                HttpStatus.OK,
-//                expiredStock
-//        );
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/expiredStockWithSupplier")
     public ResponseEntity<?> getExpiredStockWithSupplier(
             @RequestHeader("Authorization") String token,

@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
@@ -29,7 +30,7 @@ public class SupplierController {
     @Autowired
     private SupplierRepository supplierRepository;
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createSupplier(
             @RequestHeader("Authorization") String token,
@@ -45,6 +46,7 @@ public class SupplierController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Supplier created successfully", HttpStatus.OK, savedSupplier);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSupplier(
             @RequestHeader("Authorization") String token,
@@ -60,6 +62,7 @@ public class SupplierController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Supplier retrieved successfully", HttpStatus.OK, suppliers);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{supplierId}")
     public ResponseEntity<?> getSupplierById(
             @RequestHeader("Authorization") String token,
@@ -82,7 +85,7 @@ public class SupplierController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{supplierId}")
     public ResponseEntity<?> updateSupplier(
             @RequestHeader("Authorization") String token,
@@ -114,6 +117,7 @@ public class SupplierController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{supplierId}")
     public ResponseEntity<?> deleteSupplier(
             @RequestHeader("Authorization") String token,
@@ -147,16 +151,56 @@ public class SupplierController {
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/check-duplicate")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicateSupplier(@RequestBody SupplierDto request) {
+    public ResponseEntity<?> checkDuplicateSupplier(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId,
+            @RequestBody SupplierDto request
+    ) {
+        Optional<User> userOptional = userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", true));
+        }
+
+        User user = userOptional.get();
+
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", true, "message", "User does not belong to this pharmacy"));
+        }
+
         Map<String, Boolean> result = new HashMap<>();
-        result.put("supplierName", supplierRepository.existsBySupplierName(request.getSupplierName()));
-        result.put("supplierMobile", supplierRepository.existsBySupplierMobile(request.getSupplierMobile()));
-        result.put("supplierGstinNo", supplierRepository.existsBySupplierGstinNo(request.getSupplierGstinNo()));
+
+        result.put(
+                "supplierName",
+                supplierRepository.existsBySupplierNameAndPharmacyId(
+                        request.getSupplierName(), pharmacyId
+                )
+        );
+
+        result.put(
+                "supplierMobile",
+                supplierRepository.existsBySupplierMobileAndPharmacyId(
+                        request.getSupplierMobile(), pharmacyId
+                )
+        );
+
+        result.put(
+                "supplierGstinNo",
+                supplierRepository.existsBySupplierGstinNoAndPharmacyId(
+                        request.getSupplierGstinNo(), pharmacyId
+                )
+        );
 
         return ResponseEntity.ok(result);
     }
+
 
 }
 

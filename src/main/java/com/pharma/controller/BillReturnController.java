@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +30,7 @@ public class BillReturnController {
     @Autowired
     private UserAuthService userAuthService;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> saveBill(
             @RequestHeader("Authorization") String token,
@@ -44,6 +46,7 @@ public class BillReturnController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllBillReturns(
             @RequestHeader("Authorization") String token,
@@ -61,6 +64,7 @@ public class BillReturnController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{billReturnId}")
     public ResponseEntity<?> getBillById(
             @RequestHeader("Authorization") String token,
@@ -81,6 +85,7 @@ public class BillReturnController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{billReturnId}")
     public ResponseEntity<?> deleteBillReturn(
             @RequestHeader("Authorization") String token,
@@ -110,22 +115,7 @@ public class BillReturnController {
 
     }
 
-//    @GetMapping("/list")
-//    public ResponseEntity<?> getBillReturnLists(@RequestHeader("Authorization") String token) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        User currentUser = currentUserOptional.get();
-//        List<BillReturnListDto> returnList = billReturnService.getBillReturnListsByCreatedBy(currentUser.getId());
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Bill Return list retrieved successfully", HttpStatus.OK, returnList);
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/list")
     public ResponseEntity<?> getBillReturnLists(
             @RequestHeader("Authorization") String token,

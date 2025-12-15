@@ -78,7 +78,7 @@ public class StockSerivceImpl implements StockService {
             stockEntity.setPaymentStatus("Pending");
         }
 
-        String newGrnNo = generateGrnNo();
+        String newGrnNo = generateGrnNo(stockDto.getPharmacyId());
         stockEntity.setGrnNo(newGrnNo);
 
         if (stockEntity.getStockItemEntities() != null && !stockEntity.getStockItemEntities().isEmpty()) {
@@ -258,27 +258,40 @@ public class StockSerivceImpl implements StockService {
 
 
     @Transactional
-    private String generateGrnNo() {
-        String yearPart = String.valueOf(LocalDate.now().getYear());
+    private String generateGrnNo(Long pharmacyId) {
 
-        Optional<StockEntity> latestGrnOpt = stockRepository.findLatestGrnNo(yearPart);
+        // YY = last 2 digits of year
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
 
-        int newSequence = 1;
+        Optional<StockEntity> latestGrnOpt =
+                stockRepository.findLatestGrnNoForYearAndPharmacy(
+                        pharmacyId, yearPart
+                );
+
+        int nextSequence = 1;
+
         if (latestGrnOpt.isPresent()) {
             String lastGrnNo = latestGrnOpt.get().getGrnNo();
+            // Example: GRN-25-09 or GRN-25-123
             String[] parts = lastGrnNo.split("-");
 
-            try {
-                if (parts.length == 3) {
-                    newSequence = Integer.parseInt(parts[2]) + 1;
+            if (parts.length == 3) {
+                try {
+                    nextSequence = Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {
+                    nextSequence = 1;
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Error parsing GRN No sequence: " + lastGrnNo);
             }
         }
 
-        return String.format("GRN-%s-%05d", yearPart, newSequence);
+        // Pad only for 1–9
+        String sequencePart = (nextSequence < 10)
+                ? "0" + nextSequence
+                : String.valueOf(nextSequence);
+
+        return "GRN-" + yearPart + "-" + sequencePart;
     }
+
 
     @Override
     @Transactional

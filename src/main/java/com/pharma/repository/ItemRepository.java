@@ -17,7 +17,7 @@ public interface ItemRepository extends JpaRepository<ItemEntity, UUID> {
 
     Optional<ItemEntity> findByItemIdAndCreatedBy(UUID itemId, Long createdBy);
 
-    boolean existsByItemNameAndManufacturer(String itemName, String manufacturer);
+    boolean existsByItemNameAndManufacturerAndPharmacyId(String itemName, String manufacturer, Long pharmacyId);
 
     List<ItemEntity> findAllByPharmacyId(Long pharmacyId);
 

@@ -62,7 +62,7 @@ public class BillReturnServiceImpl implements BillReturnService {
 
         billReturnEntity.setPharmacyId(billReturnDto.getPharmacyId());
 
-        String newBillReturnId1 = generateBillReturnId1();
+        String newBillReturnId1 = generateBillReturnId1(billReturnDto.getPharmacyId());
         billReturnEntity.setBillReturnId1(newBillReturnId1);
 
         if (billReturnEntity.getBillReturnItemEntities() != null) {
@@ -187,25 +187,38 @@ public class BillReturnServiceImpl implements BillReturnService {
     }
 
     @Transactional
-    private String generateBillReturnId1() {
-        String yearPart = String.valueOf(LocalDate.now().getYear());
+    private String generateBillReturnId1(Long pharmacyId) {
 
-        Optional<BillReturnEntity> latestBillReturnOpt = billReturnRepository.findLatestBillReturnForYear(yearPart);
+        // YY = last 2 digits of year
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
 
-        int newSequence = 1;
+        Optional<BillReturnEntity> latestBillReturnOpt =
+                billReturnRepository.findLatestBillReturnForYearAndPharmacy(
+                        pharmacyId, yearPart
+                );
+
+        int nextSequence = 1;
+
         if (latestBillReturnOpt.isPresent()) {
             String lastBillReturnId1 = latestBillReturnOpt.get().getBillReturnId1();
+            // Example: BILLRTN-25-09 or BILLRTN-25-123
             String[] parts = lastBillReturnId1.split("-");
 
-            try {
-                if (parts.length == 3) {
-                    newSequence = Integer.parseInt(parts[2]) + 1;
+            if (parts.length == 3) {
+                try {
+                    nextSequence = Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {
+                    nextSequence = 1;
                 }
-            } catch (NumberFormatException e) {
-                System.err.println("Error parsing Bill Return sequence: " + lastBillReturnId1);
             }
         }
 
-        return String.format("BILLRTN-%s-%05d", yearPart, newSequence);
+        // Pad only for 1–9
+        String sequencePart = (nextSequence < 10)
+                ? "0" + nextSequence
+                : String.valueOf(nextSequence);
+
+        return "BILLRTN-" + yearPart + "-" + sequencePart;
     }
+
 }

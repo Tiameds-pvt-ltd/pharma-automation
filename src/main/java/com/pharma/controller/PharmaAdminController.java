@@ -18,6 +18,7 @@ import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,6 +58,7 @@ public class PharmaAdminController {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Transactional
     @GetMapping("/get-members/{pharmacyId}")
     public ResponseEntity<?> getPharmacyMembers(
@@ -74,20 +76,15 @@ public class PharmaAdminController {
         if (isAccessible == false) {
             return ApiResponseHelper.errorResponse("Pharmacy is not accessible", HttpStatus.UNAUTHORIZED);
         }
-//        if (!lab.getCreatedBy().equals(currentUser)) {
-//            return ApiResponseHelper.errorResponse("You are not authorized to view members of this lab", HttpStatus.UNAUTHORIZED);
-//        }
-
-        // check if the user is correct role to view members SUPERADMIN AND ADMIN
 
         List<UserInPharmaDto> memberDTOs = MemberUserServices.getMembersInPharmacy(pharmacy);
         return ApiResponseHelper.successResponse("Pharmacy members retrieved successfully", memberDTOs);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Transactional
     @PostMapping("/create-user/{pharmacyId}")
-    public ResponseEntity<?> createUserInLab(
+    public ResponseEntity<?> createUserInPharma(
             @RequestBody MemberRegisterDto registerRequest,
             @PathVariable Long pharmacyId,
             @RequestHeader("Authorization") String token) {
@@ -105,16 +102,11 @@ public class PharmaAdminController {
         if (pharmacy == null)
             return ApiResponseHelper.errorResponse("Pharmacy not found", HttpStatus.NOT_FOUND);
 
-        // Check creator of the lab
-//        if (!lab.getCreatedBy().equals(currentUser)) {
-//            return ApiResponseHelper.errorResponse("You are not authorized to create members in this lab", HttpStatus.UNAUTHORIZED);
-//        }
-        //check the user is already a member of the lab using username and email
+
         if (pharmacy.getMembers().stream().anyMatch(user -> user.getUsername().equals(registerRequest.getUsername()) || user.getEmail().equals(registerRequest.getEmail()))) {
             return ApiResponseHelper.errorResponse("User is already a member of this pharmacy", HttpStatus.CONFLICT);
         }
 
-        // deligate to memberUserServices to create user and add to lab send currentuser and registerRequest
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             return ApiResponseHelper.errorResponse("Username already exists", HttpStatus.CONFLICT);
         }
@@ -122,16 +114,15 @@ public class PharmaAdminController {
             return ApiResponseHelper.errorResponse("Email already exists", HttpStatus.CONFLICT);
         }
 
-        // Create a new user and add to the lab
         memberUserServices.createUserAndAddToPharmacy(registerRequest, pharmacy, currentUser);
 
         return ApiResponseHelper.successResponse("User created and added to pharmacy successfully", HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Transactional
     @PutMapping("/update-user/{pharmacyId}/{userId}")
-    public ResponseEntity<?> updateUserInLab(
+    public ResponseEntity<?> updateUserInPharma(
             @PathVariable Long pharmacyId,
             @PathVariable Long userId,
             @RequestBody MemberDetailsUpdate registerRequest,
@@ -152,23 +143,20 @@ public class PharmaAdminController {
             return ApiResponseHelper.errorResponse("Pharmacy is not accessible", HttpStatus.UNAUTHORIZED);
         }
 
-        // Check creator of the lab
-//        if (!lab.getCreatedBy().equals(currentUser)) {
-//            return ApiResponseHelper.errorResponse("You are not authorized to update members in this lab", HttpStatus.UNAUTHORIZED);
-//        }
+
 
         User userToUpdate = userRepository.findById(userId).orElse(null);
         if (userToUpdate == null) {
             return ApiResponseHelper.errorResponse("User not found", HttpStatus.NOT_FOUND);
         }
 
-        // delegate to memberUserServices to update user and add to lab
         memberUserServices.updateUserInPharmacy(registerRequest, userToUpdate, pharmacy, currentUser);
 
         return ApiResponseHelper.successResponse("User updated successfully", HttpStatus.OK);
 
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Transactional
     @PutMapping("/reset-password/{pharmacyId}/{userId}")
     public ResponseEntity<?> resetUserPassword(
@@ -220,7 +208,7 @@ public class PharmaAdminController {
         return ApiResponseHelper.successResponse("Password reset successfully", HttpStatus.OK);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @Transactional
     @GetMapping("/getUserById")
     public ResponseEntity<?> getMemberByUserIdAndPharmacy(

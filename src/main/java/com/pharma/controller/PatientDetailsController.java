@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,6 +40,7 @@ public class PatientDetailsController {
     @Autowired
     private PatientDetailsRepository patientDetailsRepository;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createDoctor(
             @RequestHeader("Authorization") String token,
@@ -54,7 +56,7 @@ public class PatientDetailsController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Patient created successfully", HttpStatus.OK, savedPatient);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllDoctors(
             @RequestHeader("Authorization") String token,
@@ -71,6 +73,7 @@ public class PatientDetailsController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{patientId}")
     public ResponseEntity<?> getDoctorById(
             @RequestHeader("Authorization") String token,
@@ -92,7 +95,7 @@ public class PatientDetailsController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{patientId}")
     public ResponseEntity<?> updatePatientById(
             @RequestHeader("Authorization") String token,
@@ -122,6 +125,7 @@ public class PatientDetailsController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{patientId}")
     public ResponseEntity<?> deletePatientById(
             @RequestHeader("Authorization") String token,
@@ -151,17 +155,47 @@ public class PatientDetailsController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/check-duplicate")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestBody PatientDetailsDto request) {
-        boolean exists = patientDetailsRepository.existsByFirstNameAndPhone(
-                request.getFirstName(), request.getPhone()
-        );
+    public ResponseEntity<?> checkDuplicate(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId,
+            @RequestBody PatientDetailsDto request
+    ) {
+        Optional<User> userOptional = userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", true));
+        }
+
+        User user = userOptional.get();
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of(
+                            "error", true,
+                            "message", "User does not belong to this pharmacy"
+                    ));
+        }
+
+        boolean exists = patientDetailsRepository
+                .existsByFirstNameAndPhoneAndPharmacyId(
+                        request.getFirstName(),
+                        request.getPhone(),
+                        pharmacyId
+                );
+
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }
 
-    @GetMapping("/maxPatientId")
-    public ResponseEntity<?> getMaxPatientId() {
-        return ResponseEntity.ok(patientDetailsServiceImpl.getNextMaxPatientId());
 
-    }
+//    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+//    @GetMapping("/maxPatientId")
+//    public ResponseEntity<?> getMaxPatientId() {
+//        return ResponseEntity.ok(patientDetailsServiceImpl.getNextMaxPatientId());
+//
+//    }
 }

@@ -10,6 +10,7 @@ import com.pharma.utils.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,6 +36,7 @@ public class SupplierPaymentController {
         this.userAuthService = userAuthService;
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<?> saveSupplierPayment(
             @RequestHeader("Authorization") String token,
@@ -48,7 +50,7 @@ public class SupplierPaymentController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Supplier Payment created successfully", HttpStatus.OK, savedSupplierPayment);
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSupplierPayment(
             @RequestHeader("Authorization") String token,
@@ -66,6 +68,7 @@ public class SupplierPaymentController {
                 "Supplier Payment retrieved successfully", HttpStatus.OK, supplierPaymentDtos);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/getById/{paymentId}")
     public ResponseEntity<?> getPurchaseOrderById(
             @RequestHeader("Authorization") String token,

@@ -12,6 +12,7 @@ import com.pharma.utils.UserAuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -37,6 +38,7 @@ public class StockController {
         this.userAuthService = userAuthService;
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> saveStockItems(
             @RequestHeader("Authorization") String token,
@@ -50,6 +52,7 @@ public class StockController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Stock created successfully", HttpStatus.OK, savedStock);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllStocks(
             @RequestHeader("Authorization") String token,
@@ -68,6 +71,7 @@ public class StockController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{invId}")
     public ResponseEntity<?> getStockById(
             @RequestHeader("Authorization") String token,
@@ -88,7 +92,7 @@ public class StockController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{invId}")
     public ResponseEntity<?> deleteStockById(
             @RequestHeader("Authorization") String token,
@@ -117,7 +121,7 @@ public class StockController {
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getByItemId/{itemId}")
     public ResponseEntity<?> getStockByItemId(
             @RequestHeader("Authorization") String token,
@@ -140,6 +144,7 @@ public class StockController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/summary")
     public ResponseEntity<?> getStockSummaryByItem(@RequestHeader("Authorization") String token, @RequestParam Long pharmacyId) {
         Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
@@ -148,8 +153,6 @@ public class StockController {
                     "Invalid token", HttpStatus.UNAUTHORIZED, null);
         }
 
-//        User currentUser = currentUserOptional.get();
-//        List<StockDto> stocks = stockService.getAllStocks(currentUser.getId());
         List<StockDto> stocks = stockService.getAllStocks(pharmacyId, currentUserOptional.get());
 
         Map<UUID, BigDecimal> amountPerItem = new HashMap<>();
@@ -174,12 +177,7 @@ public class StockController {
                 "Stock summary fetched successfully", HttpStatus.OK, response);
     }
 
-//    @GetMapping("/{supplierId}/items")
-//    public ResponseEntity<List<StockItemEntity>> getItemsBySupplier(@PathVariable UUID supplierId) {
-//        List<StockItemEntity> items = stockSerivceImpl.getItemsBySupplierId(supplierId);
-//        return ResponseEntity.ok(items);
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/{supplierId}/items")
     public ResponseEntity<?> getItemsBySupplier(
             @RequestHeader("Authorization") String token,
@@ -205,6 +203,7 @@ public class StockController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/confirmPayment/{invId}")
     public ResponseEntity<?> confirmPayment(
             @RequestHeader("Authorization") String token,
@@ -227,20 +226,7 @@ public class StockController {
         }
     }
 
-//    @GetMapping("/checkBillNo")
-//    public ResponseEntity<Map<String, Boolean>> checkBillNoExists(
-//            @RequestParam("supplierId") UUID supplierId,
-//            @RequestParam("year") int year,
-//            @RequestParam("purchaseBillNo") String purchaseBillNo) {
-//        try {
-//            boolean exists = stockService.isBillNoExists(supplierId, year, purchaseBillNo);
-//            return ResponseEntity.ok(Map.of("exists", exists));
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body(Map.of("error", true));
-//        }
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/checkBillNo")
     public ResponseEntity<?> checkBillNoExists(
             @RequestHeader("Authorization") String token,
@@ -270,31 +256,7 @@ public class StockController {
     }
 
 
-//    @GetMapping("/paymentStatusAndSupplierFilter")
-//    public ResponseEntity<?> getStocksByPaymentStatusAndSupplier(
-//            @RequestHeader("Authorization") String token,
-//            @RequestParam String paymentStatus,
-//            @RequestParam UUID supplierId
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//
-//        List<StockSummaryDto> stocks = stockService.getStocksByPaymentStatusAndSupplierAndCreatedBy(
-//                paymentStatus, supplierId, createdById
-//        );
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Stocks retrieved successfully",
-//                HttpStatus.OK,
-//                stocks
-//        );
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/paymentStatusAndSupplierFilter")
     public ResponseEntity<?> getStocksByPaymentStatusAndSupplier(
             @RequestHeader("Authorization") String token,
@@ -324,33 +286,7 @@ public class StockController {
     }
 
 
-//    @PutMapping("/updateStockItem/{invId}/{itemId}/{batchNo}")
-//    public ResponseEntity<?> updateStockItem(
-//            @RequestHeader("Authorization") String token,
-//            @PathVariable UUID invId,
-//            @PathVariable UUID itemId,
-//            @PathVariable String batchNo,
-//            @RequestBody StockItemDto updateDto
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        User currentUser = currentUserOptional.get();
-//
-//        try {
-//            StockItemDto updated = stockService.updateStockItem(
-//                    currentUser.getId(), invId, itemId, batchNo, updateDto);
-//
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Stock item updated successfully", HttpStatus.OK, updated);
-//        } catch (RuntimeException e) {
-//            return ApiResponseHelper.errorResponse(e.getMessage(), HttpStatus.NOT_FOUND);
-//        }
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/updateStockItem/{invId}/{itemId}/{batchNo}")
     public ResponseEntity<?> updateStockItem(
             @RequestHeader("Authorization") String token,

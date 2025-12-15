@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class DoctorController {
     @Autowired
     private DoctorRepository doctorRepository;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createDoctor(
             @RequestHeader("Authorization") String token,
@@ -49,6 +51,7 @@ public class DoctorController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Doctor created successfully", HttpStatus.OK, savedDoctor);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllDoctors(
             @RequestHeader("Authorization") String token,
@@ -65,6 +68,7 @@ public class DoctorController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{doctorId}")
     public ResponseEntity<?> getDoctorById(
             @RequestHeader("Authorization") String token,
@@ -86,7 +90,7 @@ public class DoctorController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{doctorId}")
     public ResponseEntity<?> updateDoctorById(
             @RequestHeader("Authorization") String token,
@@ -117,7 +121,7 @@ public class DoctorController {
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{doctorId}")
     public ResponseEntity<?> deleteDoctorById(
             @RequestHeader("Authorization") String token,
@@ -147,13 +151,43 @@ public class DoctorController {
         }
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/check-duplicate")
-    public ResponseEntity<Map<String, Boolean>> checkDuplicate(@RequestBody DoctorDto request) {
-        boolean exists = doctorRepository.existsByDoctorNameAndDoctorMobile(
-                request.getDoctorName(), request.getDoctorMobile()
-        );
+    public ResponseEntity<?> checkDuplicate(
+            @RequestHeader("Authorization") String token,
+            @RequestParam Long pharmacyId,
+            @RequestBody DoctorDto request
+    ) {
+        Optional<User> userOptional = userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", true));
+        }
+
+        User user = userOptional.get();
+
+        // ✅ Validate user–pharmacy membership
+        boolean isMember = user.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of(
+                            "error", true,
+                            "message", "User does not belong to this pharmacy"
+                    ));
+        }
+
+        boolean exists = doctorRepository
+                .existsByDoctorNameAndDoctorMobileAndPharmacyId(
+                        request.getDoctorName(),
+                        request.getDoctorMobile(),
+                        pharmacyId
+                );
+
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }
+
 
 }

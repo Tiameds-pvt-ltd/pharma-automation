@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -29,6 +30,7 @@ public class BillController {
     @Autowired
     private UserAuthService userAuthService;
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> saveBill(
             @RequestHeader("Authorization") String token,
@@ -43,6 +45,7 @@ public class BillController {
         return ApiResponseHelper.successResponseWithDataAndMessage("Bill created successfully", HttpStatus.OK, savedBill);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/addPayment")
     public ResponseEntity<?> addBillPayment(
             @RequestHeader("Authorization") String token,
@@ -67,7 +70,7 @@ public class BillController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllBills(
             @RequestHeader("Authorization") String token,
@@ -85,6 +88,7 @@ public class BillController {
                 "Bill retrieved successfully", HttpStatus.OK, billDtos);
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{billId}")
     public ResponseEntity<?> getBillById(
             @RequestHeader("Authorization") String token,
@@ -105,7 +109,7 @@ public class BillController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{billId}")
     public ResponseEntity<?> deleteBill(
             @RequestHeader("Authorization") String token,
@@ -135,14 +139,7 @@ public class BillController {
 
     }
 
-//    @GetMapping("/getPackageQuantity")
-//    public PackageQuantityDto getPackageQuantityDifference(
-//            @RequestParam String itemId,
-//            @RequestParam String batchNo
-//    ) {
-//        return billService.getPackageQuantityDifference(itemId, batchNo);
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getPackageQuantity")
     public ResponseEntity<?> getPackageQuantityDifference(
             @RequestHeader("Authorization") String token,
@@ -168,27 +165,7 @@ public class BillController {
         );
     }
 
-//    @GetMapping("/billingSummary")
-//    public ResponseEntity<?> getSummaryByDate(
-//            @RequestHeader("Authorization") String token,
-//            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//        BillingSummaryDto summaryDto = billService.getSummaryByDate(createdById, date);
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Billing summary retrieved successfully",
-//                HttpStatus.OK,
-//                summaryDto
-//        );
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/billingSummary")
     public ResponseEntity<?> getSummaryByDate(
             @RequestHeader("Authorization") String token,
@@ -214,27 +191,7 @@ public class BillController {
         );
     }
 
-//    @GetMapping("/paymentSummary")
-//    public ResponseEntity<?> getPaymentSummaryByDate(
-//            @RequestHeader("Authorization") String token,
-//            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//        PaymentSummaryDto summaryDto = billService.getPaymentSummaryByDate(createdById, date);
-//
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Payment summary retrieved successfully",
-//                HttpStatus.OK,
-//                summaryDto
-//        );
-//    }
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/paymentSummary")
     public ResponseEntity<?> getPaymentSummaryByDate(
             @RequestHeader("Authorization") String token,
@@ -259,7 +216,7 @@ public class BillController {
         );
     }
 
-
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/billGstSummary")
     public ResponseEntity<?> getBillingGstSummary(
             @RequestHeader("Authorization") String token,
@@ -290,32 +247,4 @@ public class BillController {
         );
     }
 
-
-//    @GetMapping("/billGstSummary")
-//    public ResponseEntity<?> getBillingGstSummary(
-//            @RequestHeader("Authorization") String token,
-//            @RequestParam(value = "date", required = false)
-//            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
-//            @RequestParam(value = "month", required = false) String month
-//    ) {
-//        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-//        if (currentUserOptional.isEmpty()) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-//        }
-//
-//        if (date == null && (month == null || month.isBlank())) {
-//            return ApiResponseHelper.successResponseWithDataAndMessage(
-//                    "Date or Month is required", HttpStatus.BAD_REQUEST, null);
-//        }
-//
-//        Long createdById = currentUserOptional.get().getId();
-//
-//        List<BillingGstSummaryDto> summary = billService.getBillingGstSummary(createdById, date, month);
-//        return ApiResponseHelper.successResponseWithDataAndMessage(
-//                "Billing GST summary retrieved successfully",
-//                HttpStatus.OK,
-//                summary
-//        );
-//    }
 }
