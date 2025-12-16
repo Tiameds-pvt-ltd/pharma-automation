@@ -7,6 +7,7 @@ import com.pharma.dto.ItemDto;
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.repository.ItemRepository;
+import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.ItemService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -16,6 +17,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +38,9 @@ public class ItemController {
 
     @Autowired
     private ItemRepository itemRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
@@ -161,16 +167,17 @@ public class ItemController {
             @RequestParam Long pharmacyId,
             @RequestBody ItemDto request
     ) {
-        Optional<User> userOptional = userAuthService.authenticateUser(token);
+        User user = userAuthService.authenticateUser(token)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED, "Unauthorized"
+                        )
+                );
 
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", true));
-        }
-
-        User user = userOptional.get();
-        boolean isMember = user.getPharmacies().stream()
-                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+        boolean isMember = userRepository.existsUserInPharmacy(
+                user.getId(),
+                pharmacyId
+        );
 
         if (!isMember) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -189,6 +196,5 @@ public class ItemController {
 
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }
-
 
 }

@@ -6,6 +6,7 @@ import com.pharma.dto.PatientDetailsDto;
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.repository.PatientDetailsRepository;
+import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.PatientDetailsService;
 import com.pharma.service.impl.PatientDetailsServiceImpl;
 import com.pharma.utils.ApiResponseHelper;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,9 @@ public class PatientDetailsController {
 
     @Autowired
     private PatientDetailsRepository patientDetailsRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
@@ -162,16 +167,17 @@ public class PatientDetailsController {
             @RequestParam Long pharmacyId,
             @RequestBody PatientDetailsDto request
     ) {
-        Optional<User> userOptional = userAuthService.authenticateUser(token);
+        User user = userAuthService.authenticateUser(token)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.UNAUTHORIZED, "Unauthorized"
+                        )
+                );
 
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", true));
-        }
-
-        User user = userOptional.get();
-        boolean isMember = user.getPharmacies().stream()
-                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+        boolean isMember = userRepository.existsUserInPharmacy(
+                user.getId(),
+                pharmacyId
+        );
 
         if (!isMember) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -191,11 +197,4 @@ public class PatientDetailsController {
         return ResponseEntity.ok(Map.of("duplicate", exists));
     }
 
-
-//    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
-//    @GetMapping("/maxPatientId")
-//    public ResponseEntity<?> getMaxPatientId() {
-//        return ResponseEntity.ok(patientDetailsServiceImpl.getNextMaxPatientId());
-//
-//    }
 }
