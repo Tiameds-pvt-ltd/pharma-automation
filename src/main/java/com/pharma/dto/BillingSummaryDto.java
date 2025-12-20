@@ -7,8 +7,13 @@ public interface BillingSummaryDto {
 
     BigDecimal getTotalReturnAmount();
     Long getTotalReturnBills();
+
     BigDecimal getPaidTotalAmount();
     Long getPaidTotalBills();
-    BigDecimal getUnpaidTotalAmount();
-    Long getUnpaidTotalBills();
+
+    BigDecimal getPartialTotalAmount();
+    Long getPartialTotalBills();
+
+    BigDecimal getCreditTotalAmount();
+    Long getCreditTotalBills();
 }

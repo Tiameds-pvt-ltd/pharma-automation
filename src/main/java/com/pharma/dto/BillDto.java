@@ -31,11 +31,8 @@ public class BillDto {
     private BigDecimal totalDiscount;
     private BigDecimal grandTotal;
     private String paymentStatus;
-    private String paymentType;
-    private BigDecimal receivedAmount;
-    private BigDecimal balanceAmount;
-    private BigDecimal upi;
-    private BigDecimal cash;
+    private BigDecimal balanceDue;
+    private BigDecimal roundedOff;
     private Long createdBy;
     private LocalDate createdDate;
     private Long modifiedBy;

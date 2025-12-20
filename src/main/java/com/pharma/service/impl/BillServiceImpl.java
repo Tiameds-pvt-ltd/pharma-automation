@@ -4,9 +4,7 @@ import com.pharma.dto.*;
 import com.pharma.entity.*;
 
 import com.pharma.mapper.BillMapper;
-import com.pharma.repository.BillRepository;
-import com.pharma.repository.InventoryDetailsRepository;
-import com.pharma.repository.InventoryRepository;
+import com.pharma.repository.*;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.service.BillService;
 import com.pharma.utils.JwtUtil;
@@ -14,8 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +41,17 @@ public class BillServiceImpl implements BillService {
 
     @Autowired
     private InventoryDetailsRepository inventoryDetailsRepository;
+
+    @Autowired
+    private BillPaymentRepository billPaymentRepository;
+
+    private boolean isValidPayment(BillPaymentEntity payment) {
+        return payment.getPaymentType() != null
+                && !payment.getPaymentType().isBlank()
+                && payment.getPaymentAmount() != null
+                && payment.getPaymentAmount().compareTo(BigDecimal.ZERO) > 0;
+    }
+
 
     @Transactional
     @Override
@@ -112,19 +123,58 @@ public class BillServiceImpl implements BillService {
             }
         }
 
-        BillEntity savedBill = billRepository.save(billEntity);
 
-        if ("Paid".equalsIgnoreCase(savedBill.getPaymentStatus()) &&
-                savedBill.getBillPaymentEntities() != null) {
+//        if (billEntity.getBillPaymentEntities() != null &&
+//                !billEntity.getBillPaymentEntities().isEmpty()) {
+//
+//            int sequence = generatePaymentId(billDto.getPharmacyId());
+//            String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
+//
+//            for (BillPaymentEntity payment : billEntity.getBillPaymentEntities()) {
+//                String paymentId = "PAY-" + yearPart + "-" + String.format("%02d", sequence);
+//
+//                payment.setBillPaymentId(UUID.randomUUID());
+//                payment.setPaymentId(paymentId);
+//                payment.setPaymentDate(LocalDateTime.now());
+//                payment.setCreatedBy(user.getId());
+//                payment.setCreatedDate(LocalDate.now());
+//                payment.setBillEntity(billEntity);
+//
+//                sequence++;
+//            }
+//        }
+        if (billEntity.getBillPaymentEntities() != null) {
 
-            for (BillPaymentEntity payment : savedBill.getBillPaymentEntities()) {
+            int sequence = generatePaymentId(billDto.getPharmacyId());
+            String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
+
+            Iterator<BillPaymentEntity> iterator =
+                    billEntity.getBillPaymentEntities().iterator();
+
+            while (iterator.hasNext()) {
+                BillPaymentEntity payment = iterator.next();
+
+                // ❌ REMOVE EMPTY / INVALID PAYMENTS
+                if (!isValidPayment(payment)) {
+                    iterator.remove();   // <-- THIS PREVENTS DB INSERT
+                    continue;
+                }
+
+                // ✅ VALID PAYMENT → SAVE
+                String paymentId = "PAY-" + yearPart + "-" + String.format("%02d", sequence);
+
                 payment.setBillPaymentId(UUID.randomUUID());
+                payment.setPaymentId(paymentId);
+                payment.setPaymentDate(LocalDateTime.now());
                 payment.setCreatedBy(user.getId());
                 payment.setCreatedDate(LocalDate.now());
-                payment.setBillEntity(savedBill);
+                payment.setBillEntity(billEntity);
+
+                sequence++;
             }
         }
 
+        BillEntity savedBill = billRepository.save(billEntity);
         return billMapper.toDto(savedBill);
     }
 
@@ -147,20 +197,37 @@ public class BillServiceImpl implements BillService {
 
         BillPaymentEntity payment = billMapper.toEntityPayment(billPaymentDto);
 
+        int sequence = generatePaymentId(billPaymentDto.getPharmacyId());
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
+
         if (payment.getBillPaymentId() == null) {
             payment.setBillPaymentId(UUID.randomUUID());
         }
-        payment.setBillPaymentDate(LocalDate.now());
+        payment.setPaymentId("PAY-" + yearPart + "-" + String.format("%02d", sequence));
+        payment.setPaymentDate(LocalDateTime.now());
         payment.setCreatedBy(user.getId());
         payment.setCreatedDate(LocalDate.now());
         payment.setBillEntity(bill);
-
         payment.setPharmacyId(billPaymentDto.getPharmacyId());
-
         bill.getBillPaymentEntities().add(payment);
 
-        BillEntity updatedBill = billRepository.save(bill);
+        BigDecimal currentBalance = bill.getBalanceDue();
+        if (currentBalance == null) {
+            currentBalance = bill.getGrandTotal();
+        }
 
+        BigDecimal newBalance = currentBalance.subtract(billPaymentDto.getPaymentAmount());
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            newBalance = BigDecimal.ZERO;
+        }
+
+        bill.setBalanceDue(newBalance);
+
+        bill.setPaymentStatus(
+                newBalance.compareTo(BigDecimal.ZERO) == 0 ? "Paid" : "Partial"
+        );
+
+        BillEntity updatedBill = billRepository.save(bill);
         return billMapper.toDto(updatedBill);
     }
 
@@ -228,20 +295,15 @@ public class BillServiceImpl implements BillService {
     }
     @Transactional
     private String generateBillId1(Long pharmacyId) {
-
-        // YY = last 2 digits of year
         String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
-
         Optional<BillEntity> latestBillOpt =
                 billRepository.findLatestBillForYearAndPharmacy(
                         pharmacyId, yearPart
                 );
 
         int nextSequence = 1;
-
         if (latestBillOpt.isPresent()) {
             String lastBillId1 = latestBillOpt.get().getBillId1();
-            // Example: BILL-25-09 or BILL-25-123
             String[] parts = lastBillId1.split("-");
 
             if (parts.length == 3) {
@@ -252,16 +314,12 @@ public class BillServiceImpl implements BillService {
                 }
             }
         }
-
-        // Pad only for 1–9
         String sequencePart = (nextSequence < 10)
                 ? "0" + nextSequence
                 : String.valueOf(nextSequence);
 
         return "BILL-" + yearPart + "-" + sequencePart;
     }
-
-
 
     @Transactional
     @Override
@@ -346,4 +404,81 @@ public class BillServiceImpl implements BillService {
         return List.of();
     }
 
+
+    @Transactional
+    public int generatePaymentId(Long pharmacyId) {
+
+        String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
+
+        Optional<BillPaymentEntity> latestPaymentOpt =
+                billPaymentRepository.findLatestPaymentForYearAndPharmacyForUpdate(
+                        pharmacyId, yearPart
+                );
+
+        if (latestPaymentOpt.isPresent()) {
+            String lastPaymentId = latestPaymentOpt.get().getPaymentId();
+            String[] parts = lastPaymentId.split("-");
+
+            if (parts.length == 3) {
+                try {
+                    return Integer.parseInt(parts[2]) + 1;
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+
+        return 1;
+    }
+
+    @Transactional
+    @Override
+    public List<BillDto> getBillsByPatientId(Long pharmacyId, UUID patientId, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        List<BillEntity> billEntities =
+                billRepository.findAllByPatientIdAndPharmacyId(patientId, pharmacyId);
+
+        return billEntities.stream()
+                .map(billMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    @Override
+    public List<BatchWiseProfitDto> getBatchWiseProfitBetweenDates(
+            Long pharmacyId,
+            LocalDate fromDate,
+            LocalDate toDate,
+            User user
+    ) {
+
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        LocalDateTime fromDateTime = fromDate.atStartOfDay();
+        LocalDateTime toDateTime   = toDate.plusDays(1).atStartOfDay();
+
+        return billRepository.getBatchWiseProfitBetweenDates(
+                fromDateTime,
+                toDateTime,
+                pharmacyId
+        );
+    }
 }

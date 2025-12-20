@@ -2,6 +2,7 @@ package com.pharma.service;
 
 import com.pharma.dto.*;
 import com.pharma.entity.User;
+import com.pharma.repository.BatchWiseProfitDto;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -32,14 +33,9 @@ public interface BillService {
 
     List<BillingGstSummaryDto> getBillingGstSummary(Long pharmacyId, LocalDate inputDate, String inputMonth, User user);
 
-//    PackageQuantityDto getPackageQuantityDifference(String itemId, String batchNo);
+    List<BillDto> getBillsByPatientId(Long pharmacyId, UUID patientId, User user);
 
-//    BillingSummaryDto getSummaryByDate(Long createdBy, LocalDate selectedDate);
-
-//    PaymentSummaryDto getPaymentSummaryByDate(Long createdBy, LocalDate selectedDate);
-
-//    List<BillingGstSummaryDto> getBillingGstSummary(Long createdBy, LocalDate inputDate, String inputMonth);
-
-
+    List<BatchWiseProfitDto> getBatchWiseProfitBetweenDates(Long pharmacyId, LocalDate fromDate, LocalDate toDate, User user
+    );
 
 }

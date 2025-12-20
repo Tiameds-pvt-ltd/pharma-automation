@@ -29,14 +29,20 @@ public class BillPaymentEntity {
     @Column(name = "pharmacy_id")
     private Long pharmacyId;
 
-    @Column(name = "bill_payment_date", updatable = false)
-    private LocalDate billPaymentDate;
+    @Column(name = "payment_id")
+    private String paymentId;
 
-    @Column(name = "bill_payment_mode")
-    private String billPaymentMode;
+    @Column(name = "payment_date", updatable = false)
+    private LocalDateTime paymentDate;
 
-    @Column(name = "bill_paid_amount")
-    private BigDecimal billPaidAmount;
+    @Column(name = "payment_type")
+    private String paymentType;
+
+    @Column(name = "payment_amount")
+    private BigDecimal paymentAmount;
+
+    @Column(name = "return_amount")
+    private BigDecimal returnAmount;
 
     @Column(name = "created_by")
     private Long createdBy;

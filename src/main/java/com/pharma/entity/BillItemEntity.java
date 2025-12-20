@@ -43,8 +43,8 @@ public class BillItemEntity {
     @Column(name = "discount_amount")
     private BigDecimal discountAmount;
 
-    @Column(name = "mrp_sale_price_per_unit")
-    private BigDecimal mrpSalePricePerUnit;
+    @Column(name = "sale_price")
+    private BigDecimal salePrice;
 
     @Column(name = "gst_percentage")
     private BigDecimal gstPercentage;

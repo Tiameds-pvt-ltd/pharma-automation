@@ -64,20 +64,11 @@ public class BillEntity {
     @Column(name = "payment_status")
     private String paymentStatus;
 
-    @Column(name = "payment_type")
-    private String paymentType;
+    @Column(name = "balance_due")
+    private BigDecimal balanceDue;
 
-    @Column(name = "received_amount")
-    private BigDecimal receivedAmount;
-
-    @Column(name = "balance_amount")
-    private BigDecimal balanceAmount;
-
-    @Column(name = "upi")
-    private BigDecimal upi;
-
-    @Column(name = "cash")
-    private BigDecimal cash;
+    @Column(name = "rounded_off")
+    private BigDecimal roundedOff;
 
     @Column(name = "created_by")
     private Long createdBy;

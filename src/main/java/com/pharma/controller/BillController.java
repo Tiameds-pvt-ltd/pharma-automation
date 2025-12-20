@@ -2,6 +2,7 @@ package com.pharma.controller;
 
 import com.pharma.dto.*;
 import com.pharma.entity.User;
+import com.pharma.repository.BatchWiseProfitDto;
 import com.pharma.service.BillService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -244,6 +245,71 @@ public class BillController {
                 "Billing GST summary retrieved successfully",
                 HttpStatus.OK,
                 summary
+        );
+    }
+
+
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    @GetMapping("/getBillsByPatientId/{patientId}")
+    public ResponseEntity<?> getBillsByPatientId(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID patientId,
+            @RequestParam Long pharmacyId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED,
+                    null
+            );
+        }
+
+        List<BillDto> bills = billService.getBillsByPatientId(
+                pharmacyId,
+                patientId,
+                currentUserOptional.get()
+        );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Bills retrieved successfully",
+                HttpStatus.OK,
+                bills
+        );
+    }
+
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    @GetMapping("/itemWiseGrossProfit")
+    public ResponseEntity<?> getBatchWiseGrossProfit(
+            @RequestHeader("Authorization") String token,
+            @RequestParam("fromDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam("toDate")   @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+            @RequestParam Long pharmacyId
+    ) {
+        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.errorResponse(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        User user = currentUserOptional.get();
+
+        List<BatchWiseProfitDto> report =
+                billService.getBatchWiseProfitBetweenDates(
+                        pharmacyId,
+                        fromDate,
+                        toDate,
+                        user
+                );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Batch-wise gross profit report retrieved successfully",
+                HttpStatus.OK,
+                report
         );
     }
 

@@ -53,32 +53,56 @@ public interface BillRepository extends JpaRepository<BillEntity, UUID> {
 
     @Query(value = """
 SELECT 
-  COALESCE(r.total_return_amount, 0) AS total_return_amount,
-  r.total_return_bills,
-  b.paid_total_amount,
-  b.paid_total_bills,
-  b.unpaid_total_amount,
-  b.unpaid_total_bills
+    COALESCE(r.total_return_amount, 0) AS total_return_amount,
+    r.total_return_bills,
+
+    b.paid_total_amount,
+    b.paid_total_bills,
+
+    b.partial_total_amount,
+    b.partial_total_bills,
+
+    b.credit_total_amount,
+    b.credit_total_bills
 FROM
-  (
+(
     SELECT 
-      COALESCE(SUM(grand_total), 0) AS total_return_amount,
-      COUNT(*) AS total_return_bills
+        COALESCE(SUM(grand_total), 0) AS total_return_amount,
+        COUNT(*) AS total_return_bills
     FROM pharma_billing_return
     WHERE DATE(bill_return_date_time) = :selectedDate
       AND pharmacy_id = :pharmacyId
-  ) AS r
+) r
 CROSS JOIN
-  (
+(
     SELECT 
-      SUM(CASE WHEN payment_status = 'Paid' THEN grand_total ELSE 0 END) AS paid_total_amount,
-      COUNT(CASE WHEN payment_status = 'Paid' THEN 1 ELSE NULL END) AS paid_total_bills,
-      SUM(CASE WHEN payment_status = 'Pending' THEN grand_total ELSE 0 END) AS unpaid_total_amount,
-      COUNT(CASE WHEN payment_status = 'Pending' THEN 1 ELSE NULL END) AS unpaid_total_bills
+        COALESCE(SUM(
+            CASE WHEN payment_status = 'Paid' THEN grand_total ELSE 0 END
+        ), 0) AS paid_total_amount,
+
+        COUNT(
+            CASE WHEN payment_status = 'Paid' THEN 1 ELSE NULL END
+        ) AS paid_total_bills,
+
+        COALESCE(SUM(
+            CASE WHEN payment_status = 'Partial' THEN grand_total ELSE 0 END
+        ), 0) AS partial_total_amount,
+
+        COUNT(
+            CASE WHEN payment_status = 'Partial' THEN 1 ELSE NULL END
+        ) AS partial_total_bills,
+
+        COALESCE(SUM(
+            CASE WHEN payment_status = 'Credit' THEN grand_total ELSE 0 END
+        ), 0) AS credit_total_amount,
+
+        COUNT(
+            CASE WHEN payment_status = 'Credit' THEN 1 ELSE NULL END
+        ) AS credit_total_bills
     FROM pharma_billing
     WHERE DATE(bill_date_time) = :selectedDate
       AND pharmacy_id = :pharmacyId
-  ) AS b
+) b
 """, nativeQuery = true)
     BillingSummaryDto getBillingSummaryByDateAndPharmacy(
             @Param("selectedDate") LocalDate selectedDate,
@@ -86,56 +110,57 @@ CROSS JOIN
     );
 
 
+
     @Query(value = """
 SELECT 
-  COALESCE(SUM(CASE 
-    WHEN payment_type IN ('creditCard', 'debitCard') THEN grand_total 
-    ELSE 0 
-  END), 0) AS card_total,
+    COALESCE(SUM(
+        CASE WHEN payment_type = 'CARD' THEN payment_amount ELSE 0 END
+    ), 0) AS card_total,
 
-  COALESCE(COUNT(CASE 
-    WHEN payment_type IN ('creditCard', 'debitCard') THEN 1 
-    ELSE NULL 
-  END), 0) AS card_count,
+    COALESCE(COUNT(
+        CASE WHEN payment_type = 'CARD' THEN 1 ELSE NULL END
+    ), 0) AS card_count,
 
-  COALESCE(SUM(CASE 
-    WHEN payment_type IN ('upi', 'net_banking') THEN grand_total 
-    ELSE 0 
-  END), 0) AS upi_net_total,
+    COALESCE(SUM(
+        CASE WHEN payment_type = 'UPI' THEN payment_amount ELSE 0 END
+    ), 0) AS upi_total,
 
-  COALESCE(COUNT(CASE 
-    WHEN payment_type IN ('upi', 'net_banking') THEN 1 
-    ELSE NULL 
-  END), 0) AS upi_net_count,
+    COALESCE(COUNT(
+        CASE WHEN payment_type = 'UPI' THEN 1 ELSE NULL END
+    ), 0) AS upi_count,
 
-  COALESCE(SUM(CASE 
-    WHEN payment_type = 'cash' THEN grand_total 
-    ELSE 0 
-  END), 0) AS cash_total,
+    COALESCE(SUM(
+        CASE WHEN payment_type = 'NET_BANKING' THEN payment_amount ELSE 0 END
+    ), 0) AS net_banking_total,
 
-  COALESCE(COUNT(CASE 
-    WHEN payment_type = 'cash' THEN 1 
-    ELSE NULL 
-  END), 0) AS cash_count,
+    COALESCE(COUNT(
+        CASE WHEN payment_type = 'NET_BANKING' THEN 1 ELSE NULL END
+    ), 0) AS net_banking_count,
 
-  COALESCE(SUM(CASE 
-    WHEN payment_type = 'upiCash' THEN grand_total 
-    ELSE 0 
-  END), 0) AS upi_cash_total,
+    COALESCE(SUM(
+        CASE WHEN payment_type = 'CASH' THEN payment_amount ELSE 0 END
+    ), 0) AS cash_total,
 
-  COALESCE(COUNT(CASE 
-    WHEN payment_type = 'upiCash' THEN 1 
-    ELSE NULL 
-  END), 0) AS upi_cash_count
+    COALESCE(COUNT(
+        CASE WHEN payment_type = 'CASH' THEN 1 ELSE NULL END
+    ), 0) AS cash_count,
 
-FROM pharma_billing
-WHERE DATE(bill_date_time) = :selectedDate
+    COALESCE(SUM(
+        CASE WHEN payment_type = 'CHEQUE' THEN payment_amount ELSE 0 END
+    ), 0) AS cheque_total,
+
+    COALESCE(COUNT(
+        CASE WHEN payment_type = 'CHEQUE' THEN 1 ELSE NULL END
+    ), 0) AS cheque_count
+FROM pharma_bill_payment
+WHERE DATE(payment_date) = :selectedDate
   AND pharmacy_id = :pharmacyId
 """, nativeQuery = true)
     PaymentSummaryDto getPaymentSummaryByDateAndPharmacy(
             @Param("selectedDate") LocalDate selectedDate,
             @Param("pharmacyId") Long pharmacyId
     );
+
 
     @Query(value = """
     SELECT 
@@ -172,6 +197,66 @@ WHERE DATE(bill_date_time) = :selectedDate
     List<BillEntity> findAllByPharmacyId(Long pharmacyId);
 
     Optional<BillEntity> findByBillIdAndPharmacyId(UUID billId, Long pharmacyId);
+
+    List<BillEntity> findAllByPatientIdAndPharmacyId(UUID patientId, Long pharmacyId);
+
+    @Query(value = """
+SELECT
+    b.pharmacy_id                              AS pharmacy_id,
+
+    i.item_id                                 AS item_id,
+    i.item_name                               AS item_name,
+
+    bi.batch_no                               AS batch_no,
+
+    /* Billed Amount */
+    ROUND(SUM(bi.gross_total))                AS billed_amount,
+
+    /* Cost Price (batch-wise, counted once) */
+    ROUND(MAX(si.amount))                     AS cost_price,
+
+    /* Gross Profit */
+    ROUND(
+        SUM(bi.gross_total) - MAX(si.amount)
+    )                                         AS gross_profit,
+
+    /* Gross Profit % */
+    ROUND(
+        (SUM(bi.gross_total) - MAX(si.amount))
+        / NULLIF(MAX(si.amount), 0) * 100
+    )                                         AS gross_profit_percentage
+
+FROM pharma_billing b
+JOIN pharma_billing_item bi
+    ON bi.bill_id = b.bill_id
+
+JOIN pharma_item i
+    ON i.item_id = bi.item_id
+
+LEFT JOIN pharma_stock_purchase_item si
+    ON si.item_id = bi.item_id
+   AND si.batch_no = bi.batch_no
+   AND si.pharmacy_id = b.pharmacy_id
+
+WHERE b.bill_date_time >= :fromDate
+  AND b.bill_date_time <  :toDate
+  AND b.pharmacy_id = :pharmacyId
+
+GROUP BY
+    b.pharmacy_id,
+    i.item_id,
+    i.item_name,
+    bi.batch_no
+
+ORDER BY
+    i.item_name,
+    bi.batch_no
+""", nativeQuery = true)
+    List<BatchWiseProfitDto> getBatchWiseProfitBetweenDates(
+            @Param("fromDate") LocalDateTime fromDate,
+            @Param("toDate") LocalDateTime toDate,
+            @Param("pharmacyId") Long pharmacyId
+    );
 
 }
 

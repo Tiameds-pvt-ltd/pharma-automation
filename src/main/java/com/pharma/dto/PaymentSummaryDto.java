@@ -5,11 +5,17 @@ import java.math.BigDecimal;
 public interface PaymentSummaryDto {
 
     BigDecimal getCardTotal();
-    BigDecimal getUpiNetTotal();
-    BigDecimal getCashTotal();
-    BigDecimal getUpiCashTotal();
     Long getCardCount();
-    Long getUpiNetCount();
+
+    BigDecimal getUpiTotal();
+    Long getUpiCount();
+
+    BigDecimal getNetBankingTotal();
+    Long getNetBankingCount();
+
+    BigDecimal getCashTotal();
     Long getCashCount();
-    Long getUpiCashCount();
+
+    BigDecimal getChequeTotal();
+    Long getChequeCount();
 }
