@@ -1,9 +1,11 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.PurchaseOrderDto;
+import com.pharma.dto.PurchaseOrderItemDto;
 import com.pharma.entity.PurchaseOrderEntity;
 import com.pharma.entity.PurchaseOrderItemEntity;
 import com.pharma.entity.User;
+import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.mapper.PurchaseOrderMapper;
 import com.pharma.repository.PurchaseOrderRepository;
 import com.pharma.repository.auth.UserRepository;
@@ -15,9 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -160,7 +160,6 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
             }
         }
 
-        // ✅ Pad only if single digit
         String sequencePart = (nextSequence < 10)
                 ? "0" + nextSequence
                 : String.valueOf(nextSequence);
@@ -169,27 +168,83 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     }
 
 
+    @Override
+    @Transactional
+    public PurchaseOrderDto updatePurchaseOrder(Long pharmacyId, UUID orderId, PurchaseOrderDto updatedPurchaseOrder, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-//    @Transactional
-//    private String generateOrderId1() {
-//        String yearPart = String.valueOf(LocalDate.now().getYear());
-//
-//        Optional<PurchaseOrderEntity> latestOrderOpt = purchaseOrderRepository.findLatestOrderForYear(yearPart);
-//
-//        int newSequence = 1;
-//        if (latestOrderOpt.isPresent()) {
-//            String lastOrderId1 = latestOrderOpt.get().getOrderId1();
-//            String[] parts = lastOrderId1.split("-");
-//
-//            try {
-//                if (parts.length == 3) {
-//                    newSequence = Integer.parseInt(parts[2]) + 1;
-//                }
-//            } catch (NumberFormatException e) {
-//                System.err.println("Error parsing order sequence: " + lastOrderId1);
-//            }
-//        }
-//
-//        return String.format("ORD-%s-%05d", yearPart, newSequence);
-//    }
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
+        PurchaseOrderEntity existingOrder = purchaseOrderRepository
+                .findByOrderIdAndPharmacyId(orderId, pharmacyId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException(
+                                "Purchase order not found with ID: " + orderId
+                        ));
+
+        existingOrder.setOrderedDate(updatedPurchaseOrder.getOrderedDate());
+        existingOrder.setIntendedDeliveryDate(updatedPurchaseOrder.getIntendedDeliveryDate());
+        existingOrder.setTotalAmount(updatedPurchaseOrder.getTotalAmount());
+        existingOrder.setTotalGst(updatedPurchaseOrder.getTotalGst());
+        existingOrder.setGrandTotal(updatedPurchaseOrder.getGrandTotal());
+
+        existingOrder.setModifiedBy(user.getId());
+        existingOrder.setModifiedDate(LocalDate.now());
+
+        Map<UUID, PurchaseOrderItemEntity> existingItemMap =
+                existingOrder.getPurchaseOrderItemEntities()
+                        .stream()
+                        .filter(i -> i.getOrderItemId() != null)
+                        .collect(Collectors.toMap(
+                                PurchaseOrderItemEntity::getOrderItemId,
+                                i -> i
+                        ));
+
+        List<PurchaseOrderItemEntity> updatedItems = new ArrayList<>();
+
+        for (PurchaseOrderItemDto itemDto : updatedPurchaseOrder.getPurchaseOrderItemDtos()) {
+
+            PurchaseOrderItemEntity itemEntity;
+
+            if (itemDto.getOrderItemId() != null &&
+                    existingItemMap.containsKey(itemDto.getOrderItemId())) {
+
+                itemEntity = existingItemMap.get(itemDto.getOrderItemId());
+
+            }
+            else {
+                itemEntity = new PurchaseOrderItemEntity();
+                itemEntity.setOrderItemId(UUID.randomUUID());
+                itemEntity.setCreatedBy(user.getId());
+                itemEntity.setCreatedDate(LocalDate.now());
+                itemEntity.setPurchaseOrderEntity(existingOrder);
+            }
+
+            itemEntity.setItemId(itemDto.getItemId());
+            itemEntity.setPackageQuantity(itemDto.getPackageQuantity());
+            itemEntity.setManufacturer(itemDto.getManufacturer());
+            itemEntity.setGstPercentage(itemDto.getGstPercentage());
+            itemEntity.setGstAmount(itemDto.getGstAmount());
+            itemEntity.setAmount(itemDto.getAmount());
+            itemEntity.setModifiedBy(user.getId());
+            itemEntity.setModifiedDate(LocalDate.now());
+
+            updatedItems.add(itemEntity);
+        }
+
+        existingOrder.getPurchaseOrderItemEntities().clear();
+        existingOrder.getPurchaseOrderItemEntities().addAll(updatedItems);
+
+        PurchaseOrderEntity savedOrder =
+                purchaseOrderRepository.save(existingOrder);
+
+        return purchaseOrderMapper.toDto(savedOrder);
+    }
 }

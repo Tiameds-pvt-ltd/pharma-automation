@@ -60,7 +60,9 @@ public class SpringSecurityConfig {
                                 "/public/**",
                                 "/pharma/inventory/**",
                                 "/pharma/stock/getByItemId/**",
-                                "/pharma/variant/**"
+                                "/pharma/variant/**",
+                                "/test-mail",
+                                "/auth/**"
                         ).permitAll()  // Allow Swagger and public resources
                         .anyRequest().authenticated()  // All other requests must be authenticated
                 )

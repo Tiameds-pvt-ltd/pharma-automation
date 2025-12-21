@@ -47,9 +47,9 @@ public class RegisterRequest {
     @NotBlank(message = "Country is mandatory")
     private String country;
 
-    @NotNull(message = "Enabled cannot be null")
-    @JsonProperty("verified")
-    private boolean isVerified;
+//    @NotNull(message = "Enabled cannot be null")
+//    @JsonProperty("verified")
+//    private boolean isVerified;
 
     private List<Long> modules;
 

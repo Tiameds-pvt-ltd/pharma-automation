@@ -62,6 +62,20 @@ spring:
         default_batch_fetch_size: 10
     show-sql: false
 
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: shreeraksha@tiameds.ai
+    password: bcwkaeqrtwmfwjkt
+
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+
 springdoc:
   api-docs:
     path: /v3/api-docs

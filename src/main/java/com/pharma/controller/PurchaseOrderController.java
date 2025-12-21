@@ -111,4 +111,49 @@ public class PurchaseOrderController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PutMapping("/update/{orderId}")
+    public ResponseEntity<?> updatePurchaseOrder(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID orderId,
+            @RequestParam Long pharmacyId,
+            @RequestBody PurchaseOrderDto updatedPurchaseOrder
+    ) {
+
+        Optional<User> currentUserOptional =
+                userAuthService.authenticateUser(token);
+
+        if (currentUserOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED,
+                    null
+            );
+        }
+
+        try {
+            PurchaseOrderDto updatedOrder =
+                    purchaseOrderService.updatePurchaseOrder(
+                            pharmacyId,
+                            orderId,
+                            updatedPurchaseOrder,
+                            currentUserOptional.get()
+                    );
+
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Purchase order updated successfully",
+                    HttpStatus.OK,
+                    updatedOrder
+            );
+
+        } catch (Exception e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST,
+                    null
+            );
+        }
+    }
+
+
 }

@@ -20,9 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -420,4 +418,156 @@ public class StockSerivceImpl implements StockService {
         return updatedItem;
     }
 
-}
+    @Override
+    @Transactional
+    public StockDto updateStock(Long pharmacyId, UUID invId, StockDto updatedStock, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
+        StockEntity existingStock = stockRepository
+                .findByInvIdAndPharmacyId(invId, pharmacyId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Stock not found")
+                );
+
+        existingStock.setPurchaseBillNo(updatedStock.getPurchaseBillNo());
+        existingStock.setPurchaseDate(updatedStock.getPurchaseDate());
+        existingStock.setCreditPeriod(updatedStock.getCreditPeriod());
+        existingStock.setPaymentDueDate(updatedStock.getPaymentDueDate());
+        existingStock.setInvoiceAmount(updatedStock.getInvoiceAmount());
+        existingStock.setTotalAmount(updatedStock.getTotalAmount());
+        existingStock.setTotalCgst(updatedStock.getTotalCgst());
+        existingStock.setTotalSgst(updatedStock.getTotalSgst());
+        existingStock.setTotalDiscountPercentage(updatedStock.getTotalDiscountPercentage());
+        existingStock.setTotalDiscountAmount(updatedStock.getTotalDiscountAmount());
+        existingStock.setGrandTotal(updatedStock.getGrandTotal());
+        existingStock.setPaymentStatus(updatedStock.getPaymentStatus());
+        existingStock.setGoodStatus(updatedStock.getGoodStatus());
+        existingStock.setGrnNo(updatedStock.getGrnNo());
+
+        existingStock.setModifiedBy(user.getId());
+        existingStock.setModifiedDate(LocalDate.now());
+
+        Map<UUID, StockItemEntity> existingItemMap =
+                existingStock.getStockItemEntities()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                StockItemEntity::getStockId,
+                                i -> i
+                        ));
+
+        for (StockItemDto itemDto : updatedStock.getStockItemDtos()) {
+
+            if (itemDto.getStockId() == null) {
+                throw new RuntimeException("StockId is mandatory for update");
+            }
+
+            StockItemEntity itemEntity = existingItemMap.get(itemDto.getStockId());
+
+            if (itemEntity == null) {
+                throw new RuntimeException("Stock item not found");
+            }
+
+            // ❌ HARD RULES — IDENTITY MUST NOT CHANGE
+            if (!Objects.equals(itemEntity.getBatchNo(), itemDto.getBatchNo())) {
+                throw new RuntimeException("Batch number change is not allowed");
+            }
+
+            if (!Objects.equals(itemEntity.getItemId(), itemDto.getItemId())) {
+                throw new RuntimeException("Item change is not allowed");
+            }
+
+            Long oldQty = itemEntity.getPackageQuantity();
+            Long newQty = itemDto.getPackageQuantity();
+            Long delta = newQty - oldQty;
+
+            if (delta == 0) {
+                continue; // No change
+            }
+
+            itemEntity.setPackageQuantity(newQty);
+            itemEntity.setExpiryDate(itemDto.getExpiryDate());
+            itemEntity.setFreeItem(itemDto.getFreeItem());
+            itemEntity.setPurchasePrice(itemDto.getPurchasePrice());
+            itemEntity.setMrpSalePrice(itemDto.getMrpSalePrice());
+            itemEntity.setPurchasePricePerUnit(itemDto.getPurchasePricePerUnit());
+            itemEntity.setMrpSalePricePerUnit(itemDto.getMrpSalePricePerUnit());
+            itemEntity.setGstPercentage(itemDto.getGstPercentage());
+            itemEntity.setGstAmount(itemDto.getGstAmount());
+            itemEntity.setDiscountPercentage(itemDto.getDiscountPercentage());
+            itemEntity.setDiscountAmount(itemDto.getDiscountAmount());
+            itemEntity.setAmount(itemDto.getAmount());
+
+            itemEntity.setModifiedBy(user.getId());
+            itemEntity.setModifiedDate(LocalDate.now());
+
+            stockItemRepository.save(itemEntity);
+
+            InventoryEntity inventory = inventoryRepository
+                    .findByItemIdAndPharmacyId(
+                            itemEntity.getItemId(),
+                            pharmacyId
+                    )
+                    .orElseThrow(() ->
+                            new RuntimeException("Inventory not found")
+                    );
+
+            Long newInventoryQty = inventory.getPackageQuantity() + delta;
+
+            if (newInventoryQty < 0) {
+                throw new RuntimeException("Inventory cannot be negative");
+            }
+
+            inventory.setPackageQuantity(newInventoryQty);
+            inventory.setModifiedBy(user.getId());
+            inventory.setModifiedDate(LocalDate.now());
+
+            inventoryRepository.save(inventory);
+
+            InventoryDetailsEntity details =
+                    inventoryDetailsRepository
+                            .findByItemIdAndBatchNoAndPharmacyId(
+                                    itemEntity.getItemId(),
+                                    itemEntity.getBatchNo(),
+                                    pharmacyId
+                            )
+                            .orElseThrow(() ->
+                                    new RuntimeException("Inventory batch not found")
+                            );
+
+            Long newBatchQty = details.getPackageQuantity() + delta;
+
+            if (newBatchQty < 0) {
+                throw new RuntimeException("Batch quantity cannot be negative");
+            }
+
+            details.setPackageQuantity(newBatchQty);
+            details.setExpiryDate(itemDto.getExpiryDate());
+            details.setPurchasePrice(itemDto.getPurchasePrice());
+            details.setMrpSalePrice(itemDto.getMrpSalePrice());
+            details.setPurchasePricePerUnit(itemDto.getPurchasePricePerUnit());
+            details.setMrpSalePricePerUnit(itemDto.getMrpSalePricePerUnit());
+            details.setGstPercentage(itemDto.getGstPercentage());
+            details.setGstAmount(itemDto.getGstAmount());
+
+            details.setModifiedBy(user.getId());
+            details.setModifiedDate(LocalDate.now());
+
+            inventoryDetailsRepository.save(details);
+        }
+
+        StockEntity savedStock = stockRepository.save(existingStock);
+        return stockMapper.toDto(savedStock);
+    }
+    }
+
+
+

@@ -17,8 +17,8 @@ public interface BillReturnService {
 
     void deleteBillReturn(Long pharmacyId, UUID billReturnId, User user);
 
-//    List<BillReturnListDto> getBillReturnListsByCreatedBy(Long createdById);
-
     List<BillReturnListDto> getBillReturnListsByPharmacy(Long pharmacyId, User user);
+
+    BillReturnDto updateBillReturn(Long pharmacyId, UUID billReturnId, BillReturnDto updatedReturn, User user);
 
 }

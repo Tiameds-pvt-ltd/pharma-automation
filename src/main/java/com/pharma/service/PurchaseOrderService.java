@@ -16,4 +16,6 @@ public interface PurchaseOrderService {
 
     void deletePurchaseOrderById(Long pharmacyId, UUID orderId, User user);
 
+    PurchaseOrderDto updatePurchaseOrder(Long pharmacyId, UUID orderId, PurchaseOrderDto updatedPurchaseOrder, User user);
+
 }

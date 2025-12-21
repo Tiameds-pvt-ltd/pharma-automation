@@ -136,5 +136,47 @@ public class PurchaseReturnController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PutMapping("/update/{returnId}")
+    public ResponseEntity<?> updatePurchaseReturn(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID returnId,
+            @RequestParam Long pharmacyId,
+            @RequestBody PurchaseReturnDto updatedReturn
+    ) {
 
+        Optional<User> userOptional =
+                userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED,
+                    null
+            );
+        }
+
+        try {
+            PurchaseReturnDto updated =
+                    purchaseReturnService.updatePurchaseReturn(
+                            pharmacyId,
+                            returnId,
+                            updatedReturn,
+                            userOptional.get()
+                    );
+
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Purchase return updated successfully",
+                    HttpStatus.OK,
+                    updated
+            );
+
+        } catch (Exception e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST,
+                    null
+            );
+        }
+    }
 }

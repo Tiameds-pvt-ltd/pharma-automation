@@ -324,4 +324,47 @@ public class StockController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PutMapping("/update/{invId}")
+    public ResponseEntity<?> updateStock(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID invId,
+            @RequestParam Long pharmacyId,
+            @RequestBody StockDto updatedStock
+    ) {
+
+        Optional<User> userOptional =
+                userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED,
+                    null
+            );
+        }
+
+        try {
+            StockDto updated =
+                    stockService.updateStock(
+                            pharmacyId,
+                            invId,
+                            updatedStock,
+                            userOptional.get()
+                    );
+
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Stock updated successfully",
+                    HttpStatus.OK,
+                    updated
+            );
+
+        } catch (Exception e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST,
+                    null
+            );
+        }
+    }
 }

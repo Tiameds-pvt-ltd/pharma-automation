@@ -1,5 +1,6 @@
 package com.pharma.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -36,5 +37,6 @@ public class StockDto {
     private Long modifiedBy;
     private LocalDate modifiedDate;
 
+    @JsonProperty("stockItemDtos")
     private List<StockItemDto> stockItemDtos = new ArrayList<>();
 }

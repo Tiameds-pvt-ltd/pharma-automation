@@ -140,4 +140,47 @@ public class BillReturnController {
     }
 
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
+    @PutMapping("/update/{billReturnId}")
+    public ResponseEntity<?> updateBillReturn(
+            @RequestHeader("Authorization") String token,
+            @PathVariable UUID billReturnId,
+            @RequestParam Long pharmacyId,
+            @RequestBody BillReturnDto updatedReturn
+    ) {
+
+        Optional<User> userOptional =
+                userAuthService.authenticateUser(token);
+
+        if (userOptional.isEmpty()) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Invalid token",
+                    HttpStatus.UNAUTHORIZED,
+                    null
+            );
+        }
+
+        try {
+            BillReturnDto updated =
+                    billReturnService.updateBillReturn(
+                            pharmacyId,
+                            billReturnId,
+                            updatedReturn,
+                            userOptional.get()
+                    );
+
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    "Bill return updated successfully",
+                    HttpStatus.OK,
+                    updated
+            );
+
+        } catch (Exception e) {
+            return ApiResponseHelper.successResponseWithDataAndMessage(
+                    e.getMessage(),
+                    HttpStatus.BAD_REQUEST,
+                    null
+            );
+        }
+    }
 }

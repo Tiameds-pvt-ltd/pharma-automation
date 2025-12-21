@@ -31,6 +31,8 @@ public interface InventoryRepository extends JpaRepository <InventoryEntity, UUI
 """)
     List<Object[]> getExpiredStockByPharmacy(@Param("pharmacyId") Long pharmacyId);
 
+    Optional<InventoryEntity> findByItemIdAndPharmacyId(UUID itemId, Long pharmacyId);
+
 
     List<InventoryEntity> findAllByCreatedBy(Long createdBy);
 

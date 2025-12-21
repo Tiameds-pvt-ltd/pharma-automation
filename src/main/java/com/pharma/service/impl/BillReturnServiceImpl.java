@@ -1,8 +1,10 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.BillReturnDto;
+import com.pharma.dto.BillReturnItemDto;
 import com.pharma.dto.BillReturnListDto;
 import com.pharma.entity.*;
+import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.mapper.BillReturnMapper;
 import com.pharma.repository.BillReturnRepository;
 import com.pharma.repository.InventoryDetailsRepository;
@@ -15,9 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -72,7 +72,6 @@ public class BillReturnServiceImpl implements BillReturnService {
                 item.setCreatedDate(LocalDate.now());
                 item.setBillReturnEntity(billReturnEntity);
 
-                // 🔼 ADD BACK to InventoryEntity (total stock)
                 Optional<InventoryEntity> inventoryOpt = inventoryRepository.findByItemId(item.getItemId());
                 if (inventoryOpt.isPresent()) {
                     InventoryEntity inventory = inventoryOpt.get();
@@ -219,6 +218,133 @@ public class BillReturnServiceImpl implements BillReturnService {
                 : String.valueOf(nextSequence);
 
         return "BILLRTN-" + yearPart + "-" + sequencePart;
+    }
+
+    @Override
+    @Transactional
+    public BillReturnDto updateBillReturn(Long pharmacyId, UUID billReturnId, BillReturnDto updatedReturn, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies()
+                .stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to selected pharmacy");
+        }
+
+        BillReturnEntity existingReturn =
+                billReturnRepository
+                        .findByBillReturnIdAndPharmacyId(billReturnId, pharmacyId)
+                        .orElseThrow(() ->
+                                new ResourceNotFoundException("Bill return not found")
+                        );
+
+        existingReturn.setReturnReason(updatedReturn.getReturnReason());
+        existingReturn.setModifiedBy(user.getId());
+        existingReturn.setModifiedDate(LocalDate.now());
+
+        Map<UUID, BillReturnItemEntity> existingItemMap =
+                existingReturn.getBillReturnItemEntities()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                BillReturnItemEntity::getBillReturnItemId,
+                                i -> i
+                        ));
+
+        for (BillReturnItemDto itemDto : updatedReturn.getBillReturnItemDtos()) {
+
+            if (itemDto.getBillReturnItemId() == null) {
+                throw new RuntimeException("BillReturnItemId is mandatory");
+            }
+
+            BillReturnItemEntity itemEntity =
+                    existingItemMap.get(itemDto.getBillReturnItemId());
+
+            if (itemEntity == null) {
+                throw new RuntimeException("Bill return item not found");
+            }
+
+            if (!Objects.equals(itemEntity.getItemId(), itemDto.getItemId())) {
+                throw new RuntimeException("Item change not allowed");
+            }
+
+            if (!Objects.equals(itemEntity.getBatchNo(), itemDto.getBatchNo())) {
+                throw new RuntimeException("Batch change not allowed");
+            }
+
+            Long oldQty = itemEntity.getReturnQuantity();
+            Long newQty = itemDto.getReturnQuantity();
+            Long delta = newQty - oldQty;
+
+            if (delta == 0) {
+                continue;
+            }
+
+            // ===============================
+            // 🔄 UPDATE RETURN ITEM
+            // ===============================
+            itemEntity.setReturnQuantity(newQty);
+            itemEntity.setModifiedBy(user.getId());
+            itemEntity.setModifiedDate(LocalDate.now());
+
+            // ===============================
+            // 📦 INVENTORY (ITEM LEVEL)
+            // ===============================
+            InventoryEntity inventory =
+                    inventoryRepository
+                            .findByItemIdAndPharmacyId(
+                                    itemEntity.getItemId(),
+                                    pharmacyId
+                            )
+                            .orElseThrow(() ->
+                                    new RuntimeException("Inventory not found")
+                            );
+
+            Long newInventoryQty = inventory.getPackageQuantity() + delta;
+
+            if (newInventoryQty < 0) {
+                throw new RuntimeException("Inventory cannot be negative");
+            }
+
+            inventory.setPackageQuantity(newInventoryQty);
+            inventory.setModifiedBy(user.getId());
+            inventory.setModifiedDate(LocalDate.now());
+
+            inventoryRepository.save(inventory);
+
+            // ===============================
+            // 🧾 INVENTORY DETAILS (BATCH)
+            // ===============================
+            InventoryDetailsEntity details =
+                    inventoryDetailsRepository
+                            .findByItemIdAndBatchNoAndPharmacyId(
+                                    itemEntity.getItemId(),
+                                    itemEntity.getBatchNo(),
+                                    pharmacyId
+                            )
+                            .orElseThrow(() ->
+                                    new RuntimeException("Inventory batch not found")
+                            );
+
+            Long newBatchQty = details.getPackageQuantity() + delta;
+
+            if (newBatchQty < 0) {
+                throw new RuntimeException("Batch quantity cannot be negative");
+            }
+
+            details.setPackageQuantity(newBatchQty);
+            details.setModifiedBy(user.getId());
+            details.setModifiedDate(LocalDate.now());
+
+            inventoryDetailsRepository.save(details);
+        }
+
+        BillReturnEntity saved =
+                billReturnRepository.save(existingReturn);
+
+        return billReturnMapper.toDto(saved);
     }
 
 }

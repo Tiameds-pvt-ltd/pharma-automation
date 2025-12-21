@@ -20,16 +20,6 @@ public interface StockService {
 
     void deleteStock(Long pharmacyId, UUID invId, User user);
 
-//    void confirmPayment(Long createdById, UUID invId);
-
-//    List<StockItemDto> getStockByItemId(Long createdById,UUID itemId)
-
-//    boolean isBillNoExists(UUID supplierId, int year, String purchaseBillNo);
-
-//    List<StockSummaryDto> getStocksByPaymentStatusAndSupplierAndCreatedBy(String paymentStatus, UUID supplierId, Long createdBy);
-
-//    StockItemDto updateStockItem(Long modifiedById, UUID invId, UUID itemId, String batchNo, StockItemDto updatedItem);
-
     List<StockItemDto> getStockByItemId(Long pharmacyId, UUID itemId, User user);
 
     List<StockItemDto> getItemsBySupplierId(Long pharmacyId, UUID supplierId, User user);
@@ -50,5 +40,8 @@ public interface StockService {
 
     void confirmPayment(Long pharmacyId, UUID invId, User user);
 
+    StockDto updateStock(Long pharmacyId, UUID invId, StockDto updatedStock, User user);
+
 
 }
+

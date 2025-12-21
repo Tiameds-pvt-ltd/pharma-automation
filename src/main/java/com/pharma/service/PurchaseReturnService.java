@@ -19,6 +19,7 @@ public interface PurchaseReturnService {
 
     BigDecimal getSumReturnAmountBySupplier(UUID supplierId, Long pharmacyId, User user);
 
-//    BigDecimal getSumReturnAmountBySupplierAndCreatedBy(UUID supplierId, Long createdBy);
+    PurchaseReturnDto updatePurchaseReturn(Long pharmacyId, UUID returnId, PurchaseReturnDto updatedReturn, User user);
+
 
 }
