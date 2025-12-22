@@ -6,7 +6,6 @@ import com.pharma.dto.auth.LoginRequest;
 import com.pharma.dto.auth.LoginResponse;
 import com.pharma.dto.auth.RegisterRequest;
 import com.pharma.dto.auth.ModuleDTO;
-import com.pharma.entity.ModuleEntity;
 import com.pharma.entity.Role;
 import com.pharma.entity.User;
 import com.pharma.repository.auth.ModuleRepository;

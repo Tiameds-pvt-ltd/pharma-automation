@@ -1,7 +1,6 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.ItemDto;
-import com.pharma.entity.DoctorEntity;
 import com.pharma.entity.ItemEntity;
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;

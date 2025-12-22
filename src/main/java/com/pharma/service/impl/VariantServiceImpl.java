@@ -4,7 +4,6 @@ import com.pharma.dto.VariantDto;
 import com.pharma.entity.UnitEntity;
 import com.pharma.entity.User;
 import com.pharma.entity.VariantEntity;
-import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.mapper.VariantMapper;
 import com.pharma.repository.VariantRepository;
 import com.pharma.repository.auth.UserRepository;
