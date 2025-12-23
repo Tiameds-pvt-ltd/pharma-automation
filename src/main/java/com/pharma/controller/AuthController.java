@@ -83,25 +83,29 @@ public class AuthController {
                 userDetails.getUsername()
         );
 // For Prod
-//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-//                .httpOnly(true)
-//                .secure(true)
-//                .sameSite("Strict")
-//                .path("/auth")
-//                .maxAge(30 * 24 * 60 * 60)
-//                .build();
-
-        // For Dev
         ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(false)      // ✅ localhost fix
-                .sameSite("Lax")    // ✅ Postman/browser friendly
-                .path("/")          // ✅ send cookie to all endpoints
-                .maxAge(30 * 24 * 60 * 60)
+                .secure(true)              // 🔒 HTTPS only
+                .sameSite("None")          // 🔥 REQUIRED for subdomains
+                .domain(".tiameds.ai")     // 🔥 SHARE ACROSS SUBDOMAINS
+                .path("/")                 // 🔥 available everywhere
+                .maxAge(30L * 24 * 60 * 60)
                 .build();
 
-
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+
+        // For Dev
+//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+//                .httpOnly(true)
+//                .secure(false)      // ✅ localhost fix
+//                .sameSite("Lax")    // ✅ Postman/browser friendly
+//                .path("/")          // ✅ send cookie to all endpoints
+//                .maxAge(30 * 24 * 60 * 60)
+//                .build();
+//
+//
+//        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok(Map.of(
                 "accessToken", accessToken,
@@ -112,12 +116,22 @@ public class AuthController {
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
 
-        String refreshToken = Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equals("refreshToken"))
-                .findFirst()
-                .orElseThrow()
-                .getValue();
+        Cookie[] cookies = request.getCookies();
+        if (cookies == null) {
+            return ResponseEntity.status(401).body("Refresh token missing");
+        }
 
+        String refreshToken = Arrays.stream(cookies)
+                .filter(c -> "refreshToken".equals(c.getName()))
+                .findFirst()
+                .map(Cookie::getValue)
+                .orElse(null);
+
+        if (refreshToken == null) {
+            return ResponseEntity.status(401).body("Refresh token missing");
+        }
+
+        // ✅ DO NOT revoke here
         RefreshTokenEntity tokenEntity =
                 refreshTokenService.validateRefreshToken(refreshToken);
 
@@ -141,6 +155,7 @@ public class AuthController {
     }
 
 
+
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request,
                                     HttpServletResponse response) {
@@ -156,24 +171,29 @@ public class AuthController {
         }
 
         // For Prod
-//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-//                .httpOnly(true)
-//                .secure(true)
-//                .sameSite("Strict")
-//                .path("/auth")
-//                .maxAge(30 * 24 * 60 * 60)
-//                .build();
-
-        // For Dev
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(false)      // ✅ localhost fix
-                .sameSite("Lax")    // ✅ Postman/browser friendly
-                .path("/")          // ✅ send cookie to all endpoints
-                .maxAge(30 * 24 * 60 * 60)
+                .secure(true)
+                .sameSite("None")
+                .domain(".tiameds.ai")
+                .path("/")
+                .maxAge(0)          // 🔥 DELETE COOKIE
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
+
+
+
+        // For Dev
+//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+//                .httpOnly(true)
+//                .secure(false)      // ✅ localhost fix
+//                .sameSite("Lax")    // ✅ Postman/browser friendly
+//                .path("/")          // ✅ send cookie to all endpoints
+//                .maxAge(30 * 24 * 60 * 60)
+//                .build();
+//
+//        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
         return ResponseEntity.ok().build();
     }
