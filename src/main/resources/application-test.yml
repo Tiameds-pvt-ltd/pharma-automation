@@ -27,6 +27,13 @@ spring:
   server:
     port: 8080  # Port on which the application runs
 
+security:
+  otp:
+    expiry-minutes: 5
+    max-attempts: 3
+    resend-cooldown-seconds: 60
+    max-resend-count: 5
+
 springdoc:
   api-docs:
     path: /v3/api-docs

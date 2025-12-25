@@ -20,5 +20,13 @@ public interface TempUserRegistrationRepository extends JpaRepository <TempUserR
     @Query("DELETE FROM TempUserRegistration t WHERE t.expiresAt < :now")
     void deleteExpiredRegistrations(@Param("now") LocalDateTime now);
 
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("""
+    DELETE FROM TempUserRegistration t
+    WHERE t.email = :email
+""")
+    void hardDeleteByEmail(@Param("email") String email);
+
+
 
 }

@@ -1,5 +1,6 @@
 package com.pharma.service.impl;
 
+import com.pharma.config.OtpProperties;
 import com.pharma.dto.VerifyOtpDto;
 import com.pharma.dto.auth.RegisterRequest;
 import com.pharma.entity.TempUserRegistration;
@@ -34,12 +35,8 @@ public class AuthServiceImpl implements AuthService {
     private final ObjectMapper objectMapper;
     private final OtpAttemptService otpAttemptService;
     private final UserService userService;
+    private final OtpProperties otpProperties;
 
-    private static final int OTP_EXPIRY_MIN = 10;
-    private static final int MAX_ATTEMPTS = 5;
-
-    private static final int RESEND_COOLDOWN_SECONDS = 60;
-    private static final int MAX_RESEND_COUNT = 5;
 
     @Transactional
     @Override
@@ -49,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
             throw new RuntimeException("Email already registered");
         }
 
-        tempUserRegistrationRepository.deleteByEmail(registerRequest.getEmail());
+        tempUserRegistrationRepository.hardDeleteByEmail(registerRequest.getEmail());
 
         TempUserRegistration temp = new TempUserRegistration();
         temp.setEmail(registerRequest.getEmail());
@@ -58,8 +55,9 @@ public class AuthServiceImpl implements AuthService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to process registration data", e);
         }
-        temp.setExpiresAt(LocalDateTime.now().plusMinutes(10));
-
+        temp.setExpiresAt(
+                LocalDateTime.now().plusMinutes(otpProperties.getExpiryMinutes())
+        );
         tempUserRegistrationRepository.save(temp);
 
         handleOtpSend(registerRequest.getEmail());
@@ -72,13 +70,18 @@ public class AuthServiceImpl implements AuthService {
                 .ifPresent(existingOtp -> {
 
                     if (existingOtp.getLastSentAt()
-                            .isAfter(LocalDateTime.now().minusSeconds(RESEND_COOLDOWN_SECONDS))) {
+                            .isAfter(LocalDateTime.now()
+                                    .minusSeconds(
+                                            otpProperties.getResendCooldownSeconds()
+                                    ))) {
                         throw new RuntimeException("Please wait before requesting another OTP");
                     }
 
-                    if (existingOtp.getResendCount() >= MAX_RESEND_COUNT) {
+                    if (existingOtp.getResendCount()
+                            >= otpProperties.getMaxResendCount()) {
                         throw new RuntimeException("OTP resend limit exceeded");
                     }
+
                 });
 
         userOtpRepository.deleteByEmail(email);
@@ -88,8 +91,9 @@ public class AuthServiceImpl implements AuthService {
         UserOtpEntity otpEntity = new UserOtpEntity();
         otpEntity.setEmail(email);
         otpEntity.setOtpHash(passwordEncoder.encode(otp));
-        otpEntity.setExpiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MIN));
-        otpEntity.setLastSentAt(LocalDateTime.now());
+        otpEntity.setExpiresAt(
+                LocalDateTime.now().plusMinutes(otpProperties.getExpiryMinutes())
+        );        otpEntity.setLastSentAt(LocalDateTime.now());
         otpEntity.setResendCount(1);
 
         userOtpRepository.save(otpEntity);
@@ -108,7 +112,7 @@ public class AuthServiceImpl implements AuthService {
         if (otpEntity.isVerified()) throw new RuntimeException("OTP already used");
         if (otpEntity.getExpiresAt().isBefore(LocalDateTime.now()))
             throw new RuntimeException("OTP expired");
-        if (otpEntity.getAttemptCount() >= MAX_ATTEMPTS)
+        if (otpEntity.getAttemptCount() >= otpProperties.getMaxAttempts())
             throw new RuntimeException("Max OTP attempts exceeded");
 
         if (!passwordEncoder.matches(dto.getOtp(), otpEntity.getOtpHash())) {
@@ -184,29 +188,31 @@ public class AuthServiceImpl implements AuthService {
             );
         }
 
-        // Cooldown check (60 seconds)
         if (otpEntity.getLastSentAt()
-                .isAfter(LocalDateTime.now().minusSeconds(RESEND_COOLDOWN_SECONDS))) {
+                .isAfter(LocalDateTime.now()
+                        .minusSeconds(
+                                otpProperties.getResendCooldownSeconds()
+                        ))) {
             throw new ResponseStatusException(
                     HttpStatus.TOO_MANY_REQUESTS,
-                    "Please wait 60 seconds before requesting another OTP"
+                    "Please wait before requesting another OTP"
             );
         }
 
-        // Resend limit check
-        if (otpEntity.getResendCount() >= MAX_RESEND_COUNT) {
+        if (otpEntity.getResendCount()
+                >= otpProperties.getMaxResendCount()) {
             throw new ResponseStatusException(
                     HttpStatus.TOO_MANY_REQUESTS,
                     "OTP resend limit exceeded"
             );
         }
 
-        // Generate new OTP
         String newOtp = generateOtp();
 
         otpEntity.setOtpHash(passwordEncoder.encode(newOtp));
-        otpEntity.setExpiresAt(LocalDateTime.now().plusMinutes(OTP_EXPIRY_MIN));
-        otpEntity.setLastSentAt(LocalDateTime.now());
+        otpEntity.setExpiresAt(
+                LocalDateTime.now().plusMinutes(otpProperties.getExpiryMinutes())
+        );        otpEntity.setLastSentAt(LocalDateTime.now());
         otpEntity.setResendCount(otpEntity.getResendCount() + 1);
         otpEntity.setAttemptCount(0);
         otpEntity.setVerified(false);

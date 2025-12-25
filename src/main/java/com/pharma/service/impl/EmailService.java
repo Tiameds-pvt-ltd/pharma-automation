@@ -16,18 +16,12 @@ public class EmailService {
 
         SimpleMailMessage mail = new SimpleMailMessage();
         mail.setTo(to);
-        mail.setSubject("Your OTP for Registration");
+        mail.setSubject("Your One-Time Password (OTP) for Pharmacy Management System");
         mail.setText(
-                "Dear User,\n\n" +
-                        "Thank you for registering with our Pharmacy Management System.\n\n" +
-                        "To complete your account verification, please use the One-Time Password (OTP) below:\n\n" +
-                        "OTP: " + otp + "\n\n" +
-                        "This OTP is valid for 10 minutes and can be used only once.\n\n" +
-                        "If you did not initiate this request, please ignore this email. No changes will be made to your account.\n\n" +
-                        "For your security, please do not share this OTP with anyone.\n\n" +
-                        "Regards,\n" +
-                        "Pharmacy Support Team\n" +
-                        "TiaMeds"
+                "Your OTP: " + otp + "\n\n" +
+                        "This OTP is valid for 5 minutes and can be used only once.\n\n" +
+                        "If you did not request this, please ignore this email.\n\n" +
+                        "— TiaMeds Team"
         );
 
         mailSender.send(mail);

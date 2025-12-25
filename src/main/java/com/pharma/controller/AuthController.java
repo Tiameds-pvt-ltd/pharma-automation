@@ -9,6 +9,7 @@ import com.pharma.entity.User;
 import com.pharma.repository.auth.UserRepository;
 import com.pharma.security.CustomUserDetails;
 import com.pharma.service.AuthService;
+import com.pharma.service.auth.LoginOtpService;
 import com.pharma.service.impl.RefreshTokenService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -36,7 +37,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
-
+    private final LoginOtpService loginOtpService;
 
 
     @PostMapping("/register")
@@ -57,61 +58,81 @@ public class AuthController {
         return ResponseEntity.ok("OTP resent successfully");
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request,
-                                   HttpServletResponse response) {
+//    @PostMapping("/login")
+//    public ResponseEntity<?> login(@RequestBody LoginRequest request,
+//                                   HttpServletResponse response) {
+//
+//        Authentication auth = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(
+//                        request.getUsername(),
+//                        request.getPassword()
+//                )
+//        );
+//
+//        CustomUserDetails userDetails =
+//                (CustomUserDetails) auth.getPrincipal();
+//
+//        String accessToken = jwtUtil.generateAccessToken(
+//                userDetails.getUsername(),
+//                Map.of("roles", userDetails.getAuthorities().stream()
+//                        .map(a -> a.getAuthority())
+//                        .toList())
+//        );
+//
+//        String refreshToken = refreshTokenService.createRefreshToken(
+//                userDetails.getUserId(),
+//                userDetails.getUsername()
+//        );
+//// For Prod
+//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+//                .httpOnly(true)
+//                .secure(true)              // 🔒 HTTPS only
+//                .sameSite("None")          // 🔥 REQUIRED for subdomains
+//                .domain(".tiameds.ai")     // 🔥 SHARE ACROSS SUBDOMAINS
+//                .path("/")                 // 🔥 available everywhere
+//                .maxAge(30L * 24 * 60 * 60)
+//                .build();
+//
+//        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//
+//
+//        // For Dev
+////        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+////                .httpOnly(true)
+////                .secure(false)      // ✅ localhost fix
+////                .sameSite("Lax")    // ✅ Postman/browser friendly
+////                .path("/")          // ✅ send cookie to all endpoints
+////                .maxAge(30 * 24 * 60 * 60)
+////                .build();
+////
+////
+////        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//
+//        return ResponseEntity.ok(Map.of(
+//                "accessToken", accessToken,
+//                "expiresIn", 900
+//        ));
+//    }
 
-        Authentication auth = authenticationManager.authenticate(
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getUsername(),
                         request.getPassword()
                 )
         );
 
-        CustomUserDetails userDetails =
-                (CustomUserDetails) auth.getPrincipal();
-
-        String accessToken = jwtUtil.generateAccessToken(
-                userDetails.getUsername(),
-                Map.of("roles", userDetails.getAuthorities().stream()
-                        .map(a -> a.getAuthority())
-                        .toList())
-        );
-
-        String refreshToken = refreshTokenService.createRefreshToken(
-                userDetails.getUserId(),
-                userDetails.getUsername()
-        );
-// For Prod
-        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-                .httpOnly(true)
-                .secure(true)              // 🔒 HTTPS only
-                .sameSite("None")          // 🔥 REQUIRED for subdomains
-                .domain(".tiameds.ai")     // 🔥 SHARE ACROSS SUBDOMAINS
-                .path("/")                 // 🔥 available everywhere
-                .maxAge(30L * 24 * 60 * 60)
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-
-        // For Dev
-//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-//                .httpOnly(true)
-//                .secure(false)      // ✅ localhost fix
-//                .sameSite("Lax")    // ✅ Postman/browser friendly
-//                .path("/")          // ✅ send cookie to all endpoints
-//                .maxAge(30 * 24 * 60 * 60)
-//                .build();
-//
-//
-//        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+        // 🔐 STEP-UP: send OTP only
+        loginOtpService.sendOtpAfterPasswordAuth(request.getUsername());
 
         return ResponseEntity.ok(Map.of(
-                "accessToken", accessToken,
-                "expiresIn", 900
+                "otpRequired", true,
+                "message", "OTP sent to registered email"
         ));
     }
+
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request) {
@@ -131,7 +152,6 @@ public class AuthController {
             return ResponseEntity.status(401).body("Refresh token missing");
         }
 
-        // ✅ DO NOT revoke here
         RefreshTokenEntity tokenEntity =
                 refreshTokenService.validateRefreshToken(refreshToken);
 
@@ -212,5 +232,11 @@ public class AuthController {
         ));
     }
 
+
+    @PostMapping("/login/resend-otp")
+    public ResponseEntity<?> resendLoginOtp(@Valid @RequestBody LoginRequest request) {
+        loginOtpService.sendOtpAfterPasswordAuth(request.getUsername());
+        return ResponseEntity.ok("OTP resent successfully");
+    }
 
 }

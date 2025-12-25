@@ -62,18 +62,38 @@ spring:
         default_batch_fetch_size: 10
     show-sql: false
 
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: shreeraksha@tiameds.ai
-    password: bcwkaeqrtwmfwjkt
+    mail:
+      host: ${SPRING_MAIL_HOST}
+      port: ${SPRING_MAIL_PORT}
+      username: ${SPRING_MAIL_USERNAME}
+      password: ${SPRING_MAIL_PASSWORD}
 
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
+      properties:
+        mail:
+          smtp:
+            auth: ${SPRING_MAIL_SMTP_AUTH:true}
+            starttls:
+              enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:true}
+
+security:
+  otp:
+    expiry-minutes: 5
+    max-attempts: 3
+    resend-cooldown-seconds: 60
+    max-resend-count: 5
+#
+#  mail:
+#    host: smtp.gmail.com
+#    port: 587
+#    username: shreeraksha@tiameds.ai
+#    password: bcwkaeqrtwmfwjkt
+#
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
 
 
 springdoc:
