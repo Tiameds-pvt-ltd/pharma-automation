@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender mailSender;
-//common for both register and login
+
     @Async
     public void sendOtp(String to, String otp) {
 
