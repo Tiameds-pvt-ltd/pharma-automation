@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 public class EmailService {
     private final JavaMailSender mailSender;
 
+
+
     @Async
     public void sendOtp(String to, String otp) {
 
