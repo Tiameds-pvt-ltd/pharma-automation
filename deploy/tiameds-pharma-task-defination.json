@@ -39,6 +39,30 @@
         {
           "name": "JWT_SECRET",
           "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:JWT_SECRET::"
+        },
+        {
+          "name": "SPRING_MAIL_HOST",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:SPRING_MAIL_HOST::"
+        },
+        {
+          "name": "SPRING_MAIL_PORT",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:SPRING_MAIL_PORT::"
+        },
+        {
+          "name": "SPRING_MAIL_USERNAME",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:SPRING_MAIL_USERNAME::"
+        },
+        {
+          "name": "SPRING_MAIL_PASSWORD",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:SPRING_MAIL_PASSWORD::"
+        },
+        {
+          "name": "SPRING_MAIL_SMTP_AUTH",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:SPRING_MAIL_SMTP_AUTH::"
+        },
+        {
+          "name": "SPRING_MAIL_SMTP_STARTTLS_ENABLE",
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedlabsecret-SM3XcQ:SPRING_MAIL_SMTP_STARTTLS_ENABLE::"
         }
       ],
       "ulimits": [],
