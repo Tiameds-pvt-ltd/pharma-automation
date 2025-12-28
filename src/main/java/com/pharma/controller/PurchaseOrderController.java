@@ -2,6 +2,7 @@ package com.pharma.controller;
 
 import com.pharma.dto.PurchaseOrderDto;
 import com.pharma.entity.User;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.PurchaseOrderService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,15 +30,18 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> savePurchaseOrder(
-            @RequestHeader("Authorization") String token,
-            @RequestBody PurchaseOrderDto purchaseOrderDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestBody PurchaseOrderDto purchaseOrderDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        PurchaseOrderDto savedOrder = purchaseOrderService.savePurchaseOrder(purchaseOrderDto, currentUserOptional.get());
+
+        PurchaseOrderDto savedOrder = purchaseOrderService.savePurchaseOrder(purchaseOrderDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Purchase order created successfully", HttpStatus.OK, savedOrder);
     }
 
@@ -44,16 +49,18 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllPurchaseOrders(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        List<PurchaseOrderDto> purchaseOrders = purchaseOrderService.getAllPurchaseOrders(pharmacyId, currentUserOptional.get());
+        List<PurchaseOrderDto> purchaseOrders = purchaseOrderService.getAllPurchaseOrders(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase orders retrieved successfully", HttpStatus.OK, purchaseOrders);
@@ -63,17 +70,19 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{orderId}")
     public ResponseEntity<?> getPurchaseOrderById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("orderId") UUID orderId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        PurchaseOrderDto purchaseOrderDto = purchaseOrderService.getPurchaseOrderById(pharmacyId, orderId, currentUserOptional.get());
+        PurchaseOrderDto purchaseOrderDto = purchaseOrderService.getPurchaseOrderById(pharmacyId, orderId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase order retrieved successfully",
                 HttpStatus.OK,
@@ -85,18 +94,20 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{orderId}")
     public ResponseEntity<?> deletePurchaseOrderById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("orderId") UUID orderId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        Long createdById = currentUserOptional.get().getId();
+        Long createdById = currentUser.getUser().getId();
         try {
-            purchaseOrderService.deletePurchaseOrderById(pharmacyId, orderId,currentUserOptional.get());
+            purchaseOrderService.deletePurchaseOrderById(pharmacyId, orderId,currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Purchase order deleted successfully",
                     HttpStatus.OK,
@@ -114,20 +125,16 @@ public class PurchaseOrderController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{orderId}")
     public ResponseEntity<?> updatePurchaseOrder(
-            @RequestHeader("Authorization") String token,
             @PathVariable UUID orderId,
             @RequestParam Long pharmacyId,
-            @RequestBody PurchaseOrderDto updatedPurchaseOrder
-    ) {
+            @RequestBody PurchaseOrderDto updatedPurchaseOrder,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        Optional<User> currentUserOptional =
-                userAuthService.authenticateUser(token);
-
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token",
-                    HttpStatus.UNAUTHORIZED,
-                    null
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
             );
         }
 
@@ -137,7 +144,7 @@ public class PurchaseOrderController {
                             pharmacyId,
                             orderId,
                             updatedPurchaseOrder,
-                            currentUserOptional.get()
+                            currentUser.getUser()
                     );
 
             return ApiResponseHelper.successResponseWithDataAndMessage(

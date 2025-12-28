@@ -3,6 +3,7 @@ package com.pharma.controller;
 import com.pharma.dto.PurchaseOrderDto;
 import com.pharma.dto.SupplierPaymentDto;
 import com.pharma.entity.User;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.SupplierPaymentService;
 import com.pharma.service.impl.SupplierPaymentServiceImpl;
 import com.pharma.utils.ApiResponseHelper;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -39,30 +41,35 @@ public class SupplierPaymentController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<?> saveSupplierPayment(
-            @RequestHeader("Authorization") String token,
-            @RequestBody SupplierPaymentDto SupplierPaymentDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestBody SupplierPaymentDto SupplierPaymentDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        SupplierPaymentDto savedSupplierPayment = supplierPaymentService.saveSupplierPayment(SupplierPaymentDto, currentUserOptional.get());
+        SupplierPaymentDto savedSupplierPayment = supplierPaymentService.saveSupplierPayment(SupplierPaymentDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Supplier Payment created successfully", HttpStatus.OK, savedSupplierPayment);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllSupplierPayment(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        List<SupplierPaymentDto> supplierPaymentDtos = supplierPaymentService.getAllSupplierPayment(pharmacyId, currentUserOptional.get());
+        List<SupplierPaymentDto> supplierPaymentDtos = supplierPaymentService.getAllSupplierPayment(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Supplier Payment retrieved successfully", HttpStatus.OK, supplierPaymentDtos);
@@ -71,17 +78,18 @@ public class SupplierPaymentController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/getById/{paymentId}")
     public ResponseEntity<?> getPurchaseOrderById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("paymentId") UUID paymentId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
-        }
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        SupplierPaymentDto supplierPaymentDto = supplierPaymentService.getSupplierPaymentById(pharmacyId, paymentId, currentUserOptional.get());
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+        SupplierPaymentDto supplierPaymentDto = supplierPaymentService.getSupplierPaymentById(pharmacyId, paymentId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Supplier Payment retrieved successfully",
                 HttpStatus.OK,

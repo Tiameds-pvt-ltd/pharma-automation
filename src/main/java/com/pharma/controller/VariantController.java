@@ -5,6 +5,7 @@ import com.pharma.dto.UnitDto;
 import com.pharma.dto.VariantDto;
 import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.VariantService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,31 +36,34 @@ public class VariantController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createVariant(
-            @RequestHeader("Authorization") String token,
-            @RequestBody VariantDto variantDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestBody VariantDto variantDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        VariantDto createdVariant = variantService.createVariant(variantDto, currentUserOptional.get());
+        VariantDto createdVariant = variantService.createVariant(variantDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Variant created successfully", HttpStatus.OK, createdVariant);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllVariants(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId)
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
     {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        List<VariantDto> variants = variantService.getAllVariants(pharmacyId, currentUserOptional.get());
+        List<VariantDto> variants = variantService.getAllVariants(pharmacyId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Variants retrieved successfully", HttpStatus.OK, variants);
     }
@@ -66,18 +71,19 @@ public class VariantController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{variantId}")
     public ResponseEntity<?> getVariantById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("variantId") UUID variantId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-
-        VariantDto variantDto = variantService.getVariantById(pharmacyId, variantId, currentUserOptional.get());
+        VariantDto variantDto = variantService.getVariantById(pharmacyId, variantId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Variant retrieved successfully",
@@ -89,19 +95,19 @@ public class VariantController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @DeleteMapping("/delete/{variantId}")
     public ResponseEntity<?> deleteVariantById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("variantId") UUID variantId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-
         try {
-            variantService.deleteVariant(pharmacyId, variantId, currentUserOptional.get());
+            variantService.deleteVariant(pharmacyId, variantId, currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Variant deleted successfully",
                     HttpStatus.OK,
@@ -119,19 +125,20 @@ public class VariantController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PutMapping("/update/{variantId}")
     public ResponseEntity<?> updateVariant(
-            @RequestHeader("Authorization") String token,
             @PathVariable("variantId") UUID variantId,
             @RequestParam Long pharmacyId,
-            @RequestBody VariantDto updateVariantDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null
+            @RequestBody VariantDto updateVariantDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
             );
         }
 
-        VariantDto updatedVariant = variantService.updateVariant(pharmacyId, variantId, updateVariantDto, currentUserOptional.get());
+        VariantDto updatedVariant = variantService.updateVariant(pharmacyId, variantId, updateVariantDto, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Variant updated successfully",

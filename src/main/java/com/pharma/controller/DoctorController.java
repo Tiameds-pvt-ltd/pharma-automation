@@ -6,6 +6,7 @@ import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.repository.DoctorRepository;
 import com.pharma.repository.auth.UserRepository;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.DoctorService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -43,32 +45,36 @@ public class DoctorController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createDoctor(
-            @RequestHeader("Authorization") String token,
-            @RequestBody DoctorDto doctorDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestBody DoctorDto doctorDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        DoctorDto savedDoctor = doctorService.createDoctor(doctorDto, currentUserOptional.get());
+        DoctorDto savedDoctor = doctorService.createDoctor(doctorDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Doctor created successfully", HttpStatus.OK, savedDoctor);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllDoctors(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        List<DoctorDto> doctors = doctorService.getAllDoctors(pharmacyId, currentUserOptional.get());
+        List<DoctorDto> doctors = doctorService.getAllDoctors(pharmacyId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Doctors retrieved successfully", HttpStatus.OK, doctors);
     }
 
@@ -76,17 +82,19 @@ public class DoctorController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{doctorId}")
     public ResponseEntity<?> getDoctorById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("doctorId") UUID doctorId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        DoctorDto doctorDto = doctorService.getDoctorById(pharmacyId, doctorId, currentUserOptional.get());
+        DoctorDto doctorDto = doctorService.getDoctorById(pharmacyId, doctorId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Doctor retrieved successfully",
@@ -98,20 +106,20 @@ public class DoctorController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{doctorId}")
     public ResponseEntity<?> updateDoctorById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("doctorId") UUID doctorId,
             @RequestParam Long pharmacyId,
-            @RequestBody DoctorDto doctorDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestBody DoctorDto doctorDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-
         try {
-            DoctorDto updatedDoctor = doctorService.updateDoctor(pharmacyId, doctorId, doctorDto, currentUserOptional.get());
+            DoctorDto updatedDoctor = doctorService.updateDoctor(pharmacyId, doctorId, doctorDto, currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Item updated successfully",
                     HttpStatus.OK,
@@ -129,19 +137,19 @@ public class DoctorController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{doctorId}")
     public ResponseEntity<?> deleteDoctorById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("doctorId") UUID doctorId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-
         try {
-            doctorService.deleteDoctorById(pharmacyId, doctorId, currentUserOptional.get());
+            doctorService.deleteDoctorById(pharmacyId, doctorId, currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Doctor deleted successfully",
                     HttpStatus.OK,
@@ -159,19 +167,20 @@ public class DoctorController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/check-duplicate")
     public ResponseEntity<?> checkDuplicate(
-            @RequestHeader("Authorization") String token,
             @RequestParam Long pharmacyId,
-            @RequestBody DoctorDto request
-    ) {
-        User user = userAuthService.authenticateUser(token)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.UNAUTHORIZED, "Unauthorized"
-                        )
-                );
+            @RequestBody DoctorDto request,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
 
         boolean isMember = userRepository.existsUserInPharmacy(
-                user.getId(),
+                currentUser.getUserId(),
                 pharmacyId
         );
 

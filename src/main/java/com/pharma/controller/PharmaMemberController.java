@@ -5,6 +5,7 @@ import com.pharma.dto.PharmacyListDto;
 import com.pharma.entity.Pharmacy;
 import com.pharma.entity.User;
 import com.pharma.repository.PharmacyRepository;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.impl.UserPharmaService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.PhramacyAccessableFilter;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -31,17 +33,17 @@ public class PharmaMemberController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/get-user-pharma")
     public ResponseEntity<?> getUserPharma(
-            @RequestHeader("Authorization") String token
-    ) {
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
         if (currentUser == null) {
             return ApiResponseHelper.errorResponse(
-                    "User not found or unauthorized",
+                    "Unauthorized",
                     HttpStatus.UNAUTHORIZED
             );
         }
 
-        Set<Pharmacy> pharmacies = pharmacyRepository.findPharmaciesByMemberId(currentUser.getId());
+        Set<Pharmacy> pharmacies = pharmacyRepository.findPharmaciesByMemberId(currentUser.getUserId());
 
         if (pharmacies.isEmpty()) {
             return ApiResponseHelper.successResponseWithDataAndMessage(
@@ -74,18 +76,18 @@ public class PharmaMemberController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/get-user-pharma-by-id")
     public ResponseEntity<?> getUserPharmaById(
-            @RequestHeader("Authorization") String token,
-            @RequestParam("pharmacyId") Long pharmacyId
-    ) {
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+            @RequestParam("pharmacyId") Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
         if (currentUser == null) {
             return ApiResponseHelper.errorResponse(
-                    "User not found or unauthorized",
+                    "Unauthorized",
                     HttpStatus.UNAUTHORIZED
             );
         }
 
-        Pharmacy pharmacy = pharmacyRepository.findPharmacyForUser(pharmacyId, currentUser.getId())
+        Pharmacy pharmacy = pharmacyRepository.findPharmacyForUser(pharmacyId, currentUser.getUserId())
                 .orElse(null);
 
         if (pharmacy == null) {
@@ -128,12 +130,12 @@ public class PharmaMemberController {
     public ResponseEntity<?> addMemberToPharmacy(
             @PathVariable Long pharmacyId,
             @PathVariable Long userId,
-            @RequestHeader("Authorization") String token
-    ) {
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
         if (currentUser == null) {
             return ApiResponseHelper.errorResponse(
-                    "User not found or unauthorized",
+                    "Unauthorized",
                     HttpStatus.UNAUTHORIZED
             );
         }

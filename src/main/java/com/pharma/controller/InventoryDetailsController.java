@@ -2,6 +2,7 @@ package com.pharma.controller;
 
 import com.pharma.dto.*;
 import com.pharma.entity.User;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.InventoryDetailsService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,35 +32,35 @@ public class InventoryDetailsController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllInventory(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        List<InventoryDetailsDto> inventoryDetailsDtos= inventoryDetailsService.getAllInventoryDetails(pharmacyId, currentUserOptional.get());
+        List<InventoryDetailsDto> inventoryDetailsDtos= inventoryDetailsService.getAllInventoryDetails(pharmacyId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory retrieved successfully", HttpStatus.OK, inventoryDetailsDtos);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/currentYearStockWithSupplier")
     public ResponseEntity<?> getCurrentYearStockWithSupplier(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        User user = currentUserOptional.get();
-
         List<ExpiredStockDto> stockList =
-                inventoryDetailsService.getCurrentYearStockWithSupplier(pharmacyId, user);
+                inventoryDetailsService.getCurrentYearStockWithSupplier(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Current year stock with supplier retrieved successfully",
@@ -70,19 +72,18 @@ public class InventoryDetailsController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/nextThreeMonthsStockWithSupplier")
     public ResponseEntity<?> getNextThreeMonthsStockWithSupplier(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        User user = currentUserOptional.get();
-
         List<ExpiredStockView> stockList =
-                inventoryDetailsService.getNextThreeMonthsStockWithSupplier(pharmacyId, user);
+                inventoryDetailsService.getNextThreeMonthsStockWithSupplier(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Next 3 months stock with supplier retrieved successfully",
@@ -94,34 +95,35 @@ public class InventoryDetailsController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PostMapping("/save")
     public ResponseEntity<?> savePurchaseOrder(
-            @RequestHeader("Authorization") String token,
-            @RequestBody InventoryDetailsDto inventoryDetailsDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestBody InventoryDetailsDto inventoryDetailsDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        InventoryDetailsDto savedInventoryDetails = inventoryDetailsService.saveInventoryDetails(inventoryDetailsDto, currentUserOptional.get());
+        InventoryDetailsDto savedInventoryDetails = inventoryDetailsService.saveInventoryDetails(inventoryDetailsDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory Details created successfully", HttpStatus.OK, savedInventoryDetails);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/stockReport")
     public ResponseEntity<?> getInventory(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        User user = currentUserOptional.get();
-
         List<InventoryView> inventoryList =
-                inventoryDetailsService.getInventory(pharmacyId, user);
+                inventoryDetailsService.getInventory(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Inventory retrieved successfully",

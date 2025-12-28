@@ -58,62 +58,6 @@ public class AuthController {
         return ResponseEntity.ok("OTP resent successfully");
     }
 
-//    @PostMapping("/login")
-//    public ResponseEntity<?> login(@RequestBody LoginRequest request,
-//                                   HttpServletResponse response) {
-//
-//        Authentication auth = authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getUsername(),
-//                        request.getPassword()
-//                )
-//        );
-//
-//        CustomUserDetails userDetails =
-//                (CustomUserDetails) auth.getPrincipal();
-//
-//        String accessToken = jwtUtil.generateAccessToken(
-//                userDetails.getUsername(),
-//                Map.of("roles", userDetails.getAuthorities().stream()
-//                        .map(a -> a.getAuthority())
-//                        .toList())
-//        );
-//
-//        String refreshToken = refreshTokenService.createRefreshToken(
-//                userDetails.getUserId(),
-//                userDetails.getUsername()
-//        );
-//// For Prod
-//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-//                .httpOnly(true)
-//                .secure(true)              // 🔒 HTTPS only
-//                .sameSite("None")          // 🔥 REQUIRED for subdomains
-//                .domain(".tiameds.ai")     // 🔥 SHARE ACROSS SUBDOMAINS
-//                .path("/")                 // 🔥 available everywhere
-//                .maxAge(30L * 24 * 60 * 60)
-//                .build();
-//
-//        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-//
-//
-//        // For Dev
-////        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
-////                .httpOnly(true)
-////                .secure(false)      // ✅ localhost fix
-////                .sameSite("Lax")    // ✅ Postman/browser friendly
-////                .path("/")          // ✅ send cookie to all endpoints
-////                .maxAge(30 * 24 * 60 * 60)
-////                .build();
-////
-////
-////        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-//
-//        return ResponseEntity.ok(Map.of(
-//                "accessToken", accessToken,
-//                "expiresIn", 900
-//        ));
-//    }
-
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
@@ -124,7 +68,6 @@ public class AuthController {
                 )
         );
 
-        // 🔐 STEP-UP: send OTP only
         loginOtpService.sendOtpAfterPasswordAuth(request.getUsername());
 
         return ResponseEntity.ok(Map.of(
@@ -133,13 +76,13 @@ public class AuthController {
         ));
     }
 
-
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(HttpServletRequest request) {
+    public ResponseEntity<?> refresh(HttpServletRequest request,
+                                     HttpServletResponse response) {
 
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return ResponseEntity.status(401).body("Refresh token missing");
+            return ResponseEntity.status(401).build();
         }
 
         String refreshToken = Arrays.stream(cookies)
@@ -149,7 +92,7 @@ public class AuthController {
                 .orElse(null);
 
         if (refreshToken == null) {
-            return ResponseEntity.status(401).body("Refresh token missing");
+            return ResponseEntity.status(401).build();
         }
 
         RefreshTokenEntity tokenEntity =
@@ -168,55 +111,87 @@ public class AuthController {
                 )
         );
 
-        return ResponseEntity.ok(Map.of(
-                "accessToken", newAccessToken,
-                "expiresIn", 900
-        ));
+        // DEV CONFIG
+//        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+//                .httpOnly(true)
+//                .secure(false)
+//                .sameSite("Lax")
+//                .path("/")
+//                .maxAge(15 * 60)
+//                .build();
+
+
+        boolean isProd = true; // 🔥 env flag
+
+        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
+                .httpOnly(true)
+                .secure(isProd)
+                .sameSite(isProd ? "None" : "Lax")
+                .domain(isProd ? ".tiameds.ai" : null)
+                .path("/")
+                .maxAge(15 * 60)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+
+        return ResponseEntity.ok().build(); // 🔒 no token body
     }
-
-
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request,
                                     HttpServletResponse response) {
 
-        String refreshToken = Arrays.stream(request.getCookies())
-                .filter(c -> c.getName().equals("refreshToken"))
-                .findFirst()
-                .map(Cookie::getValue)
-                .orElse(null);
-
-        if (refreshToken != null) {
-            refreshTokenService.revokeToken(refreshToken);
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            Arrays.stream(cookies)
+                    .filter(c -> "refreshToken".equals(c.getName()))
+                    .findFirst()
+                    .ifPresent(c -> refreshTokenService.revokeToken(c.getValue()));
         }
 
-        // For Prod
-        ResponseCookie deleteCookie = ResponseCookie.from("refreshToken", "")
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("None")
-                .domain(".tiameds.ai")
-                .path("/")
-                .maxAge(0)          // 🔥 DELETE COOKIE
-                .build();
-
-        response.addHeader(HttpHeaders.SET_COOKIE, deleteCookie.toString());
-
-
-
-        // For Dev
-//        ResponseCookie cookie = ResponseCookie.from("refreshToken", refreshToken)
+        // DEV CONFIG
+//        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
 //                .httpOnly(true)
-//                .secure(false)      // ✅ localhost fix
-//                .sameSite("Lax")    // ✅ Postman/browser friendly
-//                .path("/")          // ✅ send cookie to all endpoints
-//                .maxAge(30 * 24 * 60 * 60)
+//                .secure(false)
+//                .sameSite("Lax")
+//                .path("/")
+//                .maxAge(0)
 //                .build();
 //
-//        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+//        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
+//                .httpOnly(true)
+//                .secure(false)
+//                .sameSite("Lax")
+//                .path("/")
+//                .maxAge(0)
+//                .build();
+
+        boolean isProd = true; // 🔥 env flag
+
+        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
+                .httpOnly(true)
+                .secure(isProd)
+                .sameSite(isProd ? "None" : "Lax")
+                .domain(isProd ? ".tiameds.ai" : null)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
+                .httpOnly(true)
+                .secure(isProd)
+                .sameSite(isProd ? "None" : "Lax")
+                .domain(isProd ? ".tiameds.ai" : null)
+                .path("/auth/refresh")
+                .maxAge(0)
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccess.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
 
         return ResponseEntity.ok().build();
     }
+
 
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {

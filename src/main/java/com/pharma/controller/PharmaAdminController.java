@@ -8,6 +8,7 @@ import com.pharma.entity.Pharmacy;
 import com.pharma.entity.User;
 import com.pharma.repository.PharmacyRepository;
 import com.pharma.repository.auth.UserRepository;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.MemberUserServices;
 import com.pharma.service.auth.UserService;
 import com.pharma.service.impl.UserPharmacyService;
@@ -19,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -63,10 +65,14 @@ public class PharmaAdminController {
     @GetMapping("/get-members/{pharmacyId}")
     public ResponseEntity<?> getPharmacyMembers(
             @PathVariable Long pharmacyId,
-            @RequestHeader("Authorization") String token) {
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
         if (currentUser == null) {
-            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
         Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId).orElse(null);
         if (pharmacy == null) {
@@ -87,12 +93,15 @@ public class PharmaAdminController {
     public ResponseEntity<?> createUserInPharma(
             @RequestBody MemberRegisterDto registerRequest,
             @PathVariable Long pharmacyId,
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
-        if (currentUser == null)
-            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
-
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
         boolean isAccessible = phramacyAccessableFilter.isPharmacyAccessible(pharmacyId);
         if (isAccessible == false) {
             return ApiResponseHelper.errorResponse("Pharmacy is not accessible", HttpStatus.UNAUTHORIZED);
@@ -114,7 +123,7 @@ public class PharmaAdminController {
             return ApiResponseHelper.errorResponse("Email already exists", HttpStatus.CONFLICT);
         }
 
-        memberUserServices.createUserAndAddToPharmacy(registerRequest, pharmacy, currentUser);
+        memberUserServices.createUserAndAddToPharmacy(registerRequest, pharmacy, currentUser.getUser());
 
         return ApiResponseHelper.successResponse("User created and added to pharmacy successfully", HttpStatus.OK);
     }
@@ -126,11 +135,14 @@ public class PharmaAdminController {
             @PathVariable Long pharmacyId,
             @PathVariable Long userId,
             @RequestBody MemberDetailsUpdate registerRequest,
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
         if (currentUser == null) {
-            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
         Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId).orElse(null);
@@ -150,7 +162,7 @@ public class PharmaAdminController {
             return ApiResponseHelper.errorResponse("User not found", HttpStatus.NOT_FOUND);
         }
 
-        memberUserServices.updateUserInPharmacy(registerRequest, userToUpdate, pharmacy, currentUser);
+        memberUserServices.updateUserInPharmacy(registerRequest, userToUpdate, pharmacy, currentUser.getUser());
 
         return ApiResponseHelper.successResponse("User updated successfully", HttpStatus.OK);
 
@@ -163,10 +175,14 @@ public class PharmaAdminController {
             @PathVariable Long pharmacyId,
             @PathVariable Long userId,
             @RequestBody Map<String, String> passwordRequest, // Change to accept JSON object
-            @RequestHeader("Authorization") String token) {
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
         if (currentUser == null) {
-            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
         Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId).orElse(null);
@@ -214,13 +230,15 @@ public class PharmaAdminController {
     public ResponseEntity<?> getMemberByUserIdAndPharmacy(
             @RequestParam("userId") Long userId,
             @RequestParam("pharmacyId") Long pharmacyId,
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        User currentUser = userAuthService.authenticateUser(token).orElse(null);
         if (currentUser == null) {
-            return ApiResponseHelper.errorResponse("User not found or unauthorized", HttpStatus.UNAUTHORIZED);
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
         Pharmacy pharmacy = pharmacyRepository.findById(pharmacyId).orElse(null);
         if (pharmacy == null) {
             return ApiResponseHelper.errorResponse("Pharmacy not found", HttpStatus.NOT_FOUND);

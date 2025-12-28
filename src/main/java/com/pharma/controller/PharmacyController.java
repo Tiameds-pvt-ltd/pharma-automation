@@ -2,7 +2,7 @@ package com.pharma.controller;
 
 import com.pharma.dto.PharmacyDto;
 
-import com.pharma.entity.User;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.PharmacyService;
 import com.pharma.service.impl.UserPharmaService;
 import com.pharma.utils.ApiResponseHelper;
@@ -11,10 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/pharma/pharmacy")
@@ -32,19 +32,16 @@ public class PharmacyController {
     @PreAuthorize("hasAnyRole('SUPERADMIN')")
     @PostMapping("/save")
     public ResponseEntity<?> savePharmacy(
-            @RequestHeader("Authorization") String token,
-            @RequestBody PharmacyDto pharmacyDto) {
+            @RequestBody PharmacyDto pharmacyDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-
-        if (currentUserOptional.isEmpty()) {
+        if (currentUser == null) {
             return ApiResponseHelper.errorResponse(
-                    "Invalid token",
+                    "Unauthorized",
                     HttpStatus.UNAUTHORIZED
             );
         }
-
-        User user = currentUserOptional.get();
 
         if (userPharmaService.existsPharmaByName(pharmacyDto.getName())) {
             return ApiResponseHelper.errorResponse(
@@ -53,7 +50,7 @@ public class PharmacyController {
             );
         }
 
-        PharmacyDto savedPharmacy = pharmacyService.savePharmacy(pharmacyDto, user);
+        PharmacyDto savedPharmacy = pharmacyService.savePharmacy(pharmacyDto, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Pharmacy saved successfully",
@@ -62,23 +59,21 @@ public class PharmacyController {
         );
     }
 
+
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAllPharmacies")
     public ResponseEntity<?> getPharmaciesCreatedByUser(
-            @RequestHeader("Authorization") String token) {
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-
-        if (currentUserOptional.isEmpty()) {
+        if (currentUser == null) {
             return ApiResponseHelper.errorResponse(
-                    "Invalid token",
+                    "Unauthorized",
                     HttpStatus.UNAUTHORIZED
             );
         }
 
-        User currentUser = currentUserOptional.get();
-
-        List<PharmacyDto> pharmacies = pharmacyService.getPharmaciesCreatedByUser(currentUser);
+        List<PharmacyDto> pharmacies = pharmacyService.getPharmaciesCreatedByUser(currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Pharmacies fetched successfully",

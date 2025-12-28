@@ -4,6 +4,7 @@ import com.pharma.dto.ExpiredStockDto;
 import com.pharma.dto.InventoryDto;
 import com.pharma.dto.StockItemDto;
 import com.pharma.entity.User;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.InventoryService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,35 +34,37 @@ public class InventoryController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllInventory(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        List<InventoryDto> inventoryDtos = inventoryService.getAllInventory(pharmacyId, currentUserOptional.get());
+        List<InventoryDto> inventoryDtos = inventoryService.getAllInventory(pharmacyId, currentUser.getUser()
+        );
         return ApiResponseHelper.successResponseWithDataAndMessage("Inventory retrieved successfully", HttpStatus.OK, inventoryDtos);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/expiredStock")
     public ResponseEntity<?> getExpiredStock(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        User user = currentUserOptional.get();
-
         List<StockItemDto> expiredStock =
-                inventoryService.getExpiredStock(pharmacyId, user);
+                inventoryService.getExpiredStock(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Expired stock retrieved successfully",
@@ -72,19 +76,19 @@ public class InventoryController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/expiredStockWithSupplier")
     public ResponseEntity<?> getExpiredStockWithSupplier(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.errorResponse("Invalid token", HttpStatus.UNAUTHORIZED);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        User user = currentUserOptional.get();
-
         List<ExpiredStockDto> expiredStock =
-                inventoryService.getExpiredStockWithSupplier(pharmacyId, user);
+                inventoryService.getExpiredStockWithSupplier(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Expired stock with supplier retrieved successfully",

@@ -3,6 +3,7 @@ package com.pharma.controller;
 import com.pharma.dto.PurchaseOrderDto;
 import com.pharma.dto.PurchaseReturnDto;
 import com.pharma.entity.User;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.PurchaseReturnService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -30,31 +32,36 @@ public class PurchaseReturnController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> savePurchaseReturn(
-            @RequestHeader("Authorization") String token,
-            @RequestBody PurchaseReturnDto purchaseReturnDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestBody PurchaseReturnDto purchaseReturnDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-        PurchaseReturnDto savedReturn = purchaseReturnService.savePurchaseReturn(purchaseReturnDto, currentUserOptional.get());
+
+        PurchaseReturnDto savedReturn = purchaseReturnService.savePurchaseReturn(purchaseReturnDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Purchase return created successfully", HttpStatus.OK, savedReturn);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllPurchaseReturn(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-         List<PurchaseReturnDto> purchaseReturns = purchaseReturnService.getAllPurchaseReturn(pharmacyId, currentUserOptional.get());
+         List<PurchaseReturnDto> purchaseReturns = purchaseReturnService.getAllPurchaseReturn(pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase return retrieved successfully", HttpStatus.OK, purchaseReturns);
@@ -64,17 +71,19 @@ public class PurchaseReturnController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{returnId}")
     public ResponseEntity<?> getPurchaseReturnById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("returnId") UUID returnId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        PurchaseReturnDto purchaseReturnDto = purchaseReturnService.getPurchaseReturnById(pharmacyId, returnId, currentUserOptional.get());
+        PurchaseReturnDto purchaseReturnDto = purchaseReturnService.getPurchaseReturnById(pharmacyId, returnId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Purchase return retrieved successfully",
                 HttpStatus.OK,
@@ -85,18 +94,20 @@ public class PurchaseReturnController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{returnId}")
     public ResponseEntity<?> deletePurchaseReturnById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("returnId") UUID returnId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
          try {
-            purchaseReturnService.deletePurchaseReturnById(pharmacyId, returnId, currentUserOptional.get());
+            purchaseReturnService.deletePurchaseReturnById(pharmacyId, returnId, currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Purchase return deleted successfully",
                     HttpStatus.OK,
@@ -114,20 +125,19 @@ public class PurchaseReturnController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @GetMapping("/creditNote/{supplierId}")
     public ResponseEntity<?> getSumReturnAmountBySupplier(
-            @RequestHeader("Authorization") String token,
             @PathVariable UUID supplierId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
-
-        User user = currentUserOptional.get();
-
         BigDecimal sumReturnAmount =
-                purchaseReturnService.getSumReturnAmountBySupplier(supplierId, pharmacyId, user);
+                purchaseReturnService.getSumReturnAmountBySupplier(supplierId, pharmacyId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Sum of return amount retrieved successfully",
@@ -139,20 +149,16 @@ public class PurchaseReturnController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{returnId}")
     public ResponseEntity<?> updatePurchaseReturn(
-            @RequestHeader("Authorization") String token,
             @PathVariable UUID returnId,
             @RequestParam Long pharmacyId,
-            @RequestBody PurchaseReturnDto updatedReturn
-    ) {
+            @RequestBody PurchaseReturnDto updatedReturn,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        Optional<User> userOptional =
-                userAuthService.authenticateUser(token);
-
-        if (userOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token",
-                    HttpStatus.UNAUTHORIZED,
-                    null
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
             );
         }
 
@@ -162,7 +168,7 @@ public class PurchaseReturnController {
                             pharmacyId,
                             returnId,
                             updatedReturn,
-                            userOptional.get()
+                            currentUser.getUser()
                     );
 
             return ApiResponseHelper.successResponseWithDataAndMessage(

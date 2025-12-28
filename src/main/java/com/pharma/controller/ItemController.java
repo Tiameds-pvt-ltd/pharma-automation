@@ -8,6 +8,7 @@ import com.pharma.entity.User;
 import com.pharma.exception.ResourceNotFoundException;
 import com.pharma.repository.ItemRepository;
 import com.pharma.repository.auth.UserRepository;
+import com.pharma.security.CustomUserDetails;
 import com.pharma.service.ItemService;
 import com.pharma.utils.ApiResponseHelper;
 import com.pharma.utils.UserAuthService;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -45,32 +47,36 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/save")
     public ResponseEntity<?> createItem(
-            @RequestHeader("Authorization") String token,
-            @RequestBody ItemDto itemDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestBody ItemDto itemDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        ItemDto savedItem = itemService.createItem(itemDto, currentUserOptional.get());
+        ItemDto savedItem = itemService.createItem(itemDto, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Item created successfully", HttpStatus.OK, savedItem);
     }
 
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getAll")
     public ResponseEntity<?> getAllItems(
-            @RequestHeader("Authorization") String token,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
 
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage("Invalid token", HttpStatus.UNAUTHORIZED, null);
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        List<ItemDto> items = itemService.getAllItem(pharmacyId, currentUserOptional.get());
+        List<ItemDto> items = itemService.getAllItem(pharmacyId, currentUser.getUser());
         return ApiResponseHelper.successResponseWithDataAndMessage("Items retrieved successfully", HttpStatus.OK, items);
     }
 
@@ -78,17 +84,19 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @GetMapping("/getById/{itemId}")
     public ResponseEntity<?> getItemById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("itemId") UUID itemId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        ItemDto itemDto = itemService.getItemById(pharmacyId, itemId, currentUserOptional.get());
+        ItemDto itemDto = itemService.getItemById(pharmacyId, itemId, currentUser.getUser());
 
         return ApiResponseHelper.successResponseWithDataAndMessage(
                 "Item retrieved successfully",
@@ -100,21 +108,23 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @PutMapping("/update/{itemId}")
     public ResponseEntity<?> updateDoctorById(
-            @RequestHeader("Authorization") String token,
             @PathVariable("itemId") UUID itemId,
             @RequestParam Long pharmacyId,
-            @RequestBody ItemDto itemDto
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestBody ItemDto itemDto,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
-        Long modifiedById = currentUserOptional.get().getId();
+        Long modifiedById = currentUser.getUser().getId();
 
         try {
-            ItemDto updatedItem = itemService.updateItem(pharmacyId, itemId, itemDto, currentUserOptional.get());
+            ItemDto updatedItem = itemService.updateItem(pharmacyId, itemId, itemDto, currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Item updated successfully",
                     HttpStatus.OK,
@@ -134,18 +144,20 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN')")
     @DeleteMapping("/delete/{itemId}")
     public ResponseEntity<?> deleteItem(
-            @RequestHeader("Authorization") String token,
             @PathVariable("itemId") UUID itemId,
-            @RequestParam Long pharmacyId
-    ) {
-        Optional<User> currentUserOptional = userAuthService.authenticateUser(token);
-        if (currentUserOptional.isEmpty()) {
-            return ApiResponseHelper.successResponseWithDataAndMessage(
-                    "Invalid token", HttpStatus.UNAUTHORIZED, null);
+            @RequestParam Long pharmacyId,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
         }
 
         try {
-            itemService.deleteItem(pharmacyId, itemId, currentUserOptional.get());
+            itemService.deleteItem(pharmacyId, itemId, currentUser.getUser());
             return ApiResponseHelper.successResponseWithDataAndMessage(
                     "Item deleted successfully",
                     HttpStatus.OK,
@@ -163,19 +175,20 @@ public class ItemController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     @PostMapping("/check-duplicate")
     public ResponseEntity<?> checkDuplicateItem(
-            @RequestHeader("Authorization") String token,
             @RequestParam Long pharmacyId,
-            @RequestBody ItemDto request
-    ) {
-        User user = userAuthService.authenticateUser(token)
-                .orElseThrow(() ->
-                        new ResponseStatusException(
-                                HttpStatus.UNAUTHORIZED, "Unauthorized"
-                        )
-                );
+            @RequestBody ItemDto request,
+            @AuthenticationPrincipal CustomUserDetails currentUser)
+    {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
 
         boolean isMember = userRepository.existsUserInPharmacy(
-                user.getId(),
+                currentUser.getUserId(),
                 pharmacyId
         );
 
