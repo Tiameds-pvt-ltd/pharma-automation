@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -38,6 +39,10 @@ public class AuthController {
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
     private final LoginOtpService loginOtpService;
+
+    @Value("${app.env}")
+    private String appEnv;
+
 
 
     @PostMapping("/register")
@@ -101,6 +106,9 @@ public class AuthController {
         User user = userRepository.findById(tokenEntity.getUserId())
                 .orElseThrow();
 
+        boolean isProd = "prod".equalsIgnoreCase(appEnv);
+
+        // 🔐 New access token
         String newAccessToken = jwtUtil.generateAccessToken(
                 user.getUsername(),
                 Map.of(
@@ -111,17 +119,9 @@ public class AuthController {
                 )
         );
 
-        // DEV CONFIG
-//        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-//                .httpOnly(true)
-//                .secure(false)
-//                .sameSite("Lax")
-//                .path("/")
-//                .maxAge(15 * 60)
-//                .build();
-
-
-        boolean isProd = true; // 🔥 env flag
+        // 🔁 Rotate refresh token (THIS WAS MISSING)
+        String newRefreshToken =
+                refreshTokenService.rotateRefreshToken(tokenEntity);
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
                 .httpOnly(true)
@@ -132,10 +132,22 @@ public class AuthController {
                 .maxAge(15 * 60)
                 .build();
 
-        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
+                .httpOnly(true)
+                .secure(isProd)
+                .sameSite(isProd ? "None" : "Lax")
+                .domain(isProd ? ".tiameds.ai" : null)
+                .path("/")                     // ✅ IMPORTANT
+                .maxAge(7 * 24 * 60 * 60)
+                .build();
 
-        return ResponseEntity.ok().build(); // 🔒 no token body
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
+
+        return ResponseEntity.ok().build();
     }
+
+
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request,
@@ -166,7 +178,7 @@ public class AuthController {
 //                .maxAge(0)
 //                .build();
 
-        boolean isProd = true; // 🔥 env flag
+        boolean isProd = "prod".equalsIgnoreCase(appEnv);
 
         ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
@@ -182,7 +194,7 @@ public class AuthController {
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
                 .domain(isProd ? ".tiameds.ai" : null)
-                .path("/auth/refresh")
+                .path("/")
                 .maxAge(0)
                 .build();
 

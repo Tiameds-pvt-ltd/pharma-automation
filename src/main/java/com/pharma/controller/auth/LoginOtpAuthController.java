@@ -4,6 +4,7 @@ import com.pharma.dto.auth.VerifyLoginOtpRequest;
 import com.pharma.service.auth.LoginOtpService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class LoginOtpAuthController {
     private final LoginOtpService loginOtpService;
+
+    @Value("${app.env}")
+    private String appEnv;
+
 
     @PostMapping("/verify")
     public ResponseEntity<?> verify(
@@ -49,7 +54,7 @@ public class LoginOtpAuthController {
 //                .build();
 
 
-        boolean isProd = true; // 🔥 replace with env flag later
+        boolean isProd = "prod".equalsIgnoreCase(appEnv);
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
@@ -65,7 +70,7 @@ public class LoginOtpAuthController {
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
                 .domain(isProd ? ".tiameds.ai" : null)
-                .path("/auth/refresh")
+                .path("/")
                 .maxAge(24 * 60 * 60)
                 .build();
 
