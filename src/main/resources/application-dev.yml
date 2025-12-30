@@ -3,7 +3,7 @@ app:
 
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/pharmacy  # Database URL
+    url: jdbc:postgresql://localhost:5432/pharmacy
     username: postgres
     password: root
     driver-class-name: org.postgresql.Driver
@@ -18,10 +18,12 @@ spring:
         default_batch_fetch_size: 10  # Batch size for collection loading
 
   mail:
-    host: ${SPRING_MAIL_HOST}
-    port: ${SPRING_MAIL_PORT}
-    username: ${SPRING_MAIL_USERNAME}
-    password: ${SPRING_MAIL_PASSWORD}
+    # Mail configuration with defaults for local development
+    # Override with environment variables if needed
+    host: ${SPRING_MAIL_HOST:smtp.gmail.com}
+    port: ${SPRING_MAIL_PORT:587}
+    username: ${SPRING_MAIL_USERNAME:itadmin@tiameds.ai}
+    password: ${SPRING_MAIL_PASSWORD:fpkpxeiacxuqncjm}
 
     properties:
       mail:
@@ -37,15 +39,6 @@ security:
     max-attempts: 3
     resend-cooldown-seconds: 60
     max-resend-count: 5
-
-  server:
-    port: 8080  # Port on which the application runs
-
-  servlet:
-    multipart:
-      max-file-size: 10MB  # Maximum size for a single file
-      max-request-size: 10MB  # Maximum total request size, should be >= max-file-size
-
   jwt:
     # RSA Keys for RS256 algorithm (Development)
     # Option 1: Load from classpath (for local development)
@@ -67,6 +60,7 @@ logging:
   level:
     org.springframework: INFO  # General logging level
     org.springframework.security: DEBUG  # Detailed logging for Spring Security (optional)
+    com.pharma: DEBUG  # Enable debug logging for pharma package
     com:
       fasterxml:
         jackson: DEBUG  # Enable detailed logging for Jackson

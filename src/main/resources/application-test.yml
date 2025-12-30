@@ -21,6 +21,7 @@ spring:
       max-request-size: 10MB  # Maximum total request size, should be >= max-file-size
     context-path: /api/v1  # Combined the `context-path` here
 
+security:
   jwt:
     # RSA Keys for RS256 algorithm (Test Environment)
     # Use environment variables for test environment
@@ -31,16 +32,14 @@ spring:
     # public-key-path: ${JWT_PUBLIC_KEY_PATH:}
     # Legacy secret (ignored if RSA keys are provided)
     secret: "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V"
-
-  server:
-    port: 8080  # Port on which the application runs
-
-security:
   otp:
     expiry-minutes: 5
     max-attempts: 3
     resend-cooldown-seconds: 60
     max-resend-count: 5
+
+  server:
+  port: 8080  # Port on which the application runs
 
 springdoc:
   api-docs:

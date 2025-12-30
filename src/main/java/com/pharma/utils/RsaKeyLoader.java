@@ -29,31 +29,38 @@ public class RsaKeyLoader {
     /**
      * Loads RSA private key from various sources:
      * 1. Environment variable (JWT_PRIVATE_KEY)
-     * 2. Configuration property (spring.jwt.private-key)
-     * 3. File path (spring.jwt.private-key-path)
+     * 2. Configuration property (security.jwt.private-key)
+     * 3. File path (security.jwt.private-key-path)
      */
     public RSAPrivateKey loadPrivateKey() {
         try {
             // Priority 1: Environment variable
             String privateKeyContent = System.getenv("JWT_PRIVATE_KEY");
+            log.info("Loading RSA private key - Environment variable JWT_PRIVATE_KEY: {}", privateKeyContent != null ? "set" : "not set");
             
             // Priority 2: Configuration property
             if (privateKeyContent == null || privateKeyContent.isEmpty()) {
                 privateKeyContent = jwtProperties.getPrivateKey();
+                log.info("Configuration property security.jwt.private-key: {}", privateKeyContent != null ? "set" : "not set");
             }
 
             // Priority 3: File path (classpath or filesystem)
             if (privateKeyContent == null || privateKeyContent.isEmpty()) {
                 String keyPath = jwtProperties.getPrivateKeyPath();
+                log.info("Configuration property security.jwt.private-key-path: {}", keyPath);
                 if (keyPath != null && !keyPath.isEmpty()) {
+                    log.info("Attempting to load key from path: {}", keyPath);
                     privateKeyContent = loadKeyFromPath(keyPath);
+                    log.info("Key loaded from path: {}", privateKeyContent != null ? "success" : "failed");
+                } else {
+                    log.warn("privateKeyPath is null or empty!");
                 }
             }
 
             if (privateKeyContent == null || privateKeyContent.isEmpty()) {
                 throw new IllegalStateException(
                     "RSA Private Key not found. Provide JWT_PRIVATE_KEY environment variable, " +
-                    "spring.jwt.private-key property, or spring.jwt.private-key-path property."
+                    "security.jwt.private-key property, or security.jwt.private-key-path property."
                 );
             }
 
@@ -67,8 +74,8 @@ public class RsaKeyLoader {
     /**
      * Loads RSA public key from various sources:
      * 1. Environment variable (JWT_PUBLIC_KEY)
-     * 2. Configuration property (spring.jwt.public-key)
-     * 3. File path (spring.jwt.public-key-path)
+     * 2. Configuration property (security.jwt.public-key)
+     * 3. File path (security.jwt.public-key-path)
      */
     public RSAPublicKey loadPublicKey() {
         try {
@@ -91,7 +98,7 @@ public class RsaKeyLoader {
             if (publicKeyContent == null || publicKeyContent.isEmpty()) {
                 throw new IllegalStateException(
                     "RSA Public Key not found. Provide JWT_PUBLIC_KEY environment variable, " +
-                    "spring.jwt.public-key property, or spring.jwt.public-key-path property."
+                    "security.jwt.public-key property, or security.jwt.public-key-path property."
                 );
             }
 

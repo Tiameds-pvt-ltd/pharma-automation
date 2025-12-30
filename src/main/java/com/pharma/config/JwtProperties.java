@@ -1,14 +1,17 @@
 package com.pharma.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 
+@Slf4j
 @Getter
 @Setter
 @Configuration
-@ConfigurationProperties(prefix = "spring.jwt")
+@ConfigurationProperties(prefix = "security.jwt")
 public class JwtProperties {
 
     /**
@@ -46,5 +49,13 @@ public class JwtProperties {
      * Will be ignored if privateKey/publicKey are provided
      */
     private String secret;
+
+    @PostConstruct
+    public void logProperties() {
+        log.info("JwtProperties loaded - privateKeyPath: {}, publicKeyPath: {}, privateKey: {}, publicKey: {}", 
+            privateKeyPath, publicKeyPath, 
+            privateKey != null ? "set" : "null", 
+            publicKey != null ? "set" : "null");
+    }
 }
 

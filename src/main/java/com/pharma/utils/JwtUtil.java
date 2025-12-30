@@ -41,13 +41,13 @@ public class JwtUtil {
      */
     public String generateAccessToken(String username, Map<String, Object> claims) {
         try {
-            return Jwts.builder()
-                    .setClaims(claims)
-                    .setSubject(username)
-                    .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRY))
                     .signWith(privateKey, SignatureAlgorithm.RS256)
-                    .compact();
+                .compact();
         } catch (Exception e) {
             log.error("Failed to generate access token for user: {}", username, e);
             throw new RuntimeException("Token generation failed", e);
@@ -59,12 +59,12 @@ public class JwtUtil {
      */
     public String generateRefreshToken(String username) {
         try {
-            return Jwts.builder()
-                    .setSubject(username)
-                    .setIssuedAt(new Date())
-                    .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRY))
                     .signWith(privateKey, SignatureAlgorithm.RS256)
-                    .compact();
+                .compact();
         } catch (Exception e) {
             log.error("Failed to generate refresh token for user: {}", username, e);
             throw new RuntimeException("Token generation failed", e);
@@ -90,12 +90,12 @@ public class JwtUtil {
      */
     public <T> T extractClaim(String token, Function<Claims, T> resolver) {
         try {
-            Claims claims = Jwts.parserBuilder()
+        Claims claims = Jwts.parserBuilder()
                     .setSigningKey(publicKey)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody();
-            return resolver.apply(claims);
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+        return resolver.apply(claims);
         } catch (ExpiredJwtException e) {
             log.warn("Token expired: {}", e.getMessage());
             throw e;
@@ -110,7 +110,7 @@ public class JwtUtil {
      */
     public boolean isTokenExpired(String token) {
         try {
-            return extractExpiration(token).before(new Date());
+        return extractExpiration(token).before(new Date());
         } catch (Exception e) {
             log.error("Failed to check token expiration", e);
             return true; // Treat as expired if we can't parse
