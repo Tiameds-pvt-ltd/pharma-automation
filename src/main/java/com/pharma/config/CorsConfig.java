@@ -15,7 +15,6 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // ✅ Use patterns (supports wildcards)
         configuration.setAllowedOriginPatterns(List.of(
                 "http://localhost:3000",
                 "https://*.vercel.app",
@@ -34,7 +33,6 @@ public class CorsConfig {
                 "X-Requested-With"
         ));
 
-        // 🔥 REQUIRED for refresh token cookies
         configuration.setAllowCredentials(true);
 
         configuration.setMaxAge(3600L);

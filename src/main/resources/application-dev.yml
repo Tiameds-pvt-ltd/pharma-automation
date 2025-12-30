@@ -1,6 +1,9 @@
 app:
   env: dev
 
+frontend:
+  reset-password-url: http://localhost:3000/resetPassword
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/pharmacy  # Database URL

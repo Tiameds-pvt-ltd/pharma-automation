@@ -108,7 +108,6 @@ public class AuthController {
 
         boolean isProd = "prod".equalsIgnoreCase(appEnv);
 
-        // 🔐 New access token
         String newAccessToken = jwtUtil.generateAccessToken(
                 user.getUsername(),
                 Map.of(
@@ -119,7 +118,6 @@ public class AuthController {
                 )
         );
 
-        // 🔁 Rotate refresh token (THIS WAS MISSING)
         String newRefreshToken =
                 refreshTokenService.rotateRefreshToken(tokenEntity);
 

@@ -15,7 +15,6 @@ public class OtpCleanupScheduler {
 
     private final UserOtpRepository userOtpRepository;
     private final TempUserRegistrationRepository tempRepo;
-
     private static final int MAX_ATTEMPTS = 5;
 
     @Transactional
