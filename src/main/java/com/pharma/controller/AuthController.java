@@ -43,7 +43,8 @@ public class AuthController {
     @Value("${app.env}")
     private String appEnv;
 
-
+    @Value("${app.cookie.domain:}")
+    private String cookieDomain;
 
     @PostMapping("/register")
     public ResponseEntity<?> registerInit(@Valid @RequestBody RegisterRequest registerRequest) {
@@ -125,7 +126,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? ".tiameds.ai" : null)
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(15 * 60)
                 .build();
@@ -134,8 +135,8 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? ".tiameds.ai" : null)
-                .path("/")                     // ✅ IMPORTANT
+                .domain(isProd ? cookieDomain : null)
+                .path("/")
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
 
@@ -182,7 +183,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? ".tiameds.ai" : null)
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
@@ -191,7 +192,7 @@ public class AuthController {
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? ".tiameds.ai" : null)
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();

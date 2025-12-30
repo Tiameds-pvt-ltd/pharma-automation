@@ -15,7 +15,20 @@
         }
       ],
       "essential": true,
-      "environment": [],
+      "environment": [
+        {
+          "name": "APP_ENV",
+          "value": "prod"
+        },
+        {
+          "name": "COOKIE_DOMAIN",
+          "value": ".tiameds.ai"
+        },
+        {
+          "name": "FRONTEND_RESET_PASSWORD_URL",
+          "value": "https://pharma-test.tiameds.ai/resetPassword"
+        }
+      ],
       "environmentFiles": [],
       "mountPoints": [],
       "volumesFrom": [],

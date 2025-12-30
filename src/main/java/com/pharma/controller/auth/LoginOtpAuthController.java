@@ -24,6 +24,8 @@ public class LoginOtpAuthController {
     @Value("${app.env}")
     private String appEnv;
 
+    @Value("${app.cookie.domain:}")
+    private String cookieDomain;
 
     @PostMapping("/verify")
     public ResponseEntity<?> verify(
@@ -60,7 +62,7 @@ public class LoginOtpAuthController {
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? ".tiameds.ai" : null)
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(15 * 60)
                 .build();
@@ -69,7 +71,7 @@ public class LoginOtpAuthController {
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? ".tiameds.ai" : null)
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .build();

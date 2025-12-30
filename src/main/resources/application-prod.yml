@@ -1,5 +1,10 @@
 app:
-  env: prod
+  env: ${APP_ENV}
+  cookie:
+    domain: ${COOKIE_DOMAIN}
+
+frontend:
+  reset-password-url: ${FRONTEND_RESET_PASSWORD_URL}
 
 server:
   servlet:
@@ -47,7 +52,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     open-in-view: false
     properties:
       hibernate:
