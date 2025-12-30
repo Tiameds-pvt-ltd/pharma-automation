@@ -47,6 +47,14 @@ security:
       max-request-size: 10MB  # Maximum total request size, should be >= max-file-size
 
   jwt:
+    # RSA Keys for RS256 algorithm (Development)
+    # Option 1: Load from classpath (for local development)
+    private-key-path: classpath:keys/private_key.pem
+    public-key-path: classpath:keys/public_key.pem
+    # Option 2: Use environment variables (override classpath)
+    # private-key: ${JWT_PRIVATE_KEY:}
+    # public-key: ${JWT_PUBLIC_KEY:}
+    # Legacy secret (ignored if RSA keys are provided)
     secret: "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V"
 
 springdoc:
