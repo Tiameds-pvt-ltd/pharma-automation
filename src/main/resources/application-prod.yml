@@ -86,14 +86,14 @@ security:
     # RSA Keys for RS256 algorithm (Production)
     # Priority: Environment variables > Properties > File paths
     # Private key for signing tokens (keep secure!)
-    private-key: ${JWT_PRIVATE_KEY:}
+    private-key: ${JWT_PRIVATE_KEY}
 #    # Public key for verifying tokens
-    public-key: ${JWT_PUBLIC_KEY:}
+    public-key: ${JWT_PUBLIC_KEY}
     # Alternative: Load from file paths (if keys not in env vars)
     # private-key-path: ${JWT_PRIVATE_KEY_PATH:}
     # public-key-path: ${JWT_PUBLIC_KEY_PATH:}
     # Legacy secret (ignored if RSA keys are provided)
-    secret: ${JWT_SECRET:}
+#    secret: ${JWT_SECRET:}
   otp:
     expiry-minutes: 5
     max-attempts: 3
