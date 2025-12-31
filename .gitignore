@@ -31,3 +31,11 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### JWT RSA Keys - NEVER COMMIT PRIVATE KEYS ###
+#*.pem
+#*.key
+#**/keys/private*
+#**/keys/*private*
+#src/main/resources/keys/private_key.pem
+#src/main/resources/keys/*private*
