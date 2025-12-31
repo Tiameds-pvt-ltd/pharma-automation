@@ -83,7 +83,7 @@
         },
         {
           "name": "JWT_PUBLIC_KEY",
-          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedspharmatest-Ru1QBE:SPRING_MAIL_SMTP_STARTTLS_ENABLE::"
+          "valueFrom": "arn:aws:secretsmanager:ap-south-1:977098986605:secret:tiamedspharmatest-Ru1QBE:JWT_PUBLIC_KEY::"
         }
       ],
       "ulimits": [],
