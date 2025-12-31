@@ -77,6 +77,8 @@ public class BillItemEntity {
     @JoinColumn(name = "billId")
     private BillEntity billEntity;
 
+
+
     @PrePersist
     public void generateUUID() {
         if (billItemId == null) {
