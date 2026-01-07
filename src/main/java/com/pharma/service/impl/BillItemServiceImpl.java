@@ -1,6 +1,7 @@
 package com.pharma.service.impl;
 
 import com.pharma.dto.GstSlabNetPayableDto;
+import com.pharma.dto.ItemProfitByDoctorDto;
 import com.pharma.dto.ItemProfitRowDto;
 import com.pharma.entity.User;
 import com.pharma.repository.BillItemRepository;
@@ -74,6 +75,34 @@ public class BillItemServiceImpl implements BillItemService {
         LocalDateTime endDate   = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
 
         return billItemRepository.findNetGstSlabWise(
+                pharmacyId,
+                startDate,
+                endDate
+        );
+    }
+
+    @Override
+    public List<ItemProfitByDoctorDto> getDoctorWiseItemProfit(UUID doctorId, Long pharmacyId, String monthYear, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        YearMonth yearMonth = YearMonth.parse(
+                monthYear,
+                DateTimeFormatter.ofPattern("MM-yyyy")
+        );
+
+        LocalDateTime startDate = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime endDate   = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+
+        return billItemRepository.findDoctorWiseItemProfit(
+                doctorId,
                 pharmacyId,
                 startDate,
                 endDate

@@ -1,6 +1,7 @@
 package com.pharma.controller;
 
 import com.pharma.dto.GstSlabNetPayableDto;
+import com.pharma.dto.ItemProfitByDoctorDto;
 import com.pharma.dto.ItemProfitRowDto;
 import com.pharma.security.CustomUserDetails;
 import com.pharma.service.BillItemService;
@@ -85,4 +86,34 @@ public class BillItemController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    @GetMapping("/doctorWiseProfit")
+    public ResponseEntity<?> getDoctorWiseItemProfit(
+            @RequestParam UUID doctorId,
+            @RequestParam Long pharmacyId,
+            @RequestParam String monthYear,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        List<ItemProfitByDoctorDto> result =
+                billItemService.getDoctorWiseItemProfit(
+                        doctorId,
+                        pharmacyId,
+                        monthYear,
+                        currentUser.getUser()
+                );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Doctor-wise item profit retrieved successfully",
+                HttpStatus.OK,
+                result
+        );
+    }
 }

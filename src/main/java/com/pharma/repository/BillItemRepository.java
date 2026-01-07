@@ -1,6 +1,7 @@
 package com.pharma.repository;
 
 import com.pharma.dto.GstSlabNetPayableDto;
+import com.pharma.dto.ItemProfitByDoctorDto;
 import com.pharma.dto.ItemProfitRowDto;
 import com.pharma.entity.BillItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -81,4 +82,46 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
         );
 
 
+    @Query(
+            value = """
+        SELECT
+            i.item_name                    AS itemName,
+            SUM(t.quantity_sold)           AS totalQuantitySold,
+            SUM(t.sales_price)             AS totalSalesPrice,
+            SUM(t.cost_price)              AS totalCostPrice,
+            SUM(t.sales_price) - SUM(t.cost_price) AS profit
+        FROM (
+            SELECT
+                bi.item_id,
+                bi.batch_no,
+                SUM(bi.package_quantity) AS quantity_sold,
+                ROUND(SUM(bi.net_total)) AS sales_price,
+                ROUND(
+                    SUM(bi.package_quantity * sp.purchase_price_per_unit)
+                ) AS cost_price
+            FROM pharma_billing_item bi
+            JOIN pharma_billing b
+                ON b.bill_id = bi.bill_id
+            LEFT JOIN pharma_stock_purchase_item sp
+                ON sp.item_id = bi.item_id
+               AND sp.batch_no = bi.batch_no
+            WHERE b.doctor_id   = :doctorId
+              AND b.pharmacy_id = :pharmacyId
+              AND b.bill_date_time >= :startDate
+              AND b.bill_date_time <  :endDate
+            GROUP BY bi.item_id, bi.batch_no
+        ) t
+        JOIN pharma_item i
+            ON i.item_id = t.item_id
+        GROUP BY i.item_id, i.item_name
+        ORDER BY i.item_name
+        """,
+            nativeQuery = true
+    )
+    List<ItemProfitByDoctorDto> findDoctorWiseItemProfit(
+            @Param("doctorId") UUID doctorId,
+            @Param("pharmacyId") Long pharmacyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }

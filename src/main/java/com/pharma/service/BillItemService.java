@@ -1,6 +1,7 @@
 package com.pharma.service;
 
 import com.pharma.dto.GstSlabNetPayableDto;
+import com.pharma.dto.ItemProfitByDoctorDto;
 import com.pharma.dto.ItemProfitRowDto;
 import com.pharma.entity.User;
 
@@ -12,4 +13,6 @@ public interface BillItemService {
     List<ItemProfitRowDto> getItemProfitByMonth(UUID itemId, Long pharmacyId, String monthYear, User user);
 
     List<GstSlabNetPayableDto> getNetGstSlabWise(Long pharmacyId, String monthYear, User user);
+
+    List<ItemProfitByDoctorDto> getDoctorWiseItemProfit(UUID doctorId, Long pharmacyId, String monthYear, User user);
 }

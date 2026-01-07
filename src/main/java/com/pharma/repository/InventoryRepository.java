@@ -15,16 +15,9 @@ public interface InventoryRepository extends JpaRepository <InventoryEntity, UUI
 
     Optional<InventoryEntity> findByItemId(UUID itemId);
 
-//    @Query("SELECT p.itemId, SUM(p.packageQuantity) " +
-//            "FROM StockItemEntity p " +
-//            "JOIN InventoryEntity i ON p.itemId = i.itemId " +
-//            "WHERE p.expiryDate < CURRENT_DATE " +
-//            "GROUP BY p.itemId")
-//    List<Object[]> getExpiredStock(Long createdBy);
-
     @Query("""
     SELECT p.itemId, SUM(p.packageQuantity)
-    FROM StockItemEntity p
+    FROM InventoryDetailsEntity p
     WHERE p.expiryDate < CURRENT_DATE
       AND p.pharmacyId = :pharmacyId
     GROUP BY p.itemId
@@ -36,25 +29,6 @@ public interface InventoryRepository extends JpaRepository <InventoryEntity, UUI
 
     List<InventoryEntity> findAllByCreatedBy(Long createdBy);
 
-//    @Query("""
-//    SELECT new com.pharma.dto.ExpiredStockDto(
-//        i.itemId,
-//        itm.itemName,
-//        i.batchNo,
-//        i.packageQuantity,
-//        i.expiryDate,
-//        s.supplierId,
-//        sup.supplierName
-//    )
-//    FROM InventoryDetailsEntity i
-//    JOIN StockItemEntity e ON i.itemId = e.itemId AND i.batchNo = e.batchNo
-//    JOIN e.stockEntity s
-//    JOIN ItemEntity itm ON i.itemId = itm.itemId
-//    JOIN SupplierEntity sup ON s.supplierId = sup.supplierId
-//    WHERE i.expiryDate <= CURRENT_DATE
-//      AND i.createdBy = :createdById
-//""")
-//    List<ExpiredStockDto> findExpiredStockWithSupplier(@Param("createdById") Long createdById);
 
     @Query("""
     SELECT new com.pharma.dto.ExpiredStockDto(
