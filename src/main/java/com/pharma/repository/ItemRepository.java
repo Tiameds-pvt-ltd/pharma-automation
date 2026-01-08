@@ -23,4 +23,5 @@ public interface ItemRepository extends JpaRepository<ItemEntity, UUID> {
 
     Optional<ItemEntity> findByItemIdAndPharmacyId(UUID itemId, Long pharmacyId);
 
+
 }
