@@ -8,7 +8,12 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "pharma_refresh_token")
+@Table(
+        name = "pharma_refresh_token",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = "userId")
+        }
+)
 @Getter
 @Setter
 public class RefreshTokenEntity {

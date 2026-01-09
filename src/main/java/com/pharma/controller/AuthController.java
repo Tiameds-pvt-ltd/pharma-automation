@@ -74,6 +74,12 @@ public class AuthController {
                 )
         );
 
+        User user = userRepository
+                .findByUsername(request.getUsername())
+                .orElseThrow();
+
+        refreshTokenService.assertUserNotLoggedIn(user.getId());
+
         loginOtpService.sendOtpAfterPasswordAuth(request.getUsername());
 
         return ResponseEntity.ok(Map.of(
@@ -149,8 +155,6 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(HttpServletRequest request,
                                        HttpServletResponse response) {
-
-        // 1️⃣ Revoke refresh token in DB
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             Arrays.stream(cookies)
@@ -184,63 +188,6 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }
-
-
-//    @PostMapping("/logout")
-//    public ResponseEntity<?> logout(HttpServletRequest request,
-//                                    HttpServletResponse response) {
-//
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            Arrays.stream(cookies)
-//                    .filter(c -> "refreshToken".equals(c.getName()))
-//                    .findFirst()
-//                    .ifPresent(c -> refreshTokenService.revokeToken(c.getValue()));
-//        }
-//
-//        // DEV CONFIG
-////        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
-////                .httpOnly(true)
-////                .secure(false)
-////                .sameSite("Lax")
-////                .path("/")
-////                .maxAge(0)
-////                .build();
-////
-////        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
-////                .httpOnly(true)
-////                .secure(false)
-////                .sameSite("Lax")
-////                .path("/")
-////                .maxAge(0)
-////                .build();
-//
-//        boolean isProd = "prod".equalsIgnoreCase(appEnv);
-//
-//        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
-//                .httpOnly(true)
-//                .secure(isProd)
-//                .sameSite(isProd ? "None" : "Lax")
-//                .domain(isProd ? cookieDomain : null)
-//                .path("/")
-//                .maxAge(0)
-//                .build();
-//
-//        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
-//                .httpOnly(true)
-//                .secure(isProd)
-//                .sameSite(isProd ? "None" : "Lax")
-//                .domain(isProd ? cookieDomain : null)
-//                .path("/")
-//                .maxAge(0)
-//                .build();
-//
-//        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccess.toString());
-//        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
-//
-//        return ResponseEntity.ok().build();
-//    }
-
 
     @GetMapping("/me")
     public ResponseEntity<?> me(Authentication authentication) {
