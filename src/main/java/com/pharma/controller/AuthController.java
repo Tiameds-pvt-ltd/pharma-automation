@@ -150,7 +150,7 @@ public class AuthController {
     public ResponseEntity<Void> logout(HttpServletRequest request,
                                        HttpServletResponse response) {
 
-        // 1️⃣ Revoke refresh token in DB (if present)
+        // 1️⃣ Revoke refresh token in DB
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             Arrays.stream(cookies)
@@ -161,20 +161,20 @@ public class AuthController {
 
         boolean isProd = "prod".equalsIgnoreCase(appEnv);
 
-        // 2️⃣ Delete access token cookie
         ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
 
-        // 3️⃣ Delete refresh token cookie
         ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
+                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
