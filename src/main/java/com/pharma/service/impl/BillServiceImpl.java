@@ -83,6 +83,7 @@ public class BillServiceImpl implements BillService {
                 item.setCreatedBy(user.getId());
                 item.setCreatedDate(LocalDate.now());
                 item.setBillEntity(billEntity);
+                item.setPharmacyId(billDto.getPharmacyId());
 
                 Optional<InventoryEntity> inventoryOpt = inventoryRepository.findByItemId(item.getItemId());
                 if (inventoryOpt.isPresent()) {

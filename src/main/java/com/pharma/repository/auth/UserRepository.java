@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,6 +23,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @NotNull
     Optional<User> findById(@NotNull Long id);
+
+    @Query("""
+    SELECT DISTINCT u
+    FROM User u
+    JOIN u.roles r
+    WHERE r.name = 'SUPERADMIN'
+""")
+    List<User> findAllSuperAdmins();
+
 
     @Query("""
         SELECT DISTINCT u

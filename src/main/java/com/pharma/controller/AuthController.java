@@ -146,12 +146,11 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-
-
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletRequest request,
-                                    HttpServletResponse response) {
+    public ResponseEntity<Void> logout(HttpServletRequest request,
+                                       HttpServletResponse response) {
 
+        // 1️⃣ Revoke refresh token in DB (if present)
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             Arrays.stream(cookies)
@@ -160,39 +159,22 @@ public class AuthController {
                     .ifPresent(c -> refreshTokenService.revokeToken(c.getValue()));
         }
 
-        // DEV CONFIG
-//        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
-//                .httpOnly(true)
-//                .secure(false)
-//                .sameSite("Lax")
-//                .path("/")
-//                .maxAge(0)
-//                .build();
-//
-//        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
-//                .httpOnly(true)
-//                .secure(false)
-//                .sameSite("Lax")
-//                .path("/")
-//                .maxAge(0)
-//                .build();
-
         boolean isProd = "prod".equalsIgnoreCase(appEnv);
 
+        // 2️⃣ Delete access token cookie
         ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
 
+        // 3️⃣ Delete refresh token cookie
         ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
                 .secure(isProd)
                 .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
@@ -202,6 +184,62 @@ public class AuthController {
 
         return ResponseEntity.ok().build();
     }
+
+
+//    @PostMapping("/logout")
+//    public ResponseEntity<?> logout(HttpServletRequest request,
+//                                    HttpServletResponse response) {
+//
+//        Cookie[] cookies = request.getCookies();
+//        if (cookies != null) {
+//            Arrays.stream(cookies)
+//                    .filter(c -> "refreshToken".equals(c.getName()))
+//                    .findFirst()
+//                    .ifPresent(c -> refreshTokenService.revokeToken(c.getValue()));
+//        }
+//
+//        // DEV CONFIG
+////        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
+////                .httpOnly(true)
+////                .secure(false)
+////                .sameSite("Lax")
+////                .path("/")
+////                .maxAge(0)
+////                .build();
+////
+////        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
+////                .httpOnly(true)
+////                .secure(false)
+////                .sameSite("Lax")
+////                .path("/")
+////                .maxAge(0)
+////                .build();
+//
+//        boolean isProd = "prod".equalsIgnoreCase(appEnv);
+//
+//        ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
+//                .httpOnly(true)
+//                .secure(isProd)
+//                .sameSite(isProd ? "None" : "Lax")
+//                .domain(isProd ? cookieDomain : null)
+//                .path("/")
+//                .maxAge(0)
+//                .build();
+//
+//        ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
+//                .httpOnly(true)
+//                .secure(isProd)
+//                .sameSite(isProd ? "None" : "Lax")
+//                .domain(isProd ? cookieDomain : null)
+//                .path("/")
+//                .maxAge(0)
+//                .build();
+//
+//        response.addHeader(HttpHeaders.SET_COOKIE, deleteAccess.toString());
+//        response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
+//
+//        return ResponseEntity.ok().build();
+//    }
 
 
     @GetMapping("/me")

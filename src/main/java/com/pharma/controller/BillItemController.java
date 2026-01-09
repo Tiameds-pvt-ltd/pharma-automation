@@ -1,5 +1,6 @@
 package com.pharma.controller;
 
+import com.pharma.dto.DailySalesCostProfitDto;
 import com.pharma.dto.GstSlabNetPayableDto;
 import com.pharma.dto.ItemProfitByDoctorDto;
 import com.pharma.dto.ItemProfitRowDto;
@@ -116,4 +117,35 @@ public class BillItemController {
                 result
         );
     }
+
+
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    @GetMapping("/dailyProfit")
+    public ResponseEntity<?> getDailySalesCostProfit(
+            @RequestParam Long pharmacyId,
+            @RequestParam String monthYear, // MM-yyyy
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        List<DailySalesCostProfitDto> result =
+                billItemService.getDailySalesCostProfit(
+                        pharmacyId,
+                        monthYear,
+                        currentUser.getUser()
+                );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Daily sales, cost and profit retrieved successfully",
+                HttpStatus.OK,
+                result
+        );
+    }
+
 }

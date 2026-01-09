@@ -1,5 +1,6 @@
 package com.pharma.repository;
 
+import com.pharma.dto.DailySalesCostProfitDto;
 import com.pharma.dto.GstSlabNetPayableDto;
 import com.pharma.dto.ItemProfitByDoctorDto;
 import com.pharma.dto.ItemProfitRowDto;
@@ -120,6 +121,60 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
     )
     List<ItemProfitByDoctorDto> findDoctorWiseItemProfit(
             @Param("doctorId") UUID doctorId,
+            @Param("pharmacyId") Long pharmacyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+
+    @Query(
+            value = """
+            SELECT
+                DATE(b.bill_date_time) AS bill_date,
+
+                SUM(bi.package_quantity) AS total_quantity_sold,
+
+                ROUND(SUM(bi.gross_total)::numeric) AS sales_price,
+
+                ROUND(
+                    SUM(
+                        bi.package_quantity
+                        * COALESCE(sp.purchase_price_per_unit, 0)
+                        * (1 + COALESCE(sp.gst_percentage, 0) / 100)
+                    )::numeric
+                ) AS cost_price,
+
+                ROUND(
+                    ROUND(SUM(bi.gross_total)::numeric)
+                    -
+                    ROUND(
+                        SUM(
+                            bi.package_quantity
+                            * COALESCE(sp.purchase_price_per_unit, 0)
+                            * (1 + COALESCE(sp.gst_percentage, 0) / 100)
+                        )::numeric
+                    )
+                ) AS profit
+
+            FROM pharma_billing_item bi
+            JOIN pharma_billing b
+                ON b.bill_id = bi.bill_id
+
+            LEFT JOIN pharma_stock_purchase_item sp
+                ON sp.item_id  = bi.item_id
+               AND sp.batch_no = bi.batch_no
+               AND sp.pharmacy_id = :pharmacyId   
+
+            WHERE b.pharmacy_id = :pharmacyId     
+              AND b.bill_date_time >= :startDate
+              AND b.bill_date_time <  :endDate
+
+            GROUP BY DATE(b.bill_date_time)
+            ORDER BY bill_date
+        """,
+            nativeQuery = true
+    )
+    List<DailySalesCostProfitDto> findDailySalesCostProfitPharmacyWise(
             @Param("pharmacyId") Long pharmacyId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
