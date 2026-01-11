@@ -11,5 +11,7 @@ public interface RefreshTokenRepository
 
     Optional<RefreshTokenEntity> findByTokenAndRevokedFalse(String token);
 
+    Optional<RefreshTokenEntity> findByUserId(Long userId);
+
     void deleteByUserId(Long userId);
 }
