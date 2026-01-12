@@ -16,6 +16,20 @@ public class RefreshTokenService {
     private final RefreshTokenRepository refreshTokenRepo;
     private final JwtUtil jwtUtil;
 
+//    public String createRefreshToken(Long userId, String username) {
+//
+//        String token = jwtUtil.generateRefreshToken(username);
+//
+//        RefreshTokenEntity entity = new RefreshTokenEntity();
+//        entity.setUserId(userId);
+//        entity.setToken(token);
+//        entity.setExpiryDate(LocalDateTime.now().plusDays(30));
+//
+//        refreshTokenRepo.save(entity);
+//
+//        return token;
+//    }
+
     public String createRefreshToken(Long userId, String username) {
 
         String token = jwtUtil.generateRefreshToken(username);
@@ -54,6 +68,29 @@ public class RefreshTokenService {
                 });
     }
 
+//    public String rotateRefreshToken(RefreshTokenEntity oldToken) {
+//
+//        // 1️⃣ Revoke old token
+//        oldToken.setRevoked(true);
+//        refreshTokenRepo.save(oldToken);
+//
+//        // 2️⃣ Create new refresh token
+//        String newToken = jwtUtil.generateRefreshToken(
+//                jwtUtil.extractUsername(oldToken.getToken())
+//        );
+//
+//        RefreshTokenEntity newEntity = new RefreshTokenEntity();
+//        newEntity.setUserId(oldToken.getUserId());
+//        newEntity.setToken(newToken);
+//        newEntity.setExpiryDate(LocalDateTime.now().plusDays(30));
+//        newEntity.setRevoked(false);
+//
+//        // 3️⃣ Save new token
+//        refreshTokenRepo.save(newEntity);
+//
+//        // 4️⃣ Return new token
+//        return newToken;
+//    }
 
     public String rotateRefreshToken(RefreshTokenEntity oldToken) {
 
