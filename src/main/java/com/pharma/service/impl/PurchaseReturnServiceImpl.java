@@ -232,16 +232,7 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
 
     @Override
     @Transactional
-    public PurchaseReturnDto updatePurchaseReturn(
-            Long pharmacyId,
-            UUID returnId,
-            PurchaseReturnDto updatedReturn,
-            User user
-    ) {
-
-        // ===============================
-        // 1️⃣ USER & PHARMACY VALIDATION
-        // ===============================
+    public PurchaseReturnDto updatePurchaseReturn(Long pharmacyId, UUID returnId, PurchaseReturnDto updatedReturn, User user) {
         User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -278,9 +269,6 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
                                 i -> i
                         ));
 
-        // ===============================
-        // 5️⃣ UPDATE RETURN ITEMS + INVENTORY
-        // ===============================
         for (PurchaseReturnItemDto itemDto : updatedReturn.getPurchaseReturnItemDtos()) {
 
             if (itemDto.getReturnItemId() == null) {
@@ -310,9 +298,6 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
                 continue;
             }
 
-            // ===============================
-            // 🔄 UPDATE RETURN ITEM
-            // ===============================
             itemEntity.setReturnQuantity(newQty);
             itemEntity.setReturnType(itemDto.getReturnType());
             itemEntity.setGstPercentage(itemDto.getGstPercentage());
@@ -344,9 +329,6 @@ public class PurchaseReturnServiceImpl implements PurchaseReturnService {
 
             inventoryRepository.save(inventory);
 
-            // ===============================
-            // 🧾 INVENTORY DETAILS (BATCH)
-            // ===============================
             InventoryDetailsEntity details =
                     inventoryDetailsRepository
                             .findByItemIdAndBatchNoAndPharmacyId(

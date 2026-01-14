@@ -37,12 +37,6 @@ public class PurchaseReturnEntity {
     @Column(name = "return_date")
     private LocalDate returnDate;
 
-    @Column(name = "supplier_id")
-    private UUID supplierId;
-
-    @Column(name = "purchase_bill_no")
-    private String purchaseBillNo;
-
     @Column(name = "total_amount")
     private BigDecimal totalAmount;
 

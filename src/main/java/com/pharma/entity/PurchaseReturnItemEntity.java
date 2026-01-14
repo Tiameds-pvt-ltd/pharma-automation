@@ -31,6 +31,12 @@ public class PurchaseReturnItemEntity {
     @Column(name = "batch_no")
     private String batchNo;
 
+    @Column(name = "supplier_id")
+    private UUID supplierId;
+
+    @Column(name = "purchase_bill_no")
+    private String purchaseBillNo;
+
     @Column(name = "return_type")
     private String returnType;
 

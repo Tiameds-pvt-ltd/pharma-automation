@@ -17,6 +17,8 @@ public class PurchaseReturnItemDto {
     private UUID returnItemId;
     private UUID itemId;
     private String batchNo;
+    private UUID supplierId;
+    private String purchaseBillNo;
     private String returnType;
     private Long returnQuantity;
     private Long gstPercentage;

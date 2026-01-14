@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -31,18 +32,45 @@ public interface PurchaseReturnRepository extends JpaRepository<PurchaseReturnEn
             @Param("year") String year
     );
 
-    @Query("SELECT COALESCE(SUM(p.returnAmount), 0) FROM PurchaseReturnEntity p " +
-            "WHERE p.creditNote = FALSE " +
-            "AND p.supplierId = :supplierId " +
-            "AND p.pharmacyId = :pharmacyId")
+    @Query("""
+    SELECT COALESCE(SUM(pr.returnAmount), 0)
+    FROM PurchaseReturnItemEntity pri
+    JOIN pri.purchaseReturnEntity pr
+    WHERE pri.supplierId = :supplierId
+      AND pr.pharmacyId = :pharmacyId
+      AND pr.creditNote = FALSE
+""")
     BigDecimal sumReturnAmountBySupplierIdAndPharmacyId(
             @Param("supplierId") UUID supplierId,
-            @Param("pharmacyId") Long pharmacyId);
+            @Param("pharmacyId") Long pharmacyId
+    );
 
-
+    @Transactional
     @Modifying
-    @Query("UPDATE PurchaseReturnEntity pr SET pr.creditNote = true WHERE pr.supplierId = :supplierId")
+    @Query("""
+    UPDATE PurchaseReturnEntity pr
+    SET pr.creditNote = true
+    WHERE pr.returnId IN (
+        SELECT pri.purchaseReturnEntity.returnId
+        FROM PurchaseReturnItemEntity pri
+        WHERE pri.supplierId = :supplierId
+    )
+""")
     int markCreditNoteTrueForSupplier(@Param("supplierId") UUID supplierId);
+
+
+//    @Query("SELECT COALESCE(SUM(p.returnAmount), 0) FROM PurchaseReturnEntity p " +
+//            "WHERE p.creditNote = FALSE " +
+//            "AND p.supplierId = :supplierId " +
+//            "AND p.pharmacyId = :pharmacyId")
+//    BigDecimal sumReturnAmountBySupplierIdAndPharmacyId(
+//            @Param("supplierId") UUID supplierId,
+//            @Param("pharmacyId") Long pharmacyId);
+//
+//
+//    @Modifying
+//    @Query("UPDATE PurchaseReturnEntity pr SET pr.creditNote = true WHERE pr.supplierId = :supplierId")
+//    int markCreditNoteTrueForSupplier(@Param("supplierId") UUID supplierId);
 
     List<PurchaseReturnEntity> findAllByPharmacyId(Long pharmacyId);
 

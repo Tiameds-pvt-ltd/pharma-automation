@@ -20,8 +20,6 @@ public class PurchaseReturnMapper {
         purchaseReturnDto.setReturnId1(purchaseReturnEntity.getReturnId1());
         purchaseReturnDto.setInvId(purchaseReturnEntity.getInvId());
         purchaseReturnDto.setReturnDate(purchaseReturnEntity.getReturnDate());
-        purchaseReturnDto.setSupplierId(purchaseReturnEntity.getSupplierId());
-        purchaseReturnDto.setPurchaseBillNo(purchaseReturnEntity.getPurchaseBillNo());
         purchaseReturnDto.setTotalAmount(purchaseReturnEntity.getTotalAmount());
         purchaseReturnDto.setTotalGst(purchaseReturnEntity.getTotalGst());
         purchaseReturnDto.setReturnAmount(purchaseReturnEntity.getReturnAmount());
@@ -52,15 +50,11 @@ public class PurchaseReturnMapper {
         purchaseReturnEntity.setReturnId1(purchaseReturnDto.getReturnId1());
         purchaseReturnEntity.setInvId(purchaseReturnDto.getInvId());
         purchaseReturnEntity.setReturnDate(purchaseReturnDto.getReturnDate());
-        purchaseReturnEntity.setSupplierId(purchaseReturnDto.getSupplierId());
-        purchaseReturnEntity.setPurchaseBillNo(purchaseReturnDto.getPurchaseBillNo());
         purchaseReturnEntity.setTotalAmount(purchaseReturnDto.getTotalAmount());
         purchaseReturnEntity.setTotalGst(purchaseReturnDto.getTotalGst());
         purchaseReturnEntity.setReturnAmount(purchaseReturnDto.getReturnAmount());
         purchaseReturnEntity.setPharmacyId(purchaseReturnDto.getPharmacyId());
         purchaseReturnEntity.setRemark(purchaseReturnDto.getRemark());
-
-
         purchaseReturnEntity.setCreatedBy(purchaseReturnDto.getCreatedBy());
         purchaseReturnEntity.setCreatedDate(purchaseReturnDto.getCreatedDate());
         purchaseReturnEntity.setModifiedBy(purchaseReturnDto.getModifiedBy());
@@ -84,13 +78,13 @@ public class PurchaseReturnMapper {
         purchaseReturnItemDto.setReturnItemId(purchaseReturnItemEntity.getReturnItemId());
         purchaseReturnItemDto.setItemId(purchaseReturnItemEntity.getItemId());
         purchaseReturnItemDto.setBatchNo(purchaseReturnItemEntity.getBatchNo());
-
+        purchaseReturnItemDto.setSupplierId(purchaseReturnItemEntity.getSupplierId());
+        purchaseReturnItemDto.setPurchaseBillNo(purchaseReturnItemEntity.getPurchaseBillNo());
         purchaseReturnItemDto.setReturnType(purchaseReturnItemEntity.getReturnType());
         purchaseReturnItemDto.setReturnQuantity(purchaseReturnItemEntity.getReturnQuantity());
         purchaseReturnItemDto.setGstPercentage(purchaseReturnItemEntity.getGstPercentage());
         purchaseReturnItemDto.setDiscrepancyIn(purchaseReturnItemEntity.getDiscrepancyIn());
         purchaseReturnItemDto.setDiscrepancy(purchaseReturnItemEntity.getDiscrepancy());
-
         purchaseReturnItemDto.setCreatedBy(purchaseReturnItemEntity.getCreatedBy());
         purchaseReturnItemDto.setCreatedDate(purchaseReturnItemEntity.getCreatedDate());
         purchaseReturnItemDto.setModifiedBy(purchaseReturnItemEntity.getModifiedBy());
@@ -108,13 +102,13 @@ public class PurchaseReturnMapper {
         purchaseReturnItemEntity.setReturnItemId(purchaseReturnItemDto.getReturnItemId());
         purchaseReturnItemEntity.setItemId(purchaseReturnItemDto.getItemId());
         purchaseReturnItemEntity.setBatchNo(purchaseReturnItemDto.getBatchNo());
-
+        purchaseReturnItemEntity.setSupplierId(purchaseReturnItemDto.getSupplierId());
+        purchaseReturnItemEntity.setPurchaseBillNo(purchaseReturnItemDto.getPurchaseBillNo());
         purchaseReturnItemEntity.setReturnType(purchaseReturnItemDto.getReturnType());
         purchaseReturnItemEntity.setReturnQuantity(purchaseReturnItemDto.getReturnQuantity());
         purchaseReturnItemEntity.setGstPercentage(purchaseReturnItemDto.getGstPercentage());
         purchaseReturnItemEntity.setDiscrepancyIn(purchaseReturnItemDto.getDiscrepancyIn());
         purchaseReturnItemEntity.setDiscrepancy(purchaseReturnItemDto.getDiscrepancy());
-
         purchaseReturnItemEntity.setCreatedBy(purchaseReturnItemDto.getCreatedBy());
         purchaseReturnItemEntity.setCreatedDate(purchaseReturnItemDto.getCreatedDate());
         purchaseReturnItemEntity.setModifiedBy(purchaseReturnItemDto.getModifiedBy());

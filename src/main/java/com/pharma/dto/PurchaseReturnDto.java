@@ -21,8 +21,6 @@ public class PurchaseReturnDto {
     private String returnId1;
     private UUID invId;
     private LocalDate returnDate;
-    private UUID supplierId;
-    private String purchaseBillNo;
     private BigDecimal totalAmount;
     private BigDecimal totalGst;
     private BigDecimal returnAmount;

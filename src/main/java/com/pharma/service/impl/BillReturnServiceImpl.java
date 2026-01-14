@@ -86,7 +86,6 @@ public class BillReturnServiceImpl implements BillReturnService {
                     throw new RuntimeException("Inventory not found for item ID: " + item.getItemId());
                 }
 
-                // 🔼 ADD BACK to InventoryDetailsEntity (batch stock)
                 Optional<InventoryDetailsEntity> detailsOpt = inventoryDetailsRepository
                         .findByItemIdAndBatchNo(item.getItemId(), item.getBatchNo());
 
@@ -282,16 +281,10 @@ public class BillReturnServiceImpl implements BillReturnService {
                 continue;
             }
 
-            // ===============================
-            // 🔄 UPDATE RETURN ITEM
-            // ===============================
             itemEntity.setReturnQuantity(newQty);
             itemEntity.setModifiedBy(user.getId());
             itemEntity.setModifiedDate(LocalDate.now());
 
-            // ===============================
-            // 📦 INVENTORY (ITEM LEVEL)
-            // ===============================
             InventoryEntity inventory =
                     inventoryRepository
                             .findByItemIdAndPharmacyId(
@@ -314,9 +307,6 @@ public class BillReturnServiceImpl implements BillReturnService {
 
             inventoryRepository.save(inventory);
 
-            // ===============================
-            // 🧾 INVENTORY DETAILS (BATCH)
-            // ===============================
             InventoryDetailsEntity details =
                     inventoryDetailsRepository
                             .findByItemIdAndBatchNoAndPharmacyId(
