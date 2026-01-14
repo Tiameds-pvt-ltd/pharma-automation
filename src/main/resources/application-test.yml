@@ -1,60 +1,109 @@
+app:
+  env: ${APP_ENV:test}
+  cookie:
+    domain: ${COOKIE_DOMAIN}
+
+frontend:
+  reset-password-url: ${FRONTEND_RESET_PASSWORD_URL}
+
+server:
+  servlet:
+    context-path: /api/v1
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/xml,text/plain,application/javascript,text/css
+  error:
+    whitelabel:
+      enabled: false
+
+logging:
+  level:
+    org.springframework: INFO
+    org.springframework.security: WARN  # Changed to WARN for production
+    com:
+      fasterxml:
+        jackson: WARN  # Changed to WARN for production
+
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
   datasource:
-    url: jdbc:postgresql://tiamed-test-db.cfsi2w0iou42.ap-south-1.rds.amazonaws.com:5432/tiamedtestdb
-    username: tiamedtestdb
-    password: tiamedtestdb
+    hikari:
+      auto-commit: false
+      data-source-properties:
+        cachePrepStmts: true
+        prepStmtCacheSize: 500
+        prepStmtCacheSqlLimit: 1024
+        useServerPrepStmts: false
+      minimumIdle: 0
+      maxLifetime: 900000
+      maximum-pool-size: 40
+      transaction-isolation: TRANSACTION_READ_COMMITTED
+    url: jdbc:postgresql://${DB_URL}:5432/${DB_NAME}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: create   # 'create' for development; 'update' or 'none' for production
-    show-sql: true  # Optional: Shows SQL queries in logs
+      ddl-auto: update
+    open-in-view: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-        default_batch_fetch_size: 10  # Batch size for collection loading
+        connection:
+          provider_disables_autocommit: true
+        jdbc:
+          batch_size: 15
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        query:
+          fail_on_pagination_over_collection_fetch: true
+          in_clause_parameter_padding: true
+          plan_cache_max_size: 4096
+        default_batch_fetch_size: 10
+    show-sql: false
 
-
-  servlet:
-    multipart:
-      max-file-size: 10MB  # Maximum size for a single file
-      max-request-size: 10MB  # Maximum total request size, should be >= max-file-size
-    context-path: /api/v1  # Combined the `context-path` here
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT}
+    username: ${SPRING_MAIL_USERNAME}
+    password: ${SPRING_MAIL_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: ${SPRING_MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${SPRING_MAIL_SMTP_STARTTLS_ENABLE:true}
 
 security:
   jwt:
-    # RSA Keys for RS256 algorithm (Test Environment)
-    # Use environment variables for test environment
-    private-key: ${JWT_PRIVATE_KEY:}
-    public-key: ${JWT_PUBLIC_KEY:}
-    # Alternative: Load from file paths
+    #    private-key-path: classpath:keys/private_key.pem
+    #    public-key-path: classpath:keys/public_key.pem
+    # RSA Keys for RS256 algorithm (Production)
+    # Priority: Environment variables > Properties > File paths
+    # Private key for signing tokens (keep secure!)
+    private-key: ${JWT_PRIVATE_KEY}
+    #    # Public key for verifying tokens
+    public-key: ${JWT_PUBLIC_KEY}
+    # Alternative: Load from file paths (if keys not in env vars)
     # private-key-path: ${JWT_PRIVATE_KEY_PATH:}
     # public-key-path: ${JWT_PUBLIC_KEY_PATH:}
     # Legacy secret (ignored if RSA keys are provided)
-    secret: "TaK+HaV^uvCHEFsEVfypW#7g9^k*Z8$V"
+  #    secret: ${JWT_SECRET:}
   otp:
     expiry-minutes: 5
     max-attempts: 3
     resend-cooldown-seconds: 60
     max-resend-count: 5
 
-  server:
-  port: 8080  # Port on which the application runs
+
 
 springdoc:
   api-docs:
     path: /v3/api-docs
   swagger-ui:
-    path: /doc  # Swagger UI path
-
-logging:
-  level:
-    org.springframework: INFO  # General logging level
-    org.springframework.security: DEBUG  # Detailed logging for Spring Security (optional)
-    com:
-      fasterxml:
-        jackson: DEBUG  # Enable detailed logging for Jackson
-
-server:
-  servlet:
-    context-path: /api/v1
+    path: /doc  # Consider restricting Swagger UI in production
