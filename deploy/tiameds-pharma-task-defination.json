@@ -21,6 +21,10 @@
           "value": "test"
         },
         {
+          "name": "SPRING_PROFILES_ACTIVE",
+          "value": "test"
+        },
+        {
           "name": "COOKIE_DOMAIN",
           "value": ".tiameds.ai"
         },
