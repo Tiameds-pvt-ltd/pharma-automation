@@ -31,7 +31,8 @@ public class JwtFilter extends OncePerRequestFilter {
             "/auth/login",
             "/auth/loginOtp",        // ✅ covers /auth/loginOtp/**
             "/auth/register",
-            "/auth/refresh"
+            "/auth/refresh",
+            "/public/health-check"   // ALB health check (no auth header)
     );
 
     @Override
