@@ -43,10 +43,10 @@ public class JwtUtil {
             Date now = new Date();
             Date expiry = new Date(now.getTime() + ACCESS_TOKEN_EXPIRY);
 
-            System.out.println("🔐 Generating ACCESS token");
-            System.out.println("👤 User       = " + username);
-            System.out.println("🕒 Issued At = " + now);
-            System.out.println("⏰ Expires At= " + expiry);
+//            System.out.println("🔐 Generating ACCESS token");
+//            System.out.println("👤 User       = " + username);
+//            System.out.println("🕒 Issued At = " + now);
+//            System.out.println("⏰ Expires At= " + expiry);
 
             return Jwts.builder()
                     .setClaims(claims)
@@ -68,10 +68,10 @@ public class JwtUtil {
             Date now = new Date();
             Date expiry = new Date(now.getTime() + REFRESH_TOKEN_EXPIRY);
 
-            System.out.println("🔁 Generating REFRESH token");
-            System.out.println("👤 User       = " + username);
-            System.out.println("🕒 Issued At = " + now);
-            System.out.println("⏰ Expires At= " + expiry);
+//            System.out.println("🔁 Generating REFRESH token");
+//            System.out.println("👤 User       = " + username);
+//            System.out.println("🕒 Issued At = " + now);
+//            System.out.println("⏰ Expires At= " + expiry);
 
             return Jwts.builder()
                     .setSubject(username)
@@ -107,9 +107,9 @@ public class JwtUtil {
             return resolver.apply(claims);
 
         } catch (ExpiredJwtException e) {
-            System.out.println("⏰ JWT EXPIRED while parsing");
-            System.out.println("⏰ Expired At = " + e.getClaims().getExpiration());
-            System.out.println("🕒 Now        = " + new Date());
+//            System.out.println("⏰ JWT EXPIRED while parsing");
+//            System.out.println("⏰ Expired At = " + e.getClaims().getExpiration());
+//            System.out.println("🕒 Now        = " + new Date());
             throw e;
 
         } catch (JwtException e) {
@@ -124,9 +124,9 @@ public class JwtUtil {
             Date exp = extractExpiration(token);
             Date now = new Date();
 
-            System.out.println("🔍 Checking token expiry");
-            System.out.println("⏰ Token Exp = " + exp);
-            System.out.println("🕒 Now       = " + now);
+//            System.out.println("🔍 Checking token expiry");
+//            System.out.println("⏰ Token Exp = " + exp);
+//            System.out.println("🕒 Now       = " + now);
 
             return exp.before(now);
 
@@ -142,10 +142,10 @@ public class JwtUtil {
             boolean usernameMatches = tokenUsername.equals(username);
             boolean notExpired = !isTokenExpired(token);
 
-            System.out.println("🔐 Validating access token");
-            System.out.println("👤 Token user = " + tokenUsername);
-            System.out.println("✔ Username match = " + usernameMatches);
-            System.out.println("✔ Not expired    = " + notExpired);
+//            System.out.println("🔐 Validating access token");
+//            System.out.println("👤 Token user = " + tokenUsername);
+//            System.out.println("✔ Username match = " + usernameMatches);
+//            System.out.println("✔ Not expired    = " + notExpired);
 
             return usernameMatches && notExpired;
 

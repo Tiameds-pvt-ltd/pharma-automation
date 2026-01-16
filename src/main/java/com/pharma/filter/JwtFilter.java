@@ -42,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String path = request.getServletPath();
-        System.out.println("🔍 JwtFilter HIT | Path = " + path);
+//        System.out.println("🔍 JwtFilter HIT | Path = " + path);
 
         if (JWT_SKIP_PREFIXES.stream().anyMatch(path::startsWith)) {
             chain.doFilter(request, response);
@@ -60,7 +60,7 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-        System.out.println("🍪 AccessToken cookie = " + (jwt != null));
+//        System.out.println("🍪 AccessToken cookie = " + (jwt != null));
 
         if (jwt == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -90,10 +90,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-            System.out.println("✅ Authentication SUCCESS for user: " + username);
+//            System.out.println("✅ Authentication SUCCESS for user: " + username);
 
         } catch (Exception e) {
-            System.out.println("⛔ Token invalid or expired → 401");
+//            System.out.println("⛔ Token invalid or expired → 401");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
