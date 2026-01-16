@@ -21,9 +21,6 @@ import java.util.Map;
 public class LoginOtpAuthController {
     private final LoginOtpService loginOtpService;
 
-    @Value("${app.env}")
-    private String appEnv;
-
     @Value("${app.cookie.domain:}")
     private String cookieDomain;
 
@@ -55,23 +52,22 @@ public class LoginOtpAuthController {
 //                .maxAge(24 * 60 * 60)
 //                .build();
 
-
-        boolean isProd = "prod".equalsIgnoreCase(appEnv);
+        boolean isLocal = (cookieDomain == null || cookieDomain.isBlank());
 
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", accessToken)
                 .httpOnly(true)
-                .secure(isProd)
-                .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
+                .secure(!isLocal)
+                .sameSite(!isLocal ? "None" : "Lax")
+                .domain(!isLocal ? cookieDomain : null)
                 .path("/")
                 .maxAge(15 * 60)
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
                 .httpOnly(true)
-                .secure(isProd)
-                .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
+                .secure(!isLocal)
+                .sameSite(!isLocal ? "None" : "Lax")
+                .domain(!isLocal ? cookieDomain : null)
                 .path("/")
                 .maxAge(24 * 60 * 60)
                 .build();

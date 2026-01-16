@@ -17,10 +17,6 @@
       "essential": true,
       "environment": [
         {
-          "name": "APP_ENV",
-          "value": "test"
-        },
-        {
           "name": "SPRING_PROFILES_ACTIVE",
           "value": "test"
         },

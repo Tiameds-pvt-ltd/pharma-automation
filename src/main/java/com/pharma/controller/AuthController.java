@@ -40,9 +40,6 @@ public class AuthController {
     private final UserRepository userRepository;
     private final LoginOtpService loginOtpService;
 
-    @Value("${app.env}")
-    private String appEnv;
-
     @Value("${app.cookie.domain:}")
     private String cookieDomain;
 
@@ -82,69 +79,6 @@ public class AuthController {
         ));
     }
 
-//    @PostMapping("/refresh")
-//    public ResponseEntity<?> refresh(HttpServletRequest request,
-//                                     HttpServletResponse response) {
-//
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies == null) {
-//            return ResponseEntity.status(401).build();
-//        }
-//
-//        String refreshToken = Arrays.stream(cookies)
-//                .filter(c -> "refreshToken".equals(c.getName()))
-//                .findFirst()
-//                .map(Cookie::getValue)
-//                .orElse(null);
-//
-//        if (refreshToken == null) {
-//            return ResponseEntity.status(401).build();
-//        }
-//
-//        RefreshTokenEntity tokenEntity =
-//                refreshTokenService.validateRefreshToken(refreshToken);
-//
-//        User user = userRepository.findById(tokenEntity.getUserId())
-//                .orElseThrow();
-//
-//        boolean isProd = "prod".equalsIgnoreCase(appEnv);
-//
-//        String newAccessToken = jwtUtil.generateAccessToken(
-//                user.getUsername(),
-//                Map.of(
-//                        "roles",
-//                        user.getRoles().stream()
-//                                .map(r -> "ROLE_" + r.getName())
-//                                .toList()
-//                )
-//        );
-//
-//        String newRefreshToken =
-//                refreshTokenService.rotateRefreshToken(tokenEntity);
-//
-//        ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
-//                .httpOnly(true)
-//                .secure(isProd)
-//                .sameSite(isProd ? "None" : "Lax")
-//                .domain(isProd ? cookieDomain : null)
-//                .path("/")
-//                .maxAge(15 * 60)
-//                .build();
-//
-//        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
-//                .httpOnly(true)
-//                .secure(isProd)
-//                .sameSite(isProd ? "None" : "Lax")
-//                .domain(isProd ? cookieDomain : null)
-//                .path("/")
-//                .maxAge(7 * 24 * 60 * 60)
-//                .build();
-//
-//        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
-//        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
-//
-//        return ResponseEntity.ok().build();
-//    }
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request,
@@ -171,13 +105,15 @@ public class AuthController {
         } catch (Exception e) {
 
             // 🔥 FORCE DELETE COOKIE WHEN TOKEN IS INVALID / EXPIRED
+            boolean isLocal = (cookieDomain == null || cookieDomain.isBlank());
+
             ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
                     .httpOnly(true)
-                    .secure("prod".equalsIgnoreCase(appEnv))
-                    .sameSite("prod".equalsIgnoreCase(appEnv) ? "None" : "Lax")
-                    .domain("prod".equalsIgnoreCase(appEnv) ? cookieDomain : null)
                     .path("/")
                     .maxAge(0)
+                    .secure(!isLocal)
+                    .sameSite(isLocal ? "Lax" : "None")
+                    .domain(isLocal ? null : cookieDomain)
                     .build();
 
             response.addHeader(HttpHeaders.SET_COOKIE, deleteRefresh.toString());
@@ -187,7 +123,7 @@ public class AuthController {
         User user = userRepository.findById(tokenEntity.getUserId())
                 .orElseThrow();
 
-        boolean isProd = "prod".equalsIgnoreCase(appEnv);
+
 
         String newAccessToken = jwtUtil.generateAccessToken(
                 user.getUsername(),
@@ -202,20 +138,22 @@ public class AuthController {
         String newRefreshToken =
                 refreshTokenService.rotateRefreshToken(tokenEntity);
 
+        boolean isLocal = (cookieDomain == null || cookieDomain.isBlank());
+
         ResponseCookie accessCookie = ResponseCookie.from("accessToken", newAccessToken)
                 .httpOnly(true)
-                .secure(isProd)
-                .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
+                .secure(!isLocal)
+                .sameSite(!isLocal  ? "None" : "Lax")
+                .domain(!isLocal  ? cookieDomain : null)
                 .path("/")
                 .maxAge(15 * 60)
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", newRefreshToken)
                 .httpOnly(true)
-                .secure(isProd)
-                .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
+                .secure(!isLocal)
+                .sameSite(!isLocal ? "None" : "Lax")
+                .domain(!isLocal ? cookieDomain : null)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
                 .build();
@@ -239,22 +177,22 @@ public class AuthController {
                     .ifPresent(c -> refreshTokenService.revokeToken(c.getValue()));
         }
 
-        boolean isProd = "prod".equalsIgnoreCase(appEnv);
+        boolean isLocal = (cookieDomain == null || cookieDomain.isBlank());
 
         ResponseCookie deleteAccess = ResponseCookie.from("accessToken", "")
                 .httpOnly(true)
-                .secure(isProd)
-                .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
+                .secure(!isLocal)
+                .sameSite(!isLocal ? "None" : "Lax")
+                .domain(!isLocal ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
 
         ResponseCookie deleteRefresh = ResponseCookie.from("refreshToken", "")
                 .httpOnly(true)
-                .secure(isProd)
-                .sameSite(isProd ? "None" : "Lax")
-                .domain(isProd ? cookieDomain : null)
+                .secure(!isLocal)
+                .sameSite(!isLocal ? "None" : "Lax")
+                .domain(!isLocal ? cookieDomain : null)
                 .path("/")
                 .maxAge(0)
                 .build();
