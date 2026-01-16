@@ -1,5 +1,5 @@
 app:
-  env: ${APP_ENV}
+  env: ${APP_ENV:prod}
   cookie:
     domain: ${COOKIE_DOMAIN}
 

@@ -18,7 +18,7 @@
       "environment": [
         {
           "name": "APP_ENV",
-          "value": "prod"
+          "value": "test"
         },
         {
           "name": "COOKIE_DOMAIN",
