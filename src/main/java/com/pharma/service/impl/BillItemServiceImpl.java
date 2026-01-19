@@ -162,7 +162,6 @@ public class BillItemServiceImpl implements BillItemService {
         LocalDateTime startDate;
         LocalDateTime endDate;
 
-        /* ========= MONTH MODE ========= */
         if (monthYear != null && !monthYear.isBlank()) {
 
             YearMonth yearMonth = YearMonth.parse(
@@ -173,7 +172,6 @@ public class BillItemServiceImpl implements BillItemService {
             startDate = yearMonth.atDay(1).atStartOfDay();
             endDate   = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
         }
-        /* ========= DATE RANGE MODE ========= */
         else if (dateRange != null && !dateRange.isBlank()) {
 
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
@@ -186,7 +184,6 @@ public class BillItemServiceImpl implements BillItemService {
             startDate = LocalDate.parse(parts[0], formatter).atStartOfDay();
             endDate   = LocalDate.parse(parts[1], formatter).plusDays(1).atStartOfDay();
         }
-        /* ========= INVALID ========= */
         else {
             throw new IllegalArgumentException("Either monthYear or dateRange must be provided");
         }

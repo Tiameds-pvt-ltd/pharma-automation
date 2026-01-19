@@ -8,14 +8,16 @@ public interface ItemProfitSummaryDto {
     String getHsnNo();
     BigDecimal getGstPercentage();
 
-    Long getTotalPackageQty();
+    Long getQuantity();
 
-    BigDecimal getNetSaleAmount();
-    BigDecimal getGrossSaleAmount();
+    BigDecimal getGrossSalePrice();
+    BigDecimal getSaleGstAmount();
+    BigDecimal getNetSalePrice();
 
-    BigDecimal getNetCostPrice();
     BigDecimal getGrossCostPrice();
+    BigDecimal getCostGstAmount();
+    BigDecimal getNetCostPrice();
 
-    BigDecimal getNetProfit();
     BigDecimal getGrossProfit();
+    BigDecimal getNetProfit();
 }

@@ -179,105 +179,124 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
 
 
     @Query(value = """
+    SELECT
+        item_name        AS itemName,
+        hsn_no           AS hsnNo,
+        MAX(gst_percentage) AS gstPercentage,
+
+        SUM(quantity) AS quantity,
+
+        ROUND(SUM(gross_sale_price), 2) AS grossSalePrice,
+        ROUND(SUM(sale_gst_amount), 2)  AS saleGstAmount,
+        ROUND(SUM(net_sale_price), 2)   AS netSalePrice,
+
+        ROUND(SUM(gross_cost_price), 2) AS grossCostPrice,
+        ROUND(SUM(cost_gst_amount), 2)  AS costGstAmount,
+        ROUND(SUM(net_cost_price), 2)   AS netCostPrice,
+
+        ROUND(SUM(gross_profit), 2)     AS grossProfit,
+        ROUND(SUM(net_profit), 2)       AS netProfit
+
+    FROM (
         SELECT
-            item_name        AS itemName,
-            hsn_no           AS hsnNo,
-            MAX(gst_percentage) AS gstPercentage,
+            bi.item_id,
+            i.item_name,
+            i.hsn_no,
+            bi.batch_no,
+            bi.gst_percentage,
 
-            SUM(total_package_qty) AS totalPackageQty,
+            SUM(bi.package_quantity) AS quantity,
 
-            ROUND(SUM(net_sale_amount), 2)   AS netSaleAmount,
-            ROUND(SUM(gross_sale_amount), 2) AS grossSaleAmount,
+            ROUND(
+                SUM(bi.package_quantity)::numeric * bi.sale_price,
+                2
+            ) AS gross_sale_price,
 
-            ROUND(SUM(net_cost_price), 2)    AS netCostPrice,
-            ROUND(SUM(gross_cost_price), 2)  AS grossCostPrice,
+            ROUND(
+                (SUM(bi.package_quantity)::numeric * bi.sale_price)
+                * (bi.gst_percentage / 100.0),
+                2
+            ) AS sale_gst_amount,
 
-            ROUND(SUM(net_profit), 2)        AS netProfit,
-            ROUND(SUM(gross_profit), 2)      AS grossProfit
+            ROUND(
+                (SUM(bi.package_quantity)::numeric * bi.sale_price)
+                * (1 + bi.gst_percentage / 100.0),
+                2
+            ) AS net_sale_price,
 
-        FROM (
-            SELECT
-                bi.item_id,
-                i.item_name,
-                i.hsn_no,
-                bi.batch_no,
-                bi.gst_percentage,
+            ROUND(
+                SUM(bi.package_quantity)::numeric * si.purchase_price_per_unit,
+                2
+            ) AS gross_cost_price,
 
-                SUM(bi.package_quantity) AS total_package_qty,
+            ROUND(
+                (SUM(bi.package_quantity)::numeric * si.purchase_price_per_unit)
+                * (bi.gst_percentage / 100.0),
+                2
+            ) AS cost_gst_amount,
 
-                ROUND(SUM(bi.package_quantity) * bi.sale_price, 2) AS net_sale_amount,
+            ROUND(
+                (SUM(bi.package_quantity)::numeric * si.purchase_price_per_unit)
+                * (1 + bi.gst_percentage / 100.0),
+                2
+            ) AS net_cost_price,
 
-                ROUND(
-                    (SUM(bi.package_quantity) * bi.sale_price)
-                    + ((SUM(bi.package_quantity) * bi.sale_price * bi.gst_percentage) / 100),
-                    2
-                ) AS gross_sale_amount,
+            ROUND(
+                (SUM(bi.package_quantity)::numeric * bi.sale_price)
+                -
+                (SUM(bi.package_quantity)::numeric * si.purchase_price_per_unit),
+                2
+            ) AS gross_profit,
 
-                ROUND(
-                    SUM(bi.package_quantity) * si.purchase_price_per_unit,
-                    2
-                ) AS net_cost_price,
+            ROUND(
+                (
+                    (SUM(bi.package_quantity)::numeric * bi.sale_price)
+                    * (1 + bi.gst_percentage / 100.0)
+                )
+                -
+                (
+                    (SUM(bi.package_quantity)::numeric * si.purchase_price_per_unit)
+                    * (1 + bi.gst_percentage / 100.0)
+                ),
+                2
+            ) AS net_profit
 
-                ROUND(
-                    (SUM(bi.package_quantity) * si.purchase_price_per_unit)
-                    + ((SUM(bi.package_quantity) * si.purchase_price_per_unit * bi.gst_percentage) / 100),
-                    2
-                ) AS gross_cost_price,
+        FROM pharma_billing_item bi
+        JOIN pharma_billing b
+            ON b.bill_id = bi.bill_id
+        JOIN pharma_item i
+            ON i.item_id = bi.item_id
+        LEFT JOIN pharma_stock_purchase_item si
+            ON si.item_id = bi.item_id
+           AND si.batch_no = bi.batch_no
 
-                ROUND(
-                    (SUM(bi.package_quantity) * bi.sale_price)
-                    - (SUM(bi.package_quantity) * si.purchase_price_per_unit),
-                    2
-                ) AS net_profit,
-
-                ROUND(
-                    (
-                        (SUM(bi.package_quantity) * bi.sale_price)
-                        + ((SUM(bi.package_quantity) * bi.sale_price * bi.gst_percentage) / 100)
-                    )
-                    -
-                    (
-                        (SUM(bi.package_quantity) * si.purchase_price_per_unit)
-                        + ((SUM(bi.package_quantity) * si.purchase_price_per_unit * bi.gst_percentage) / 100)
-                    ),
-                    2
-                ) AS gross_profit
-
-            FROM pharma_billing_item bi
-            JOIN pharma_billing b
-                ON b.bill_id = bi.bill_id
-            JOIN pharma_item i
-                ON i.item_id = bi.item_id
-            LEFT JOIN pharma_stock_purchase_item si
-                ON si.item_id = bi.item_id
-               AND si.batch_no = bi.batch_no
-
-            WHERE
-                b.pharmacy_id = :pharmacyId
+        WHERE
+            b.pharmacy_id = :pharmacyId
             AND b.bill_date_time >= :startDate
             AND b.bill_date_time <  :endDate
 
-            GROUP BY
-                bi.item_id,
-                i.item_name,
-                i.hsn_no,
-                bi.batch_no,
-                bi.sale_price,
-                bi.gst_percentage,
-                si.purchase_price_per_unit
-        ) batch_level
-
         GROUP BY
-            item_name,
-            hsn_no
+            bi.item_id,
+            i.item_name,
+            i.hsn_no,
+            bi.batch_no,
+            bi.sale_price,
+            bi.gst_percentage,
+            si.purchase_price_per_unit
+    ) batch_level
 
-        ORDER BY
-            item_name
-        """, nativeQuery = true)
+    GROUP BY
+        item_name,
+        hsn_no
+
+    ORDER BY
+        item_name
+    """, nativeQuery = true)
     List<ItemProfitSummaryDto> findItemProfitSummary(
             @Param("pharmacyId") Long pharmacyId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
 
 }
