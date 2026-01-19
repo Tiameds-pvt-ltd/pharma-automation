@@ -1,9 +1,6 @@
 package com.pharma.service.impl;
 
-import com.pharma.dto.DailySalesCostProfitDto;
-import com.pharma.dto.GstSlabNetPayableDto;
-import com.pharma.dto.ItemProfitByDoctorDto;
-import com.pharma.dto.ItemProfitRowDto;
+import com.pharma.dto.*;
 import com.pharma.entity.User;
 import com.pharma.repository.BillItemRepository;
 import com.pharma.repository.auth.UserRepository;
@@ -12,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
@@ -141,5 +139,64 @@ public class BillItemServiceImpl implements BillItemService {
                 endDate
         );
     }
+
+
+    @Override
+    public List<ItemProfitSummaryDto> getItemWiseProfitSummary(
+            Long pharmacyId,
+            String monthYear,
+            String dateRange,
+            User user
+    ) {
+
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        /* ========= MONTH MODE ========= */
+        if (monthYear != null && !monthYear.isBlank()) {
+
+            YearMonth yearMonth = YearMonth.parse(
+                    monthYear,
+                    DateTimeFormatter.ofPattern("MM-yyyy")
+            );
+
+            startDate = yearMonth.atDay(1).atStartOfDay();
+            endDate   = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+        }
+        /* ========= DATE RANGE MODE ========= */
+        else if (dateRange != null && !dateRange.isBlank()) {
+
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+            String[] parts = dateRange.split(" - ");
+
+            if (parts.length != 2) {
+                throw new IllegalArgumentException("Invalid dateRange format. Use dd-MM-yyyy - dd-MM-yyyy");
+            }
+
+            startDate = LocalDate.parse(parts[0], formatter).atStartOfDay();
+            endDate   = LocalDate.parse(parts[1], formatter).plusDays(1).atStartOfDay();
+        }
+        /* ========= INVALID ========= */
+        else {
+            throw new IllegalArgumentException("Either monthYear or dateRange must be provided");
+        }
+
+        return billItemRepository.findItemProfitSummary(
+                pharmacyId,
+                startDate,
+                endDate
+        );
+    }
+
 
 }

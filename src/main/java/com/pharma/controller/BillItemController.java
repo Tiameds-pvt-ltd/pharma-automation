@@ -1,9 +1,6 @@
 package com.pharma.controller;
 
-import com.pharma.dto.DailySalesCostProfitDto;
-import com.pharma.dto.GstSlabNetPayableDto;
-import com.pharma.dto.ItemProfitByDoctorDto;
-import com.pharma.dto.ItemProfitRowDto;
+import com.pharma.dto.*;
 import com.pharma.security.CustomUserDetails;
 import com.pharma.service.BillItemService;
 import com.pharma.utils.ApiResponseHelper;
@@ -147,5 +144,38 @@ public class BillItemController {
                 result
         );
     }
+
+
+    @GetMapping("/itemWiseProfitSummary")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    public ResponseEntity<?> getItemWiseProfitSummary(
+            @RequestParam Long pharmacyId,
+            @RequestParam(required = false) String monthYear,   // MM-yyyy
+            @RequestParam(required = false) String dateRange,   // dd-MM-yyyy - dd-MM-yyyy
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        List<ItemProfitSummaryDto> result =
+                billItemService.getItemWiseProfitSummary(
+                        pharmacyId,
+                        monthYear,
+                        dateRange,
+                        currentUser.getUser()
+                );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Item-wise profit summary retrieved successfully",
+                HttpStatus.OK,
+                result
+        );
+    }
+
 
 }

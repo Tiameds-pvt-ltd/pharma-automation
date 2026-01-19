@@ -1,9 +1,6 @@
 package com.pharma.repository;
 
-import com.pharma.dto.DailySalesCostProfitDto;
-import com.pharma.dto.GstSlabNetPayableDto;
-import com.pharma.dto.ItemProfitByDoctorDto;
-import com.pharma.dto.ItemProfitRowDto;
+import com.pharma.dto.*;
 import com.pharma.entity.BillItemEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -179,4 +176,108 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+
+    @Query(value = """
+        SELECT
+            item_name        AS itemName,
+            hsn_no           AS hsnNo,
+            MAX(gst_percentage) AS gstPercentage,
+
+            SUM(total_package_qty) AS totalPackageQty,
+
+            ROUND(SUM(net_sale_amount), 2)   AS netSaleAmount,
+            ROUND(SUM(gross_sale_amount), 2) AS grossSaleAmount,
+
+            ROUND(SUM(net_cost_price), 2)    AS netCostPrice,
+            ROUND(SUM(gross_cost_price), 2)  AS grossCostPrice,
+
+            ROUND(SUM(net_profit), 2)        AS netProfit,
+            ROUND(SUM(gross_profit), 2)      AS grossProfit
+
+        FROM (
+            SELECT
+                bi.item_id,
+                i.item_name,
+                i.hsn_no,
+                bi.batch_no,
+                bi.gst_percentage,
+
+                SUM(bi.package_quantity) AS total_package_qty,
+
+                ROUND(SUM(bi.package_quantity) * bi.sale_price, 2) AS net_sale_amount,
+
+                ROUND(
+                    (SUM(bi.package_quantity) * bi.sale_price)
+                    + ((SUM(bi.package_quantity) * bi.sale_price * bi.gst_percentage) / 100),
+                    2
+                ) AS gross_sale_amount,
+
+                ROUND(
+                    SUM(bi.package_quantity) * si.purchase_price_per_unit,
+                    2
+                ) AS net_cost_price,
+
+                ROUND(
+                    (SUM(bi.package_quantity) * si.purchase_price_per_unit)
+                    + ((SUM(bi.package_quantity) * si.purchase_price_per_unit * bi.gst_percentage) / 100),
+                    2
+                ) AS gross_cost_price,
+
+                ROUND(
+                    (SUM(bi.package_quantity) * bi.sale_price)
+                    - (SUM(bi.package_quantity) * si.purchase_price_per_unit),
+                    2
+                ) AS net_profit,
+
+                ROUND(
+                    (
+                        (SUM(bi.package_quantity) * bi.sale_price)
+                        + ((SUM(bi.package_quantity) * bi.sale_price * bi.gst_percentage) / 100)
+                    )
+                    -
+                    (
+                        (SUM(bi.package_quantity) * si.purchase_price_per_unit)
+                        + ((SUM(bi.package_quantity) * si.purchase_price_per_unit * bi.gst_percentage) / 100)
+                    ),
+                    2
+                ) AS gross_profit
+
+            FROM pharma_billing_item bi
+            JOIN pharma_billing b
+                ON b.bill_id = bi.bill_id
+            JOIN pharma_item i
+                ON i.item_id = bi.item_id
+            LEFT JOIN pharma_stock_purchase_item si
+                ON si.item_id = bi.item_id
+               AND si.batch_no = bi.batch_no
+
+            WHERE
+                b.pharmacy_id = :pharmacyId
+            AND b.bill_date_time >= :startDate
+            AND b.bill_date_time <  :endDate
+
+            GROUP BY
+                bi.item_id,
+                i.item_name,
+                i.hsn_no,
+                bi.batch_no,
+                bi.sale_price,
+                bi.gst_percentage,
+                si.purchase_price_per_unit
+        ) batch_level
+
+        GROUP BY
+            item_name,
+            hsn_no
+
+        ORDER BY
+            item_name
+        """, nativeQuery = true)
+    List<ItemProfitSummaryDto> findItemProfitSummary(
+            @Param("pharmacyId") Long pharmacyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
 }

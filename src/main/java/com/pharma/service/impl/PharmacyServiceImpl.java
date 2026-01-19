@@ -31,49 +31,43 @@ public class PharmacyServiceImpl implements PharmacyService {
     @Autowired
     private UserRepository userRepository;
 
-    @Transactional
-    @Override
-    public PharmacyDto savePharmacy(PharmacyDto pharmacyDto, User user) {
-
-        // 1️⃣ Creator (persistent)
-        User creator = userRepository.findById(user.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        // 2️⃣ Create pharmacy
-        Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto, creator);
-        pharmacy.setCreatedDate(LocalDate.now());
-        pharmacy.setCreatedBy(creator);
-
-        // 3️⃣ Fetch ALL super admins
-        List<User> superAdmins = userRepository.findAllSuperAdmins();
-
-        // 4️⃣ Associate pharmacy with ALL super admins
-        for (User admin : superAdmins) {
-            pharmacy.getMembers().add(admin);
-            admin.getPharmacies().add(pharmacy);
-        }
-
-        // 5️⃣ Save pharmacy
-        Pharmacy savedPharmacy = pharmacyRepository.save(pharmacy);
-
-        return pharmacyMapper.toDto(savedPharmacy);
-    }
-
 //    @Transactional
 //    @Override
 //    public PharmacyDto savePharmacy(PharmacyDto pharmacyDto, User user) {
-//        User persistentUser = userRepository.findById(user.getId())
+//
+//        User creator = userRepository.findById(user.getId())
 //                .orElseThrow(() -> new RuntimeException("User not found"));
 //
-//        Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto, persistentUser);
+//        Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto, creator);
 //        pharmacy.setCreatedDate(LocalDate.now());
+//        pharmacy.setCreatedBy(creator);
 //
-//        pharmacy.getMembers().add(persistentUser);
+//        List<User> superAdmins = userRepository.findAllSuperAdmins();
 //
+//        for (User admin : superAdmins) {
+//            pharmacy.getMembers().add(admin);
+//            admin.getPharmacies().add(pharmacy);
+//        }
 //        Pharmacy savedPharmacy = pharmacyRepository.save(pharmacy);
 //
 //        return pharmacyMapper.toDto(savedPharmacy);
 //    }
+
+    @Transactional
+    @Override
+    public PharmacyDto savePharmacy(PharmacyDto pharmacyDto, User user) {
+        User persistentUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Pharmacy pharmacy = pharmacyMapper.toEntity(pharmacyDto, persistentUser);
+        pharmacy.setCreatedDate(LocalDate.now());
+
+        pharmacy.getMembers().add(persistentUser);
+
+        Pharmacy savedPharmacy = pharmacyRepository.save(pharmacy);
+
+        return pharmacyMapper.toDto(savedPharmacy);
+    }
 
     @Transactional(readOnly = true)
     @Override

@@ -135,8 +135,8 @@ public class AuthController {
                 )
         );
 
-        String newRefreshToken =
-                refreshTokenService.rotateRefreshToken(tokenEntity);
+        String newRefreshToken = refreshToken;
+
 
         boolean isLocal = (cookieDomain == null || cookieDomain.isBlank());
 

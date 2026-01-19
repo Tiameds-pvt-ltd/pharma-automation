@@ -53,27 +53,25 @@ public class RefreshTokenService {
                 });
     }
 
-    // 🔁 ROTATION WITH HARD INVALIDATION
-    public String rotateRefreshToken(RefreshTokenEntity oldToken) {
+//    public String rotateRefreshToken(RefreshTokenEntity oldToken) {
+//
+//        oldToken.setRevoked(true);
+//        refreshTokenRepo.save(oldToken);
+//
+//        String newToken = jwtUtil.generateRefreshToken(
+//                jwtUtil.extractUsername(oldToken.getToken())
+//        );
+//
+//        RefreshTokenEntity entity = new RefreshTokenEntity();
+//        entity.setUserId(oldToken.getUserId());
+//        entity.setToken(newToken);
+//        entity.setExpiryDate(LocalDateTime.now().plusDays(1));
+//        entity.setRevoked(false);
+//
+//        refreshTokenRepo.save(entity);
+//        return newToken;
+//    }
 
-        oldToken.setRevoked(true);
-        refreshTokenRepo.save(oldToken);
-
-        String newToken = jwtUtil.generateRefreshToken(
-                jwtUtil.extractUsername(oldToken.getToken())
-        );
-
-        RefreshTokenEntity entity = new RefreshTokenEntity();
-        entity.setUserId(oldToken.getUserId());
-        entity.setToken(newToken);
-        entity.setExpiryDate(LocalDateTime.now().plusDays(1));
-        entity.setRevoked(false);
-
-        refreshTokenRepo.save(entity);
-        return newToken;
-    }
-
-    // 🧹 OPTIONAL CLEANUP (cron safe)
     public void cleanupExpiredTokens() {
         refreshTokenRepo.deleteByExpiryDateBefore(LocalDateTime.now());
     }
