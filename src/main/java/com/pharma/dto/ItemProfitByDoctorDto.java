@@ -1,11 +1,14 @@
 package com.pharma.dto;
+
 import java.math.BigDecimal;
 
 public interface ItemProfitByDoctorDto {
 
     String getItemName();
-    Long getTotalQuantitySold();
-    BigDecimal getTotalSalesPrice();
-    BigDecimal getTotalCostPrice();
+    BigDecimal getGstPercentage();
+    Long getQuantity();
+    BigDecimal getSalePrice();
+    BigDecimal getPurchasePrice();
+    BigDecimal getGstAmount();
     BigDecimal getProfit();
 }

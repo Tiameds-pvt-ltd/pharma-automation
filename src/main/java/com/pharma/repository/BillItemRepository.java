@@ -83,20 +83,44 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
     @Query(
             value = """
         SELECT
-            i.item_name                    AS itemName,
-            SUM(t.quantity_sold)           AS totalQuantitySold,
-            SUM(t.sales_price)             AS totalSalesPrice,
-            SUM(t.cost_price)              AS totalCostPrice,
-            SUM(t.sales_price) - SUM(t.cost_price) AS profit
+            i.item_name                      AS itemName,
+            t.gst_percentage                 AS gstPercentage,
+
+            SUM(t.quantity)                  AS quantity,
+
+            SUM(t.sale_price)                AS salePrice,
+            SUM(t.purchase_price)            AS purchasePrice,
+
+            SUM(t.gst_amount)                AS gstAmount,
+
+            SUM(t.sale_price) - SUM(t.purchase_price) AS profit
+
         FROM (
             SELECT
                 bi.item_id,
                 bi.batch_no,
-                SUM(bi.package_quantity) AS quantity_sold,
-                ROUND(SUM(bi.net_total)) AS sales_price,
+                bi.gst_percentage,
+
+                SUM(bi.package_quantity) AS quantity,
+
+                ROUND(
+                    SUM(bi.net_total)
+                    + (SUM(bi.net_total) * bi.gst_percentage / 100),
+                    2
+                ) AS sale_price,
+
                 ROUND(
                     SUM(bi.package_quantity * sp.purchase_price_per_unit)
-                ) AS cost_price
+                    + (SUM(bi.package_quantity * sp.purchase_price_per_unit)
+                       * bi.gst_percentage / 100),
+                    2
+                ) AS purchase_price,
+
+                ROUND(
+                    SUM(bi.net_total) * bi.gst_percentage / 100,
+                    2
+                ) AS gst_amount
+
             FROM pharma_billing_item bi
             JOIN pharma_billing b
                 ON b.bill_id = bi.bill_id
@@ -107,11 +131,17 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
               AND b.pharmacy_id = :pharmacyId
               AND b.bill_date_time >= :startDate
               AND b.bill_date_time <  :endDate
-            GROUP BY bi.item_id, bi.batch_no
+            GROUP BY
+                bi.item_id,
+                bi.batch_no,
+                bi.gst_percentage
         ) t
         JOIN pharma_item i
             ON i.item_id = t.item_id
-        GROUP BY i.item_id, i.item_name
+        GROUP BY
+            i.item_id,
+            i.item_name,
+            t.gst_percentage
         ORDER BY i.item_name
         """,
             nativeQuery = true
