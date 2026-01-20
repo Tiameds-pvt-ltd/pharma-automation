@@ -186,8 +186,6 @@ public class BillReturnServiceImpl implements BillReturnService {
 
     @Transactional
     private String generateBillReturnId1(Long pharmacyId) {
-
-        // YY = last 2 digits of year
         String yearPart = String.valueOf(LocalDate.now().getYear()).substring(2);
 
         Optional<BillReturnEntity> latestBillReturnOpt =
@@ -211,7 +209,6 @@ public class BillReturnServiceImpl implements BillReturnService {
             }
         }
 
-        // Pad only for 1–9
         String sequencePart = (nextSequence < 10)
                 ? "0" + nextSequence
                 : String.valueOf(nextSequence);
@@ -240,6 +237,9 @@ public class BillReturnServiceImpl implements BillReturnService {
                                 new ResourceNotFoundException("Bill return not found")
                         );
 
+        existingReturn.setSubTotal(updatedReturn.getSubTotal());
+        existingReturn.setTotalGst(updatedReturn.getTotalGst());
+        existingReturn.setGrandTotal(updatedReturn.getGrandTotal());
         existingReturn.setReturnReason(updatedReturn.getReturnReason());
         existingReturn.setModifiedBy(user.getId());
         existingReturn.setModifiedDate(LocalDate.now());
@@ -282,6 +282,10 @@ public class BillReturnServiceImpl implements BillReturnService {
             }
 
             itemEntity.setReturnQuantity(newQty);
+            itemEntity.setNetTotal(itemDto.getNetTotal());
+            itemEntity.setGstAmount(itemDto.getGstAmount());
+            itemEntity.setGrossTotal(itemDto.getGrossTotal());
+
             itemEntity.setModifiedBy(user.getId());
             itemEntity.setModifiedDate(LocalDate.now());
 

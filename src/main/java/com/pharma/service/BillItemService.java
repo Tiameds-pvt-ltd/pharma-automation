@@ -17,4 +17,7 @@ public interface BillItemService {
     List<DailySalesCostProfitDto> getDailySalesCostProfit(Long pharmacyId, String monthYear, User user);
 
     List<ItemProfitSummaryDto> getItemWiseProfitSummary(Long pharmacyId, String monthYear, String dateRange, User user);
+
+    List<ItemPatientBillDto> getItemPatientBillDetails(UUID itemId, Long pharmacyId, String monthYear, String dateRange, User user);
+
 }

@@ -150,8 +150,8 @@ public class BillItemController {
     @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
     public ResponseEntity<?> getItemWiseProfitSummary(
             @RequestParam Long pharmacyId,
-            @RequestParam(required = false) String monthYear,   // MM-yyyy
-            @RequestParam(required = false) String dateRange,   // dd-MM-yyyy - dd-MM-yyyy
+            @RequestParam(required = false) String monthYear,
+            @RequestParam(required = false) String dateRange,
             @AuthenticationPrincipal CustomUserDetails currentUser
     ) {
 
@@ -177,5 +177,38 @@ public class BillItemController {
         );
     }
 
+
+    @GetMapping("/productFlowAnalysis")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    public ResponseEntity<?> getItemPatientBillDetails(
+            @RequestParam UUID itemId,
+            @RequestParam Long pharmacyId,
+            @RequestParam(required = false) String monthYear,
+            @RequestParam(required = false) String dateRange,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        List<ItemPatientBillDto> result =
+                billItemService.getItemPatientBillDetails(
+                        itemId,
+                        pharmacyId,
+                        monthYear,
+                        dateRange,
+                        currentUser.getUser()
+                );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Item-wise patient bill details retrieved successfully",
+                HttpStatus.OK,
+                result
+        );
+    }
 
 }

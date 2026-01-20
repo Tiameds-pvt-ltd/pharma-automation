@@ -329,4 +329,33 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
     );
 
 
+    @Query(value = """
+        SELECT
+            CONCAT(p.first_name, ' ', p.last_name) AS patientName,
+            b.bill_id1                             AS billId1,
+            b.bill_date_time                      AS billDateTime,
+            bi.batch_no                           AS batchNo,
+            bi.package_quantity                  AS packageQuantity,
+            bi.net_total                         AS netTotal,
+            bi.gst_percentage                    AS gstPercentage,
+            bi.gst_amount                        AS gstAmount,
+            bi.gross_total                       AS grossTotal
+        FROM pharma_billing_item bi
+        JOIN pharma_billing b
+            ON b.bill_id = bi.bill_id
+        JOIN pharma_patient_details p
+            ON p.patient_id = b.patient_id
+        WHERE
+            bi.item_id = :itemId
+            AND b.pharmacy_id = :pharmacyId
+            AND b.bill_date_time >= :startDate
+            AND b.bill_date_time <  :endDate
+        ORDER BY b.bill_date_time DESC
+    """, nativeQuery = true)
+    List<ItemPatientBillDto> findItemPatientBillDetails(
+            @Param("itemId") UUID itemId,
+            @Param("pharmacyId") Long pharmacyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }
