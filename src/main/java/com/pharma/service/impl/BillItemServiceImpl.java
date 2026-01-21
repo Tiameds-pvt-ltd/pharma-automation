@@ -249,4 +249,61 @@ public class BillItemServiceImpl implements BillItemService {
                 endDate
         );
     }
+
+
+
+    @Override
+    public List<ItemDayWiseSaleDto> getItemDayWiseSales(Long pharmacyId, String monthYear, String dateRange, User user) {
+        User persistentUser = userRepository.findByIdFetchPharmacies(user.getId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        boolean isMember = persistentUser.getPharmacies().stream()
+                .anyMatch(p -> p.getPharmacyId().equals(pharmacyId));
+
+        if (!isMember) {
+            throw new RuntimeException("User does not belong to the selected pharmacy");
+        }
+
+        LocalDateTime startDate;
+        LocalDateTime endDate;
+
+        if (monthYear != null && !monthYear.isBlank()) {
+
+            YearMonth yearMonth = YearMonth.parse(
+                    monthYear,
+                    DateTimeFormatter.ofPattern("MM-yyyy")
+            );
+
+            startDate = yearMonth.atDay(1).atStartOfDay();
+            endDate   = yearMonth.plusMonths(1).atDay(1).atStartOfDay();
+        }
+        else if (dateRange != null && !dateRange.isBlank()) {
+
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
+            String[] parts = dateRange.split(" - ");
+            if (parts.length != 2) {
+                throw new IllegalArgumentException(
+                        "Invalid dateRange format. Use dd-MM-yyyy - dd-MM-yyyy"
+                );
+            }
+
+            startDate = LocalDate.parse(parts[0], formatter).atStartOfDay();
+            endDate   = LocalDate.parse(parts[1], formatter)
+                    .plusDays(1)
+                    .atStartOfDay();
+        }
+        else {
+            throw new IllegalArgumentException(
+                    "Either monthYear or dateRange must be provided"
+            );
+        }
+
+        return billItemRepository.findItemDayWiseSales(
+                pharmacyId,
+                startDate,
+                endDate
+        );
+    }
 }

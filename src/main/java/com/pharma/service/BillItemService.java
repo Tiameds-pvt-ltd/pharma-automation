@@ -20,4 +20,5 @@ public interface BillItemService {
 
     List<ItemPatientBillDto> getItemPatientBillDetails(UUID itemId, Long pharmacyId, String monthYear, String dateRange, User user);
 
+    List<ItemDayWiseSaleDto> getItemDayWiseSales(Long pharmacyId, String monthYear, String dateRange, User user);
 }

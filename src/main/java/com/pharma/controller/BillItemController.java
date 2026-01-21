@@ -211,4 +211,36 @@ public class BillItemController {
         );
     }
 
+
+    @GetMapping("/stockFlowAnalysis")
+    @PreAuthorize("hasAnyRole('SUPERADMIN', 'ADMIN', 'DESKROLE')")
+    public ResponseEntity<?> getItemDayWiseSales(
+            @RequestParam Long pharmacyId,
+            @RequestParam(required = false) String monthYear,
+            @RequestParam(required = false) String dateRange,
+            @AuthenticationPrincipal CustomUserDetails currentUser
+    ) {
+
+        if (currentUser == null) {
+            return ApiResponseHelper.errorResponse(
+                    "Unauthorized",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        List<ItemDayWiseSaleDto> result =
+                billItemService.getItemDayWiseSales(
+                        pharmacyId,
+                        monthYear,
+                        dateRange,
+                        currentUser.getUser()
+                );
+
+        return ApiResponseHelper.successResponseWithDataAndMessage(
+                "Item-wise day-wise sales retrieved successfully",
+                HttpStatus.OK,
+                result
+        );
+    }
+
 }

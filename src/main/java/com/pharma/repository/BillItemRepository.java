@@ -358,4 +358,30 @@ public interface BillItemRepository extends JpaRepository<BillItemEntity, UUID> 
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+
+    @Query(value = """
+        SELECT
+            DATE(b.bill_date_time)    AS bill_date_time,
+            i.item_name               AS itemName,
+            SUM(bi.package_quantity)  AS quantity
+        FROM pharma_billing_item bi
+        JOIN pharma_billing b
+            ON b.bill_id = bi.bill_id
+        JOIN pharma_item i
+            ON i.item_id = bi.item_id
+        WHERE b.pharmacy_id = :pharmacyId
+          AND b.bill_date_time >= :startDate
+          AND b.bill_date_time <  :endDate
+        GROUP BY
+            DATE(b.bill_date_time),
+            bi.item_id,
+            i.item_name
+        ORDER BY bill_date_time, itemName
+    """, nativeQuery = true)
+    List<ItemDayWiseSaleDto> findItemDayWiseSales(
+            @Param("pharmacyId") Long pharmacyId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
 }
