@@ -84,20 +84,22 @@ public class AuthController {
     public ResponseEntity<?> refresh(HttpServletRequest request,
                                      HttpServletResponse response) {
 
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) {
+        String cookieHeader = request.getHeader("Cookie");
+        if (cookieHeader == null) {
             return ResponseEntity.status(401).build();
         }
 
-        String refreshToken = Arrays.stream(cookies)
-                .filter(c -> "refreshToken".equals(c.getName()))
+        String refreshToken = Arrays.stream(cookieHeader.split(";"))
+                .map(String::trim)
+                .filter(c -> c.startsWith("refreshToken="))
+                .map(c -> c.substring("refreshToken=".length()))
                 .findFirst()
-                .map(Cookie::getValue)
                 .orElse(null);
 
-        if (refreshToken == null) {
+        if (refreshToken == null || refreshToken.isBlank()) {
             return ResponseEntity.status(401).build();
         }
+
 
         RefreshTokenEntity tokenEntity;
         try {
