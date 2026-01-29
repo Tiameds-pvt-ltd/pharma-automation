@@ -29,7 +29,21 @@ public class RefreshTokenService {
         return token;
     }
 
-    // 🔥 HARD VALIDATION
+//    public RefreshTokenEntity validateRefreshToken(String token) {
+//
+//        RefreshTokenEntity entity = refreshTokenRepo
+//                .findByTokenAndRevokedFalse(token)
+//                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
+//
+//        if (entity.getExpiryDate().isBefore(LocalDateTime.now())) {
+//            entity.setRevoked(true);
+//            refreshTokenRepo.save(entity);
+//            throw new RuntimeException("Refresh token expired");
+//        }
+//
+//        return entity;
+//    }
+
     public RefreshTokenEntity validateRefreshToken(String token) {
 
         RefreshTokenEntity entity = refreshTokenRepo
@@ -42,8 +56,13 @@ public class RefreshTokenService {
             throw new RuntimeException("Refresh token expired");
         }
 
+        // 🔥 SLIDING EXPIRY
+        entity.setExpiryDate(LocalDateTime.now().plusDays(1));
+        refreshTokenRepo.save(entity);
+
         return entity;
     }
+
 
     public void revokeToken(String token) {
         refreshTokenRepo.findByTokenAndRevokedFalse(token)
@@ -53,97 +72,8 @@ public class RefreshTokenService {
                 });
     }
 
-//    public String rotateRefreshToken(RefreshTokenEntity oldToken) {
-//
-//        oldToken.setRevoked(true);
-//        refreshTokenRepo.save(oldToken);
-//
-//        String newToken = jwtUtil.generateRefreshToken(
-//                jwtUtil.extractUsername(oldToken.getToken())
-//        );
-//
-//        RefreshTokenEntity entity = new RefreshTokenEntity();
-//        entity.setUserId(oldToken.getUserId());
-//        entity.setToken(newToken);
-//        entity.setExpiryDate(LocalDateTime.now().plusDays(1));
-//        entity.setRevoked(false);
-//
-//        refreshTokenRepo.save(entity);
-//        return newToken;
-//    }
-
     public void cleanupExpiredTokens() {
         refreshTokenRepo.deleteByExpiryDateBefore(LocalDateTime.now());
     }
 }
-
-
-
-
-//@Service
-//@RequiredArgsConstructor
-//public class RefreshTokenService {
-//
-//    private final RefreshTokenRepository refreshTokenRepo;
-//    private final JwtUtil jwtUtil;
-//
-//    public String createRefreshToken(Long userId, String username) {
-//
-//        String token = jwtUtil.generateRefreshToken(username);
-//
-//        RefreshTokenEntity entity = new RefreshTokenEntity();
-//        entity.setUserId(userId);
-//        entity.setToken(token);
-//        entity.setExpiryDate(LocalDateTime.now().plusDays(1)); // or 30
-//        entity.setRevoked(false);
-//
-//        refreshTokenRepo.save(entity);
-//
-//        return token;
-//    }
-//
-//
-//
-//    public RefreshTokenEntity validateRefreshToken(String token) {
-//
-//        RefreshTokenEntity entity = refreshTokenRepo
-//                .findByTokenAndRevokedFalse(token)
-//                .orElseThrow(() -> new RuntimeException("Invalid refresh token"));
-//
-//        if (entity.getExpiryDate().isBefore(LocalDateTime.now())) {
-//            throw new RuntimeException("Refresh token expired");
-//        }
-//
-//        return entity;
-//    }
-//
-//    public void revokeToken(String token) {
-//        refreshTokenRepo.findByTokenAndRevokedFalse(token)
-//                .ifPresent(t -> {
-//                    t.setRevoked(true);
-//                    refreshTokenRepo.save(t);
-//                });
-//    }
-//
-//    public String rotateRefreshToken(RefreshTokenEntity oldToken) {
-//
-//        oldToken.setRevoked(true);
-//        refreshTokenRepo.save(oldToken);
-//
-//        String newToken = jwtUtil.generateRefreshToken(
-//                jwtUtil.extractUsername(oldToken.getToken())
-//        );
-//
-//        RefreshTokenEntity entity = new RefreshTokenEntity();
-//        entity.setUserId(oldToken.getUserId());
-//        entity.setToken(newToken);
-//        entity.setExpiryDate(LocalDateTime.now().plusDays(1));
-//        entity.setRevoked(false);
-//
-//        refreshTokenRepo.save(entity);
-//
-//        return newToken;
-//    }
-//
-//}
 

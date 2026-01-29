@@ -29,10 +29,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Set<String> JWT_SKIP_PREFIXES = Set.of(
             "/auth/login",
-            "/auth/loginOtp",        // ✅ covers /auth/loginOtp/**
+            "/auth/loginOtp",
             "/auth/register",
             "/auth/refresh",
-            "/public/health-check"   // ALB health check (no auth header)
+            "/public/health-check"
     );
 
     @Override
@@ -43,7 +43,6 @@ public class JwtFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
 
         String path = request.getServletPath();
-//        System.out.println("🔍 JwtFilter HIT | Path = " + path);
 
         if (JWT_SKIP_PREFIXES.stream().anyMatch(path::startsWith)) {
             chain.doFilter(request, response);
@@ -61,10 +60,9 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
 
-//        System.out.println("🍪 AccessToken cookie = " + (jwt != null));
-
+        // ✅ CASE 1: No token → allow request to continue
         if (jwt == null) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            chain.doFilter(request, response);
             return;
         }
 
@@ -73,28 +71,32 @@ public class JwtFilter extends OncePerRequestFilter {
             UserDetails userDetails =
                     userDetailsService.loadUserByUsername(username);
 
-            if (!jwtUtil.validateAccessToken(jwt, userDetails.getUsername())) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
+            // ✅ CASE 2: Valid token → authenticate
+            if (jwtUtil.validateAccessToken(jwt, userDetails.getUsername())) {
+                UsernamePasswordAuthenticationToken authToken =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+
+                SecurityContextHolder.getContext().setAuthentication(authToken);
             }
 
-            UsernamePasswordAuthenticationToken authToken =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
+            // If expired, validateAccessToken() returns false → fall through
 
-            authToken.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authToken);
-
-//            System.out.println("✅ Authentication SUCCESS for user: " + username);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            // ✅ CASE 3: EXPIRED token → DO NOT BLOCK
+            // Let controller return 401 so client can refresh
+            chain.doFilter(request, response);
+            return;
 
         } catch (Exception e) {
-//            System.out.println("⛔ Token invalid or expired → 401");
+            // ❌ CASE 4: Invalid / tampered token
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             return;
         }
@@ -113,6 +115,14 @@ public class JwtFilter extends OncePerRequestFilter {
 //    @Autowired
 //    private JwtUtil jwtUtil;
 //
+//    private static final Set<String> JWT_SKIP_PREFIXES = Set.of(
+//            "/auth/login",
+//            "/auth/loginOtp",        // ✅ covers /auth/loginOtp/**
+//            "/auth/register",
+//            "/auth/refresh",
+//            "/public/health-check"   // ALB health check (no auth header)
+//    );
+//
 //    @Override
 //    protected void doFilterInternal(
 //            HttpServletRequest request,
@@ -120,16 +130,16 @@ public class JwtFilter extends OncePerRequestFilter {
 //            FilterChain chain
 //    ) throws ServletException, IOException {
 //
-//        String authHeader = request.getHeader("Authorization");
-//        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-//            response.getWriter().write("Authorization header is not supported. Use cookies.");
+//        String path = request.getServletPath();
+////        System.out.println("🔍 JwtFilter HIT | Path = " + path);
+//
+//        if (JWT_SKIP_PREFIXES.stream().anyMatch(path::startsWith)) {
+//            chain.doFilter(request, response);
 //            return;
 //        }
 //
 //        String jwt = null;
 //
-//        // 🔐 Read accessToken from cookie
 //        if (request.getCookies() != null) {
 //            for (Cookie cookie : request.getCookies()) {
 //                if ("accessToken".equals(cookie.getName())) {
@@ -139,50 +149,40 @@ public class JwtFilter extends OncePerRequestFilter {
 //            }
 //        }
 //
-//        // No token → continue (public endpoints)
-//        if (jwt == null) {
-//            chain.doFilter(request, response);
-//            return;
-//        }
+////        System.out.println("🍪 AccessToken cookie = " + (jwt != null));
 //
-//        // Already authenticated → continue
-//        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-//            chain.doFilter(request, response);
+//        if (jwt == null) {
+//            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 //            return;
 //        }
 //
 //        try {
 //            String username = jwtUtil.extractUsername(jwt);
+//            UserDetails userDetails =
+//                    userDetailsService.loadUserByUsername(username);
 //
-//            // 🔥 EXPIRED → 401 (frontend will refresh)
-//            if (jwtUtil.isTokenExpired(jwt)) {
+//            if (!jwtUtil.validateAccessToken(jwt, userDetails.getUsername())) {
 //                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 //                return;
 //            }
 //
-//            UserDetails userDetails =
-//                    userDetailsService.loadUserByUsername(username);
+//            UsernamePasswordAuthenticationToken authToken =
+//                    new UsernamePasswordAuthenticationToken(
+//                            userDetails,
+//                            null,
+//                            userDetails.getAuthorities()
+//                    );
 //
-//            if (jwtUtil.validateAccessToken(jwt, userDetails.getUsername())) {
+//            authToken.setDetails(
+//                    new WebAuthenticationDetailsSource().buildDetails(request)
+//            );
 //
-//                UsernamePasswordAuthenticationToken authToken =
-//                        new UsernamePasswordAuthenticationToken(
-//                                userDetails,
-//                                null,
-//                                userDetails.getAuthorities()
-//                        );
+//            SecurityContextHolder.getContext().setAuthentication(authToken);
 //
-//                authToken.setDetails(
-//                        new WebAuthenticationDetailsSource()
-//                                .buildDetails(request)
-//                );
-//
-//                SecurityContextHolder.getContext()
-//                        .setAuthentication(authToken);
-//            }
+////            System.out.println("✅ Authentication SUCCESS for user: " + username);
 //
 //        } catch (Exception e) {
-//            // 🔥 INVALID TOKEN → 401
+////            System.out.println("⛔ Token invalid or expired → 401");
 //            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 //            return;
 //        }
@@ -190,4 +190,3 @@ public class JwtFilter extends OncePerRequestFilter {
 //        chain.doFilter(request, response);
 //    }
 //}
-

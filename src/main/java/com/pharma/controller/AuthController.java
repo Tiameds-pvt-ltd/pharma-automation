@@ -157,7 +157,7 @@ public class AuthController {
                 .sameSite(!isLocal ? "None" : "Lax")
                 .domain(!isLocal ? cookieDomain : null)
                 .path("/")
-                .maxAge(7 * 24 * 60 * 60)
+                .maxAge(24 * 60 * 60)
                 .build();
 
         response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
